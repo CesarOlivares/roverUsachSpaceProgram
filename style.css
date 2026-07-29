@@ -258,9 +258,15 @@ body {
     min-height: 100%;
 }
 
+.dashboard-grid.grid-two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+
 @media (max-width: 1200px) {
-    .dashboard-grid { grid-template-columns: 1fr; }
+    .dashboard-grid,
+    .dashboard-grid.grid-two { grid-template-columns: 1fr; }
 }
+
+/* La ESP sirvio la pagina: el enlace ya existe, sobra elegir transporte. */
+#login-screen.web-mode .conn-options { display: none; }
 
 .card {
     background: var(--card-bg);
@@ -315,7 +321,11 @@ body {
     margin-bottom: 0.25rem;
 }
 
-.metric-big { font-size: 1.6rem; font-weight: 800; }
+.metric-big { font-size: 1.35rem; font-weight: 800; }
+
+.sys-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.sys-stats .metric-box { padding: 0.6rem; text-align: center; }
+.sys-stats .metric-label { font-size: 0.65rem; }
 
 .action-stack {
     display: flex;
