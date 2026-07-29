@@ -2,7 +2,6 @@
 #include "mcpwm_motors.h"
 #include "stepper_drv.h"
 #include "pca9685_servo.h"
-#include "telemetry_adc.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,11 +12,15 @@
 #include "freertos/task.h"
 #include "esp_log.h"
 #include "esp_timer.h"
+#include "esp_system.h"
+#include "esp_heap_caps.h"
 #include "cJSON.h"
 
-#if ROVER_LINK_WIRED
+#if ROVER_LINK_UART
 #include "driver/uart.h"
-#else
+#endif
+
+#if ROVER_LINK_HTTP
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "esp_netif.h"
@@ -30,7 +33,7 @@ static const char *TAG = "LINK";
 #define TELEMETRY_PERIOD_MS   (1000 / ROVER_TELEMETRY_HZ)
 #define FAILSAFE_POLL_MS      25
 #define MAX_LINE_LEN          256
-#define TELEMETRY_BUF_LEN     320
+#define TELEMETRY_BUF_LEN     384
 
 // Geometria de direccion: 45 grados izq <- 90 centro -> 135 der.
 #define STEER_CENTER_DEG      90.0f
@@ -41,17 +44,32 @@ static const char *TAG = "LINK";
 /* ------------------------------------------------------------------------ */
 
 /*
- * g_armed y g_last_packet_us los tocan la tarea de RX, la de failsafe y la de
- * telemetria, repartidas entre los dos nucleos. g_last_packet_us son 64 bits,
- * asi que ni siquiera su lectura es atomica en una MCU de 32 bits: hace falta
- * seccion critica, no solo volatile.
+ * Estos campos los tocan la tarea de RX por UART, el handler HTTP, la tarea de
+ * failsafe y las de telemetria, repartidas entre los dos nucleos.
+ * g_last_packet_us son 64 bits, asi que ni su lectura es atomica en una MCU de
+ * 32 bits: hace falta seccion critica, no solo volatile.
  */
 static portMUX_TYPE g_state_lock = portMUX_INITIALIZER_UNLOCKED;
 static bool     g_armed          = false;
 static int64_t  g_last_packet_us = 0;
 static uint32_t g_rx_ok          = 0;   // tramas JSON aceptadas
 static uint32_t g_rx_err         = 0;   // lineas descartadas (JSON invalido / desbordadas)
-static uint32_t g_last_seq       = 0;   // secuencia del panel, se devuelve para medir RTT
+static uint32_t g_last_seq       = 0;   // secuencia del cliente, se devuelve para medir RTT
+
+/*
+ * Mando exclusivo.
+ *
+ * Con el addon web puede haber varios paneles conectados a la vez, y todos
+ * emiten a 20 Hz. Sin arbitraje, dos clientes armados mandarian DRIVE
+ * contradictorios en el mismo ciclo y los motores oscilarian entre ambas
+ * consignas. El primero que actua se queda el mando; los demas siguen viendo
+ * la telemetria pero no pueden mover nada.
+ *
+ * Se libera con DISARM, con STOP o cuando salta el failsafe. Parar siempre lo
+ * puede cualquiera: una parada de emergencia no se le niega a nadie.
+ */
+#define OWNER_ID_LEN 24
+static char g_owner[OWNER_ID_LEN] = {0};   // cadena vacia = mando libre
 
 static inline void state_mark_packet(void)
 {
@@ -73,6 +91,59 @@ static inline void state_set_armed(bool armed)
 {
     portENTER_CRITICAL(&g_state_lock);
     g_armed = armed;
+    portEXIT_CRITICAL(&g_state_lock);
+}
+
+static inline void state_count_error(void)
+{
+    portENTER_CRITICAL(&g_state_lock);
+    g_rx_err++;
+    portEXIT_CRITICAL(&g_state_lock);
+}
+
+/*
+ * Concede el mando a @p client si esta libre o ya era suyo.
+ * Un cliente sin identificar (client == NULL) se trata como "consola anonima":
+ * solo puede actuar si nadie tiene el mando, y no lo reclama. Asi el enlace por
+ * cable sigue funcionando aunque se hable con el rover a mano por terminal.
+ */
+static bool state_claim_control(const char *client)
+{
+    /*
+     * El id se copia saneado y acotado FUERA de la seccion critica: viene de la
+     * red, se reenvia dentro de la telemetria JSON y una comilla o una barra
+     * romperia la trama de todos los clientes. Solo se aceptan alfanumericos.
+     */
+    char id[OWNER_ID_LEN] = {0};
+    if (client) {
+        size_t n = 0;
+        for (const char *p = client; *p && n < sizeof(id) - 1; p++) {
+            if ((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') ||
+                (*p >= '0' && *p <= '9')) {
+                id[n++] = *p;
+            }
+        }
+        id[n] = '\0';
+    }
+
+    bool granted;
+    portENTER_CRITICAL(&g_state_lock);
+    if (g_owner[0] == '\0') {
+        // Mando libre: lo toma quien se identifique. Un cliente anonimo actua
+        // pero no lo reclama, para no bloquear al resto para siempre.
+        memcpy(g_owner, id, sizeof(g_owner));
+        granted = true;
+    } else {
+        granted = (id[0] != '\0') && (strcmp(g_owner, id) == 0);
+    }
+    portEXIT_CRITICAL(&g_state_lock);
+    return granted;
+}
+
+static inline void state_release_control(void)
+{
+    portENTER_CRITICAL(&g_state_lock);
+    g_owner[0] = '\0';
     portEXIT_CRITICAL(&g_state_lock);
 }
 
@@ -105,9 +176,7 @@ static void handle_command(cJSON *root)
 {
     cJSON *action = cJSON_GetObjectItem(root, "action");
     if (!cJSON_IsString(action) || !action->valuestring) {
-        portENTER_CRITICAL(&g_state_lock);
-        g_rx_err++;
-        portEXIT_CRITICAL(&g_state_lock);
+        state_count_error();
         return;
     }
 
@@ -126,16 +195,28 @@ static void handle_command(cJSON *root)
         return;                                  // ya renovo el failsafe
     }
 
-    if (strcmp(act, "ARM") == 0) {
-        state_set_armed(true);
-        ESP_LOGI(TAG, "ROVER ARMADO.");
-        return;
-    }
-
+    // Parar es universal: no pasa por el arbitraje del mando y ademas lo libera.
     if (strcmp(act, "DISARM") == 0 || strcmp(act, "STOP") == 0) {
         state_set_armed(false);
         rover_safe_stop();
+        state_release_control();
         ESP_LOGI(TAG, "ROVER DESARMADO.");
+        return;
+    }
+
+    // A partir de aqui todo son ordenes que mueven hardware: exigen el mando.
+    cJSON *client_item = cJSON_GetObjectItem(root, "client");
+    const char *client = cJSON_IsString(client_item) ? client_item->valuestring : NULL;
+
+    if (!state_claim_control(client)) {
+        // Otro operador esta al mando. Se descarta en silencio: a 20 Hz, avisar
+        // por log inundaria la consola.
+        return;
+    }
+
+    if (strcmp(act, "ARM") == 0) {
+        state_set_armed(true);
+        ESP_LOGI(TAG, "ROVER ARMADO.");
         return;
     }
 
@@ -194,59 +275,71 @@ static void handle_command(cJSON *root)
     ESP_LOGW(TAG, "Accion desconocida: %s", act);
 }
 
-// Parsea una linea completa y la despacha. Devuelve false si no era JSON valido.
-static bool dispatch_line(const char *line)
+// Parsea una linea completa y la despacha.
+static void dispatch_line(const char *line)
 {
     cJSON *root = cJSON_Parse(line);
     if (!root) {
-        portENTER_CRITICAL(&g_state_lock);
-        g_rx_err++;
-        portEXIT_CRITICAL(&g_state_lock);
-        return false;
+        state_count_error();
+        return;
     }
     handle_command(root);
     cJSON_Delete(root);
-    return true;
 }
 
 /* ------------------------------------------------------------------------ */
 /* Generador de telemetria                                                   */
 /* ------------------------------------------------------------------------ */
 
-// Serializa el estado completo en una linea JSON. Devuelve la longitud escrita.
-// Usa snprintf sobre un buffer del llamador: sin malloc en el lazo de 20 Hz.
+// Numero de clientes WebSocket vivos; 0 si el addon web esta desactivado.
+static int link_ws_client_count(void);
+
+/*
+ * Serializa el estado completo en una linea JSON. Devuelve la longitud escrita.
+ * Usa snprintf sobre un buffer del llamador: sin malloc en el lazo de 20 Hz.
+ *
+ * Todos los campos son medidas reales del rover. No hay lectura de bateria
+ * porque no hay bateria instrumentada: el divisor del GPIO 9 no esta montado y
+ * publicar el ruido de un pin al aire como "voltaje" seria un dato inventado.
+ */
 static int build_telemetry(char *out, size_t out_len)
 {
     float speeds[NUM_MOTORS];
     mcpwm_motors_get_speeds(speeds);
 
-    float    batt_v = 0.0f;
-    uint32_t raw_mv = 0;
-    telemetry_adc_read(&batt_v, &raw_mv);
+    float servos[PCA9685_STEERING_CHANNELS];
+    pca9685_get_angles(servos, PCA9685_STEERING_CHANNELS);
 
+    char owner[OWNER_ID_LEN];
     portENTER_CRITICAL(&g_state_lock);
-    bool     armed   = g_armed;
-    uint32_t rx_ok   = g_rx_ok;
-    uint32_t rx_err  = g_rx_err;
-    uint32_t seq     = g_last_seq;
+    bool     armed  = g_armed;
+    uint32_t rx_ok  = g_rx_ok;
+    uint32_t rx_err = g_rx_err;
+    uint32_t seq    = g_last_seq;
+    memcpy(owner, g_owner, sizeof(owner));
     portEXIT_CRITICAL(&g_state_lock);
 
     return snprintf(out, out_len,
         "{\"type\":\"telemetry\",\"seq\":%" PRIu32
-        ",\"battery_v\":%.2f,\"raw_mv\":%" PRIu32
         ",\"uptime\":%" PRIu32
         ",\"armed\":%s"
+        ",\"owner\":\"%s\""
         ",\"motors\":[%.1f,%.1f,%.1f,%.1f,%.1f,%.1f]"
+        ",\"servos\":[%.0f,%.0f,%.0f,%.0f,%.0f]"
         ",\"stepper_pos\":%" PRId32 ",\"stepper_moving\":%s"
-        ",\"rx_ok\":%" PRIu32 ",\"rx_err\":%" PRIu32 "}\n",
+        ",\"rx_ok\":%" PRIu32 ",\"rx_err\":%" PRIu32
+        ",\"clients\":%d,\"heap\":%" PRIu32 "}\n",
         seq,
-        batt_v, raw_mv,
         (uint32_t)(esp_timer_get_time() / 1000000LL),
         armed ? "true" : "false",
+        owner,
         speeds[0], speeds[1], speeds[2], speeds[3], speeds[4], speeds[5],
+        servos[0], servos[1], servos[2], servos[3], servos[4],
         stepper_drv_get_position(),
         stepper_drv_is_moving() ? "true" : "false",
-        rx_ok, rx_err);
+        rx_ok, rx_err,
+        link_ws_client_count(),
+        (uint32_t)esp_get_free_heap_size());
 }
 
 /* ------------------------------------------------------------------------ */
@@ -265,7 +358,7 @@ static void failsafe_task(void *arg)
         /*
          * Vigila el enlace siempre que haya hardware en movimiento, no solo
          * cuando el rover esta armado: un TEST_MOTOR desde el panel de
-         * diagnostico mueve las ruedas con el rover desarmado, y si el panel
+         * diagnostico mueve las ruedas con el rover desarmado, y si el cliente
          * se cierra a media prueba nadie mandaria el TEST_MOTOR de parada.
          */
         bool hardware_active = state_is_armed() ||
@@ -273,10 +366,13 @@ static void failsafe_task(void *arg)
                                stepper_drv_is_moving();
 
         if (hardware_active && state_silence_us() > timeout_us) {
-            ESP_LOGW(TAG, "FAILSAFE: sin trafico del panel por mas de %d ms. Parando.",
+            ESP_LOGW(TAG, "FAILSAFE: sin trafico de ningun cliente por mas de %d ms. Parando.",
                      ROVER_FAILSAFE_TIMEOUT_MS);
             state_set_armed(false);
             rover_safe_stop();
+            // Libera el mando: si el operario que lo tenia se desconecto, otro
+            // cliente debe poder tomar el control sin reiniciar el rover.
+            state_release_control();
             // Evita relanzar el aviso en bucle mientras el enlace siga caido.
             state_mark_packet();
         }
@@ -288,7 +384,7 @@ static void failsafe_task(void *arg)
 /* ======================================================================== */
 /* Transporte por cable: UART0                                              */
 /* ======================================================================== */
-#if ROVER_LINK_WIRED
+#if ROVER_LINK_UART
 
 #define LINK_UART        UART_NUM_0
 #define UART_RX_BUF_LEN  2048
@@ -321,9 +417,7 @@ static void uart_rx_task(void *arg)
             if (c == '\n' || c == '\r') {
                 if (overflow) {
                     // Linea truncada: se descarta entera en vez de despachar basura.
-                    portENTER_CRITICAL(&g_state_lock);
-                    g_rx_err++;
-                    portEXIT_CRITICAL(&g_state_lock);
+                    state_count_error();
                     overflow = false;
                 } else if (line_len > 0) {
                     line[line_len] = '\0';
@@ -364,7 +458,7 @@ static void uart_telemetry_task(void *arg)
     }
 }
 
-static esp_err_t wired_link_start(void)
+static esp_err_t uart_link_start(void)
 {
     esp_err_t ret = uart_driver_install(LINK_UART, UART_RX_BUF_LEN, UART_TX_BUF_LEN,
                                         0, NULL, 0);
@@ -373,34 +467,48 @@ static esp_err_t wired_link_start(void)
         return ret;
     }
 
-    ESP_LOGI(TAG, "Enlace por cable listo. UART0 a %d baudios, %d Hz de telemetria, "
-                  "una linea JSON por trama.",
+    ESP_LOGI(TAG, "Enlace por cable listo. UART0 a %d baudios, %d Hz de telemetria.",
              CONFIG_ESP_CONSOLE_UART_BAUDRATE, ROVER_TELEMETRY_HZ);
 
-    xTaskCreatePinnedToCore(uart_rx_task,        "link_rx",    4096, NULL, 6, NULL, 0);
-    xTaskCreatePinnedToCore(uart_telemetry_task, "link_tlm",   4096, NULL, 4, NULL, 0);
-    xTaskCreatePinnedToCore(failsafe_task,       "link_fsafe", 3072, NULL, 7, NULL, 0);
-
-    /*
-     * A partir de aqui los ESP_LOG comparten UART con la telemetria y podrian
-     * partir una linea JSON. Se bajan a WARN: los mensajes de arranque ya se
-     * emitieron y siguen visibles los avisos que importan (failsafe, I2C caido).
-     * El panel ademas descarta toda linea que no empiece por '{'.
-     */
-    esp_log_level_set("*", ESP_LOG_WARN);
+    xTaskCreatePinnedToCore(uart_rx_task,        "link_uart_rx",  4096, NULL, 6, NULL, 0);
+    xTaskCreatePinnedToCore(uart_telemetry_task, "link_uart_tlm", 4096, NULL, 4, NULL, 0);
     return ESP_OK;
 }
 
-/* ======================================================================== */
-/* Transporte inalambrico: SoftAP + WebSocket                               */
-/* ======================================================================== */
-#else
+#endif // ROVER_LINK_UART
 
-#define WIFI_SSID  "Rover_6x6_AP"
-#define WIFI_PASS  "Rover6x6Secure"
+/* ======================================================================== */
+/* Addon web: SoftAP + servidor HTTP + WebSocket                            */
+/* ======================================================================== */
+#if ROVER_LINK_HTTP
 
-static httpd_handle_t   g_server = NULL;
-static volatile int     g_ws_fd  = -1;  // -1 = sin cliente
+/*
+ * El panel va embebido en el binario (EMBED_FILES en CMakeLists.txt), asi que
+ * un solo `idf.py flash` deja la interfaz servida en http://192.168.4.1/ sin
+ * particion de archivos ni paso de flasheo extra. Los simbolos los genera el
+ * sistema de compilacion a partir del nombre de cada fichero.
+ */
+extern const uint8_t index_html_start[] asm("_binary_index_html_start");
+extern const uint8_t index_html_end[]   asm("_binary_index_html_end");
+extern const uint8_t app_js_start[]     asm("_binary_app_js_start");
+extern const uint8_t app_js_end[]       asm("_binary_app_js_end");
+extern const uint8_t style_css_start[]  asm("_binary_style_css_start");
+extern const uint8_t style_css_end[]    asm("_binary_style_css_end");
+
+typedef struct {
+    const char    *uri;
+    const char    *content_type;
+    const uint8_t *start;
+    const uint8_t *end;
+} static_asset_t;
+
+static const static_asset_t g_assets[] = {
+    { "/",          "text/html",       index_html_start, index_html_end },
+    { "/app.js",    "text/javascript", app_js_start,     app_js_end     },
+    { "/style.css", "text/css",        style_css_start,  style_css_end  },
+};
+
+static httpd_handle_t g_server = NULL;
 
 static void wifi_init_softap(void)
 {
@@ -422,11 +530,11 @@ static void wifi_init_softap(void)
 
     wifi_config_t wifi_config = {
         .ap = {
-            .ssid           = WIFI_SSID,
-            .ssid_len       = strlen(WIFI_SSID),
+            .ssid           = ROVER_AP_SSID,
+            .ssid_len       = strlen(ROVER_AP_SSID),
             .channel        = 1,
-            .password       = WIFI_PASS,
-            .max_connection = 4,
+            .password       = ROVER_AP_PASS,
+            .max_connection = ROVER_AP_MAX_CONN,
             .authmode       = WIFI_AUTH_WPA2_PSK,
         },
     };
@@ -435,14 +543,29 @@ static void wifi_init_softap(void)
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    ESP_LOGI(TAG, "SoftAP levantado. SSID: %s | IP: 192.168.4.1", WIFI_SSID);
+    // El rover manda a 20 Hz: el ahorro de energia de Wi-Fi solo anadiria jitter.
+    ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
+
+    ESP_LOGI(TAG, "SoftAP levantado. SSID: %s | Panel en http://192.168.4.1/", ROVER_AP_SSID);
+}
+
+static esp_err_t static_get_handler(httpd_req_t *req)
+{
+    const static_asset_t *asset = (const static_asset_t *)req->user_ctx;
+
+    httpd_resp_set_type(req, asset->content_type);
+    // Sin cache: si se reflashea con una UI nueva, el navegador no debe servir
+    // la anterior desde su cache.
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+
+    return httpd_resp_send(req, (const char *)asset->start,
+                           (ssize_t)(asset->end - asset->start));
 }
 
 static esp_err_t ws_handler(httpd_req_t *req)
 {
     if (req->method == HTTP_GET) {
-        g_ws_fd = httpd_req_to_sockfd(req);
-        ESP_LOGI(TAG, "Cliente WebSocket conectado (fd %d).", g_ws_fd);
+        ESP_LOGI(TAG, "Cliente WebSocket conectado (fd %d).", httpd_req_to_sockfd(req));
         state_mark_packet();
         return ESP_OK;
     }
@@ -461,19 +584,58 @@ static esp_err_t ws_handler(httpd_req_t *req)
     frame.payload = buf;
     ret = httpd_ws_recv_frame(req, &frame, frame.len);
     if (ret == ESP_OK) {
-        dispatch_line((char *)buf);
+        // Un cliente puede agrupar varias tramas JSON separadas por salto de linea.
+        char *save = NULL;
+        for (char *line = strtok_r((char *)buf, "\n", &save);
+             line != NULL;
+             line = strtok_r(NULL, "\n", &save)) {
+            if (*line) dispatch_line(line);
+        }
     }
     free(buf);
     return ESP_OK;
 }
 
-static const httpd_uri_t ws_uri = {
-    .uri          = "/ws",
-    .method       = HTTP_GET,
-    .handler      = ws_handler,
-    .user_ctx     = NULL,
-    .is_websocket = true,
-};
+/*
+ * Difunde a todos los clientes WebSocket. httpd_get_client_list devuelve solo
+ * los sockets vivos, asi que las desconexiones se limpian solas: no hace falta
+ * cachear un fd que se quede colgado apuntando a un cliente muerto.
+ */
+static void ws_broadcast(const char *payload, size_t len)
+{
+    if (!g_server) return;
+
+    int    fds[ROVER_WS_MAX_CLIENTS];
+    size_t count = ROVER_WS_MAX_CLIENTS;
+    if (httpd_get_client_list(g_server, &count, fds) != ESP_OK) return;
+
+    httpd_ws_frame_t frame;
+    memset(&frame, 0, sizeof(frame));
+    frame.payload = (uint8_t *)payload;
+    frame.len     = len;
+    frame.type    = HTTPD_WS_TYPE_TEXT;
+
+    for (size_t i = 0; i < count; i++) {
+        if (httpd_ws_get_fd_info(g_server, fds[i]) == HTTPD_WS_CLIENT_WEBSOCKET) {
+            httpd_ws_send_frame_async(g_server, fds[i], &frame);
+        }
+    }
+}
+
+static int link_ws_client_count(void)
+{
+    if (!g_server) return 0;
+
+    int    fds[ROVER_WS_MAX_CLIENTS];
+    size_t count = ROVER_WS_MAX_CLIENTS;
+    if (httpd_get_client_list(g_server, &count, fds) != ESP_OK) return 0;
+
+    int ws = 0;
+    for (size_t i = 0; i < count; i++) {
+        if (httpd_ws_get_fd_info(g_server, fds[i]) == HTTPD_WS_CLIENT_WEBSOCKET) ws++;
+    }
+    return ws;
+}
 
 static void ws_telemetry_task(void *arg)
 {
@@ -482,54 +644,63 @@ static void ws_telemetry_task(void *arg)
     TickType_t last_wake = xTaskGetTickCount();
 
     while (1) {
-        int fd = g_ws_fd;
-        if (g_server && fd >= 0) {
-            int len = build_telemetry(buf, sizeof(buf));
-            if (len > 0) {
-                httpd_ws_frame_t frame;
-                memset(&frame, 0, sizeof(frame));
-                frame.payload = (uint8_t *)buf;
-                frame.len     = (size_t)len;
-                frame.type    = HTTPD_WS_TYPE_TEXT;
-
-                /*
-                 * Si el cliente se fue, el envio falla. Hay que soltar el fd:
-                 * de lo contrario la tarea seguiria emitiendo eternamente hacia
-                 * un socket muerto y el failsafe nunca veria la desconexion.
-                 */
-                if (httpd_ws_send_frame_async(g_server, fd, &frame) != ESP_OK) {
-                    ESP_LOGW(TAG, "Cliente WebSocket %d perdido.", fd);
-                    g_ws_fd = -1;
-                }
-            }
+        int len = build_telemetry(buf, sizeof(buf));
+        if (len > 0) {
+            if (len > (int)sizeof(buf) - 1) len = (int)sizeof(buf) - 1;
+            ws_broadcast(buf, (size_t)len);
         }
         vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(TELEMETRY_PERIOD_MS));
     }
 }
 
-static esp_err_t wireless_link_start(void)
+static esp_err_t http_link_start(void)
 {
     wifi_init_softap();
 
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.server_port = ROVER_WS_PORT;
-    config.ctrl_port   = 32768;
+    config.server_port      = ROVER_HTTP_PORT;
+    config.ctrl_port        = 32768;
+    config.max_uri_handlers = 8;
+    // Handlers + WebSockets abiertos a la vez.
+    config.max_open_sockets = ROVER_WS_MAX_CLIENTS + 2;
+    config.lru_purge_enable = true;
 
-    ESP_LOGI(TAG, "Arrancando servidor WebSocket en el puerto %d...", ROVER_WS_PORT);
     esp_err_t ret = httpd_start(&g_server, &config);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "httpd_start fallo: %s", esp_err_to_name(ret));
         return ret;
     }
 
+    for (size_t i = 0; i < sizeof(g_assets) / sizeof(g_assets[0]); i++) {
+        httpd_uri_t uri = {
+            .uri      = g_assets[i].uri,
+            .method   = HTTP_GET,
+            .handler  = static_get_handler,
+            .user_ctx = (void *)&g_assets[i],
+        };
+        ESP_ERROR_CHECK(httpd_register_uri_handler(g_server, &uri));
+    }
+
+    httpd_uri_t ws_uri = {
+        .uri          = "/ws",
+        .method       = HTTP_GET,
+        .handler      = ws_handler,
+        .user_ctx     = NULL,
+        .is_websocket = true,
+    };
     ESP_ERROR_CHECK(httpd_register_uri_handler(g_server, &ws_uri));
 
-    xTaskCreatePinnedToCore(ws_telemetry_task, "link_tlm",   4096, NULL, 4, NULL, 0);
-    xTaskCreatePinnedToCore(failsafe_task,     "link_fsafe", 3072, NULL, 7, NULL, 0);
+    xTaskCreatePinnedToCore(ws_telemetry_task, "link_ws_tlm", 4096, NULL, 4, NULL, 0);
+
+    ESP_LOGI(TAG, "Servidor web listo en el puerto %d (UI + /ws).", ROVER_HTTP_PORT);
     return ESP_OK;
 }
 
-#endif // ROVER_LINK_WIRED
+#else  // ROVER_LINK_HTTP
+
+static int link_ws_client_count(void) { return 0; }
+
+#endif // ROVER_LINK_HTTP
 
 /* ------------------------------------------------------------------------ */
 /* API publica                                                               */
@@ -537,11 +708,38 @@ static esp_err_t wireless_link_start(void)
 
 esp_err_t rover_link_init(void)
 {
-#if ROVER_LINK_WIRED
-    return wired_link_start();
-#else
-    return wireless_link_start();
+#if !ROVER_LINK_UART && !ROVER_LINK_HTTP
+#error "Hay que habilitar al menos un transporte en rover_link.h"
 #endif
+
+#if ROVER_LINK_UART
+    ESP_ERROR_CHECK(uart_link_start());
+#endif
+
+#if ROVER_LINK_HTTP
+    /*
+     * El addon web se levanta despues del enlace por cable y sin ESP_ERROR_CHECK:
+     * si el Wi-Fi falla, el rover tiene que seguir gobernable por USB.
+     */
+    if (http_link_start() != ESP_OK) {
+        ESP_LOGE(TAG, "El addon web no arranco. El enlace por cable sigue operativo.");
+    }
+#endif
+
+    // Un unico failsafe para todos los transportes.
+    xTaskCreatePinnedToCore(failsafe_task, "link_failsafe", 3072, NULL, 7, NULL, 0);
+
+#if ROVER_LINK_UART
+    /*
+     * A partir de aqui los ESP_LOG comparten UART con la telemetria y podrian
+     * partir una linea JSON. Se bajan a WARN: los mensajes de arranque ya se
+     * emitieron y siguen visibles los avisos que importan (failsafe, I2C caido).
+     * El panel ademas descarta toda linea que no empiece por '{'.
+     */
+    esp_log_level_set("*", ESP_LOG_WARN);
+#endif
+
+    return ESP_OK;
 }
 
 bool rover_link_is_armed(void)

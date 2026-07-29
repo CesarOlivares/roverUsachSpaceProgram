@@ -15,28 +15,32 @@
         <h2>Rover 6×6</h2>
         <p>Estación de control · ESP32-S3 N16R8</p>
 
-        <button class="btn btn-primary" onclick="App.connectSerial()">
-            🔌 Conectar por cable (USB)
-        </button>
-
-        <details class="conn-advanced">
-            <summary>Conexión inalámbrica</summary>
-            <div class="input-group">
-                <label for="rover-ip">Dirección IP</label>
-                <input type="text" id="rover-ip" value="192.168.4.1" placeholder="192.168.4.1">
-            </div>
-            <div class="input-group">
-                <label for="rover-port">Puerto</label>
-                <input type="text" id="rover-port" value="8080" placeholder="8080">
-            </div>
-            <button class="btn btn-secondary" onclick="App.connectWifi()">
-                📡 Conectar por Wi-Fi
+        <!-- Estas opciones se ocultan cuando la propia ESP sirve la página:
+             en ese caso el enlace ya existe y se conecta sola. -->
+        <div class="conn-options">
+            <button class="btn btn-primary" onclick="App.connectSerial()">
+                🔌 Conectar por cable (USB)
             </button>
-        </details>
 
-        <button class="btn btn-ghost" onclick="App.connectDemo()">
-            🧪 Simulación (sin hardware)
-        </button>
+            <details class="conn-advanced">
+                <summary>Conexión inalámbrica</summary>
+                <div class="input-group">
+                    <label for="rover-ip">Dirección IP</label>
+                    <input type="text" id="rover-ip" value="192.168.4.1" placeholder="192.168.4.1">
+                </div>
+                <div class="input-group">
+                    <label for="rover-port">Puerto</label>
+                    <input type="text" id="rover-port" value="80" placeholder="80">
+                </div>
+                <button class="btn btn-secondary" onclick="App.connectWifi()">
+                    📡 Conectar por Wi-Fi
+                </button>
+            </details>
+
+            <button class="btn btn-ghost" onclick="App.connectDemo()">
+                🧪 Simulación (sin hardware)
+            </button>
+        </div>
 
         <div id="login-status" class="login-status-msg"></div>
     </div>
@@ -56,6 +60,7 @@
 
     <div class="header-badges">
         <span id="latency-badge" class="badge badge-gray">Latencia: --</span>
+        <span id="control-badge" class="badge badge-warning" hidden>OBSERVADOR</span>
         <span id="arm-badge" class="badge badge-danger">DESARMADO</span>
         <span id="status-badge" class="badge badge-danger">● DESCONECTADO</span>
         <button id="btn-disconnect" class="btn-icon" title="Desconectar" hidden
@@ -75,9 +80,19 @@
             <div class="header-title"><span>Estado y seguridad</span><span class="card-icon">⚡</span></div>
             <hr class="divider">
 
-            <div class="metric-box">
-                <span class="metric-label">Batería</span>
-                <strong id="battery-val" class="metric-big">-- V</strong>
+            <div class="sys-stats">
+                <div class="metric-box">
+                    <span class="metric-label">Tiempo activo</span>
+                    <strong id="uptime-val" class="metric-big">--</strong>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Memoria libre</span>
+                    <strong id="heap-val" class="metric-big">--</strong>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Clientes web</span>
+                    <strong id="clients-val" class="metric-big">0</strong>
+                </div>
             </div>
 
             <div class="input-hud-card">
@@ -90,10 +105,10 @@
             </div>
 
             <div class="action-stack">
-                <button id="btn-preflight" class="btn btn-wizard" disabled onclick="App.startPreFlight()">
+                <button id="btn-preflight" class="btn btn-wizard" data-needs-control disabled onclick="App.startPreFlight()">
                     ⚙️ Calibración pre-vuelo
                 </button>
-                <button id="btn-arm-toggle" class="btn btn-arm" disabled onclick="App.toggleArm()">
+                <button id="btn-arm-toggle" class="btn btn-arm" data-needs-control disabled onclick="App.toggleArm()">
                     🛡️ ARMAR ROVER
                 </button>
                 <button class="btn btn-danger" onclick="App.emergencyStop()">
@@ -142,8 +157,8 @@
                         <button class="popover-close" onclick="App.closeMotorPopover()">×</button>
                     </div>
                     <div class="popover-buttons">
-                        <button class="btn btn-popover btn-yes" id="btn-popover-forward">Adelante</button>
-                        <button class="btn btn-popover btn-no" id="btn-popover-backward">Atrás</button>
+                        <button class="btn btn-popover btn-yes" data-needs-control id="btn-popover-forward">Adelante</button>
+                        <button class="btn btn-popover btn-no" data-needs-control id="btn-popover-backward">Atrás</button>
                     </div>
                     <p class="hint">Mantén pulsado para mover</p>
                 </div>
@@ -179,11 +194,10 @@
                         <tr><td><strong>38 / 16</strong></td><td>M2 delantero der · L298N</td><td><span id="pin-m2-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
                         <tr><td><strong>1 / 2</strong></td><td>M3 central izq · L298N</td><td><span id="pin-m3-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
                         <tr><td><strong>42 / 41</strong></td><td>M4 central der · L298N</td><td><span id="pin-m4-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>19 / 20</strong></td><td>M5 trasero izq · L298N</td><td><span id="pin-m5-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
+                        <tr><td><strong>17 / 18</strong></td><td>M5 trasero izq · L298N</td><td><span id="pin-m5-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
                         <tr><td><strong>21 / 47</strong></td><td>M6 trasero der · L298N</td><td><span id="pin-m6-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
                         <tr><td><strong>6 / 7 / 8</strong></td><td>Paso a paso · DRV8825</td><td><span id="stepper-state-badge" class="pin-badge pin-idle">REPOSO</span></td></tr>
                         <tr><td><strong>4 / 5</strong></td><td>Bus I2C · PCA9685</td><td><span id="pin-i2c-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
-                        <tr><td><strong>9</strong></td><td>Divisor de batería · ADC1</td><td><span id="pin-adc-badge" class="pin-badge pin-idle">SIN LECTURA</span></td></tr>
                         <tr><td colspan="3" class="table-section">Servos de dirección · PCA9685</td></tr>
                         <tr><td><strong>Canal 0</strong></td><td>Servo 1</td><td><span id="servo-dir-0-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
                         <tr><td><strong>Canal 1</strong></td><td>Servo 2</td><td><span id="servo-dir-1-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
@@ -197,7 +211,7 @@
     </div>
 
     <!-- ===================== VISTA: DIAGNÓSTICO ===================== -->
-    <div id="view-diagnostics" class="dashboard-grid hidden">
+    <div id="view-diagnostics" class="dashboard-grid grid-two hidden">
 
         <div class="card">
             <div class="header-title"><span>Motores DC (M1–M6)</span></div>
@@ -206,37 +220,37 @@
             <div class="motor-grid">
                 <div class="motor-control-item" data-motor="0">
                     <label>M1 · Delantero izq</label>
-                    <input type="range" min="-100" max="100" value="0" oninput="App.setMotor(0, this.value)">
+                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(0, this.value)">
                     <span class="val-display">0%</span>
                 </div>
                 <div class="motor-control-item" data-motor="1">
                     <label>M2 · Delantero der</label>
-                    <input type="range" min="-100" max="100" value="0" oninput="App.setMotor(1, this.value)">
+                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(1, this.value)">
                     <span class="val-display">0%</span>
                 </div>
                 <div class="motor-control-item" data-motor="2">
                     <label>M3 · Central izq</label>
-                    <input type="range" min="-100" max="100" value="0" oninput="App.setMotor(2, this.value)">
+                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(2, this.value)">
                     <span class="val-display">0%</span>
                 </div>
                 <div class="motor-control-item" data-motor="3">
                     <label>M4 · Central der</label>
-                    <input type="range" min="-100" max="100" value="0" oninput="App.setMotor(3, this.value)">
+                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(3, this.value)">
                     <span class="val-display">0%</span>
                 </div>
                 <div class="motor-control-item" data-motor="4">
                     <label>M5 · Trasero izq</label>
-                    <input type="range" min="-100" max="100" value="0" oninput="App.setMotor(4, this.value)">
+                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(4, this.value)">
                     <span class="val-display">0%</span>
                 </div>
                 <div class="motor-control-item" data-motor="5">
                     <label>M6 · Trasero der</label>
-                    <input type="range" min="-100" max="100" value="0" oninput="App.setMotor(5, this.value)">
+                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(5, this.value)">
                     <span class="val-display">0%</span>
                 </div>
             </div>
 
-            <button class="btn btn-secondary" onclick="App.stopAllMotors()">Detener todos los motores</button>
+            <button class="btn btn-secondary" data-needs-control onclick="App.stopAllMotors()">Detener todos los motores</button>
         </div>
 
         <div class="card">
@@ -246,27 +260,27 @@
                 <h4>Servos de dirección · PCA9685</h4>
                 <div class="servo-row">
                     <label>Servo 1 · canal 0</label>
-                    <input type="range" min="0" max="180" value="90" oninput="App.setServo(0, this.value)">
+                    <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(0, this.value)">
                     <span id="servo-0-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
                     <label>Servo 2 · canal 1</label>
-                    <input type="range" min="0" max="180" value="90" oninput="App.setServo(1, this.value)">
+                    <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(1, this.value)">
                     <span id="servo-1-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
                     <label>Servo 3 · canal 2</label>
-                    <input type="range" min="0" max="180" value="90" oninput="App.setServo(2, this.value)">
+                    <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(2, this.value)">
                     <span id="servo-2-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
                     <label>Servo 4 · canal 3</label>
-                    <input type="range" min="0" max="180" value="90" oninput="App.setServo(3, this.value)">
+                    <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(3, this.value)">
                     <span id="servo-3-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
                     <label>Servo 5 · canal 4</label>
-                    <input type="range" min="0" max="180" value="90" oninput="App.setServo(4, this.value)">
+                    <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(4, this.value)">
                     <span id="servo-4-val">⏺️ CENTRO (90°)</span>
                 </div>
             </div>
@@ -276,25 +290,15 @@
             <div class="sub-section">
                 <h4>Paso a paso · DRV8825</h4>
                 <div class="stepper-jog-controls">
-                    <button class="btn btn-small" onclick="App.jogStepper(-500)">−500</button>
-                    <button class="btn btn-small" onclick="App.jogStepper(-100)">−100</button>
-                    <button class="btn btn-small" onclick="App.jogStepper(100)">+100</button>
-                    <button class="btn btn-small" onclick="App.jogStepper(500)">+500</button>
+                    <button class="btn btn-small" data-needs-control onclick="App.jogStepper(-500)">−500</button>
+                    <button class="btn btn-small" data-needs-control onclick="App.jogStepper(-100)">−100</button>
+                    <button class="btn btn-small" data-needs-control onclick="App.jogStepper(100)">+100</button>
+                    <button class="btn btn-small" data-needs-control onclick="App.jogStepper(500)">+500</button>
                 </div>
                 <p class="info-text">Posición: <strong id="stepper-pos-val">0</strong> pasos</p>
             </div>
         </div>
 
-        <div class="card">
-            <div class="header-title"><span>Lectura directa del ADC</span></div>
-            <div class="adc-monitor-box">
-                <span class="metric-label">GPIO 9 · ADC1 canal 8</span>
-                <h1 id="adc-mv-val">0 mV</h1>
-                <p class="info-text">
-                    Tensión en el pin: <span id="adc-pin-v">0.00 V</span> · divisor 4,3×
-                </p>
-            </div>
-        </div>
     </div>
 </main>
 
@@ -303,7 +307,7 @@
     <div class="modal-content">
         <div class="wizard-header">
             <span class="wizard-step-badge" id="modal-step-badge">PASO 1</span>
-            <h3 id="modal-step-title">Enlace y batería</h3>
+            <h3 id="modal-step-title">Comprobación del enlace</h3>
         </div>
         <div class="wizard-body">
             <p id="modal-step-desc">Verificando enlace...</p>

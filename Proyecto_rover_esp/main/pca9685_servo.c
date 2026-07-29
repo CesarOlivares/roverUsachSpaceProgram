@@ -39,6 +39,11 @@ static SemaphoreHandle_t       g_i2c_mtx = NULL;
 // el lazo DRIVE llega a 20 Hz y casi siempre pide el mismo angulo.
 static int32_t g_last_ticks[PCA9685_CHANNELS];
 
+// Ultimo angulo aceptado por canal. Es la posicion real de consigna y se
+// publica en la telemetria: con varios clientes web conectados, cada uno debe
+// ver lo que el rover tiene puesto, no lo que ese cliente pidio.
+static float g_last_angles[PCA9685_CHANNELS];
+
 static esp_err_t write_reg(uint8_t reg, uint8_t val)
 {
     uint8_t buf[2] = { reg, val };
@@ -61,7 +66,8 @@ esp_err_t pca9685_servo_init(void)
     if (!g_i2c_mtx) return ESP_ERR_NO_MEM;
 
     for (int i = 0; i < PCA9685_CHANNELS; i++) {
-        g_last_ticks[i] = -1;   // -1 = aun sin escribir
+        g_last_ticks[i]  = -1;      // -1 = aun sin escribir
+        g_last_angles[i] = 90.0f;   // centro
     }
 
     i2c_master_bus_config_t bus_cfg = {
@@ -131,6 +137,7 @@ esp_err_t pca9685_set_angle(uint8_t channel, float angle)
     esp_err_t ret = ESP_OK;
 
     xSemaphoreTake(g_i2c_mtx, portMAX_DELAY);
+    g_last_angles[channel] = angle;
     if (g_last_ticks[channel] != ticks) {
         // Auto-increment activo: ON_L, ON_H, OFF_L, OFF_H en una sola trama.
         uint8_t packet[5] = {
@@ -148,6 +155,21 @@ esp_err_t pca9685_set_angle(uint8_t channel, float angle)
     xSemaphoreGive(g_i2c_mtx);
 
     return ret;
+}
+
+void pca9685_get_angles(float *out, uint8_t count)
+{
+    if (!out) return;
+    if (count > PCA9685_CHANNELS) count = PCA9685_CHANNELS;
+
+    if (!g_i2c_mtx) {
+        for (uint8_t i = 0; i < count; i++) out[i] = 90.0f;
+        return;
+    }
+
+    xSemaphoreTake(g_i2c_mtx, portMAX_DELAY);
+    for (uint8_t i = 0; i < count; i++) out[i] = g_last_angles[i];
+    xSemaphoreGive(g_i2c_mtx);
 }
 
 esp_err_t pca9685_center_all(void)

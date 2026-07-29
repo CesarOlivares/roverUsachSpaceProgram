@@ -25,6 +25,13 @@ const CONFIG = {
     MOTOR_COUNT: 6,
 };
 
+/*
+ * Identidad de este panel, valida mientras dure la pestana. El firmware concede
+ * el mando al primer cliente que actua y rechaza al resto, para que dos paneles
+ * conectados a la vez no manden consignas contradictorias a 20 Hz.
+ */
+const CLIENT_ID = 'p' + Math.random().toString(36).slice(2, 10);
+
 const MOTOR_NAMES = [
     'M1 (Delantero Izq)', 'M2 (Delantero Der)',
     'M3 (Central Izq)', 'M4 (Central Der)',
@@ -38,6 +45,8 @@ const MOTOR_NAMES = [
 const State = {
     link: { mode: 'none', connected: false, stale: true, latency: null },
     armed: false,
+    // '' = mando libre. Distinto de CLIENT_ID = otro operador esta al mando.
+    owner: '',
     keys: { w: false, a: false, s: false, d: false },
     drive: { linear: 0, angular: 0 },
 
@@ -45,13 +54,15 @@ const State = {
     // Mientras no sea null, el lazo TX manda TEST_MOTOR en vez de DRIVE.
     manual: null,
 
-    servoAngles: new Array(CONFIG.STEERING_CHANNELS).fill(90),
-
     telemetry: {
-        batteryV: 0, rawMv: 0, uptime: 0,
+        uptime: 0,
         motors: new Array(CONFIG.MOTOR_COUNT).fill(0),
+        // Angulos reales de consigna, publicados por el firmware. No se calculan
+        // aqui: con varios clientes conectados cada uno veria algo distinto.
+        servos: new Array(CONFIG.STEERING_CHANNELS).fill(90),
         stepperPos: 0, stepperMoving: false,
         rxOk: 0, rxErr: 0,
+        clients: 0, heap: 0,
     },
 
     seq: 0,
@@ -171,6 +182,7 @@ class DemoTransport {
         this.onLine = onLine;
         this.armed = false;
         this.motors = new Array(CONFIG.MOTOR_COUNT).fill(0);
+        this.servos = new Array(CONFIG.STEERING_CHANNELS).fill(90);
         this.stepperPos = 0;
         this.uptime = 0;
         this.seq = 0;
@@ -184,20 +196,20 @@ class DemoTransport {
 
     _tick() {
         this.uptime += 1 / CONFIG.TX_HZ;
-        const batteryV = 11.85 + Math.sin(this.uptime) * 0.05;
 
         this.onLine(JSON.stringify({
             type: 'telemetry',
             seq: this.seq,
-            battery_v: Number(batteryV.toFixed(2)),
-            raw_mv: Math.round((batteryV / 4.3) * 1000),
             uptime: Math.floor(this.uptime),
             armed: this.armed,
             motors: this.motors.map((v) => Math.round(v)),
+            servos: this.servos.map((v) => Math.round(v)),
             stepper_pos: this.stepperPos,
             stepper_moving: false,
             rx_ok: this.rxOk,
             rx_err: 0,
+            clients: 1,
+            heap: 280000,
         }));
     }
 
@@ -222,15 +234,19 @@ class DemoTransport {
                     const left = clamp(cmd.linear + cmd.angular, -100, 100);
                     const right = clamp(cmd.linear - cmd.angular, -100, 100);
                     this.motors = [left, right, left, right, left, right];
+                    this.servos.fill(clamp(90 + (cmd.angular / 100) * 45, 45, 135));
                     break;
                 }
                 case 'TEST_MOTOR':
                     this.motors[cmd.motor] = cmd.speed;
                     break;
+                case 'SERVO_SET':
+                    if (cmd.channel < this.servos.length) this.servos[cmd.channel] = cmd.angle;
+                    break;
                 case 'STEPPER_JOG':
                     this.stepperPos += cmd.steps;
                     break;
-                default: break;                 // HEARTBEAT, SERVO_SET: sin efecto visible
+                default: break;                 // HEARTBEAT: sin efecto visible
             }
         }
     }
@@ -286,13 +302,13 @@ const Link = {
     sendEvent(obj) {
         if (!this.transport) return;
         if (this.events.length >= CONFIG.MAX_QUEUED_EVENTS) this.events.shift();
-        this.events.push(obj);
+        this.events.push({ ...obj, client: CLIENT_ID });
         this._pump();
     },
 
     sendFrame(obj) {
         if (!this.transport) return;
-        this.frame = obj;
+        this.frame = { ...obj, client: CLIENT_ID };
         this._pump();
     },
 
@@ -357,16 +373,19 @@ const Link = {
 function applyTelemetry(data) {
     const t = State.telemetry;
 
-    t.batteryV = num(data.battery_v);
-    t.rawMv = num(data.raw_mv);
     t.uptime = num(data.uptime);
     t.stepperPos = num(data.stepper_pos);
     t.stepperMoving = Boolean(data.stepper_moving);
     t.rxOk = num(data.rx_ok);
     t.rxErr = num(data.rx_err);
+    t.clients = num(data.clients);
+    t.heap = num(data.heap);
 
     if (Array.isArray(data.motors)) {
         for (let i = 0; i < CONFIG.MOTOR_COUNT; i++) t.motors[i] = num(data.motors[i]);
+    }
+    if (Array.isArray(data.servos)) {
+        for (let i = 0; i < CONFIG.STEERING_CHANNELS; i++) t.servos[i] = num(data.servos[i]);
     }
 
     /*
@@ -378,6 +397,19 @@ function applyTelemetry(data) {
         State.armed = data.armed;
         View.renderArmState();
         if (!data.armed) View.flashNotice('El rover se desarmo (failsafe del firmware).');
+    }
+
+    // Arbitraje del mando: si otro panel lo tiene, este pasa a observador.
+    if (typeof data.owner === 'string' && data.owner !== State.owner) {
+        const hadControl = hasControl();
+        State.owner = data.owner;
+        View.renderArmState();
+        if (hadControl && !hasControl()) {
+            State.manual = null;
+            View.flashNotice('Otro operador tomo el mando. Este panel queda en observacion.');
+        } else if (!hadControl && hasControl()) {
+            View.flashNotice('Mando disponible para este panel.');
+        }
     }
 
     // RTT real: el firmware devuelve el ultimo seq recibido.
@@ -487,7 +519,11 @@ const Tx = {
          * cada 50 ms) que podian mandar ordenes contradictorias en el mismo
          * milisegundo.
          */
-        if (State.manual) {
+        if (!hasControl()) {
+            // Observador: solo late. Mandar DRIVE seria inutil (el firmware lo
+            // rechaza) y ademas mantendria vivo el failsafe de otro operador.
+            Link.sendFrame({ action: 'HEARTBEAT', seq });
+        } else if (State.manual) {
             Link.sendFrame({
                 action: 'TEST_MOTOR',
                 motor: State.manual.motor,
@@ -521,17 +557,17 @@ const View = {
     cache() {
         const ids = [
             'login-screen', 'login-status', 'rover-ip', 'rover-port',
-            'status-badge', 'arm-badge', 'latency-badge', 'btn-arm-toggle',
-            'btn-preflight', 'btn-disconnect',
+            'status-badge', 'arm-badge', 'latency-badge', 'control-badge',
+            'btn-arm-toggle', 'btn-preflight', 'btn-disconnect',
             'hud-wasd', 'hud-gamepad', 'notice-bar',
             'debug-tx-data', 'debug-rx-data', 'debug-link-status',
             'debug-rx-ok', 'debug-rx-err',
-            'adc-mv-val', 'adc-pin-v', 'battery-val',
+            'uptime-val', 'heap-val', 'clients-val',
             'stepper-pos-val', 'stepper-state-badge',
             'view-general', 'view-diagnostics', 'tab-general', 'tab-diagnostics',
             'motor-test-popover', 'popover-title',
             'calibration-modal', 'modal-step-badge', 'modal-step-title', 'modal-step-desc',
-            'pin-i2c-badge', 'pin-adc-badge',
+            'pin-i2c-badge',
         ];
         for (const id of ids) this.el[id] = document.getElementById(id);
 
@@ -539,6 +575,7 @@ const View = {
         this.wheels = [];
         this.wheelVals = [];
         this.servoBadges = [];
+        this.servoLabels = [];
         for (let i = 0; i < CONFIG.MOTOR_COUNT; i++) {
             this.motorBadges[i] = document.getElementById(`pin-m${i + 1}-badge`);
             this.wheels[i] = document.getElementById(`m${i + 1}`);
@@ -546,6 +583,7 @@ const View = {
         }
         for (let s = 0; s < CONFIG.STEERING_CHANNELS; s++) {
             this.servoBadges[s] = document.getElementById(`servo-dir-${s}-badge`);
+            this.servoLabels[s] = document.getElementById(`servo-${s}-val`);
         }
     },
 
@@ -602,9 +640,14 @@ const View = {
         }
 
         const connected = mode !== 'none';
-        if (this.el['btn-arm-toggle']) this.el['btn-arm-toggle'].disabled = !connected;
-        if (this.el['btn-preflight']) this.el['btn-preflight'].disabled = !connected;
-        if (this.el['btn-disconnect']) this.el['btn-disconnect'].hidden = !connected;
+        // Los controles que actuan dependen tambien del mando: lo resuelve
+        // renderArmState, que es quien conoce el arbitraje.
+        this.renderArmState();
+        // Servida desde la ESP no hay nada que desconectar a mano: la pagina
+        // llega por el mismo enlace y se reconecta sola.
+        if (this.el['btn-disconnect']) {
+            this.el['btn-disconnect'].hidden = !connected || servedFromRover();
+        }
 
         const i2c = this.el['pin-i2c-badge'];
         if (i2c) {
@@ -626,23 +669,39 @@ const View = {
 
     renderArmState() {
         const armed = State.armed;
+        const control = hasControl();
+
         this.setBadge('arm-badge', armed ? 'ARMADO' : 'DESARMADO',
                       armed ? 'badge-success' : 'badge-danger');
+
+        const ctrl = this.el['control-badge'];
+        if (ctrl) {
+            ctrl.hidden = control;
+            ctrl.textContent = '👀 OBSERVADOR';
+            ctrl.className = 'badge badge-warning';
+        }
 
         const btn = this.el['btn-arm-toggle'];
         if (btn) {
             btn.textContent = armed ? '🛡️ DESARMAR ROVER' : '🛡️ ARMAR ROVER';
             btn.classList.toggle('armed', armed);
         }
+
+        // En observacion se bloquea todo lo que actua. La parada de emergencia
+        // no: cualquiera puede detener el rover, tenga el mando o no.
+        const connected = State.link.mode !== 'none';
+        document.querySelectorAll('[data-needs-control]').forEach((el) => {
+            el.disabled = !connected || !control;
+        });
     },
 
     renderTelemetry() {
         const t = State.telemetry;
 
         this.renderLatency();
-        setText(this.el['battery-val'], `${t.batteryV.toFixed(2)} V`);
-        setText(this.el['adc-mv-val'], `${Math.round(t.rawMv)} mV`);
-        setText(this.el['adc-pin-v'], `${(t.rawMv / 1000).toFixed(2)} V`);
+        setText(this.el['uptime-val'], formatUptime(t.uptime));
+        setText(this.el['heap-val'], `${Math.round(t.heap / 1024)} KB`);
+        setText(this.el['clients-val'], String(t.clients));
         setText(this.el['debug-rx-ok'], String(t.rxOk));
         setText(this.el['debug-rx-err'], String(t.rxErr));
 
@@ -670,11 +729,14 @@ const View = {
         }
 
         for (let s = 0; s < CONFIG.STEERING_CHANNELS; s++) {
+            const ang = t.servos[s];
             const badge = this.servoBadges[s];
-            if (!badge) continue;
-            const ang = State.servoAngles[s];
-            badge.textContent = steerLabel(ang);
-            badge.className = (ang < 80 || ang > 100) ? 'pin-badge pin-active' : 'pin-badge pin-i2c';
+            if (badge) {
+                badge.textContent = steerLabel(ang);
+                badge.className = (ang < 80 || ang > 100)
+                    ? 'pin-badge pin-active' : 'pin-badge pin-i2c';
+            }
+            setText(this.servoLabels[s], steerLabel(ang));
         }
 
         setText(this.el['stepper-pos-val'], String(t.stepperPos));
@@ -682,13 +744,6 @@ const View = {
         if (st) {
             st.className = t.stepperMoving ? 'pin-badge pin-active' : 'pin-badge pin-idle';
             st.textContent = t.stepperMoving ? 'EN MOVIMIENTO' : 'REPOSO';
-        }
-
-        const adc = this.el['pin-adc-badge'];
-        if (adc) {
-            const ok = t.rawMv > 0;
-            adc.className = ok ? 'pin-badge pin-active' : 'pin-badge pin-idle';
-            adc.textContent = ok ? `${Math.round(t.rawMv)} mV` : 'SIN LECTURA';
         }
     },
 
@@ -760,11 +815,12 @@ const Wizard = {
     async _run(token) {
         const alive = () => this.token === token;
 
-        this._render(1, 'Enlace y bateria',
+        this._render(1, 'Comprobacion del enlace',
             `Enlace: <strong>${State.link.mode.toUpperCase()}</strong> · ` +
-            `Bateria: <strong>${State.telemetry.batteryV.toFixed(2)} V</strong><br><br>` +
-            `Se probaran ${CONFIG.STEERING_CHANNELS} servos y ${CONFIG.MOTOR_COUNT} motores. ` +
-            `Aparta las manos del chasis antes de continuar.`);
+            `latencia <strong>${State.link.latency ?? '--'} ms</strong> · ` +
+            `tramas con error: <strong>${State.telemetry.rxErr}</strong><br><br>` +
+            `Se probaran ${CONFIG.STEERING_CHANNELS} servos y ${CONFIG.MOTOR_COUNT} motores ` +
+            `uno a uno. Aparta las manos del chasis antes de continuar.`);
         if (!await this._await(token)) return false;
 
         for (let ch = 0; ch < CONFIG.STEERING_CHANNELS; ch++) {
@@ -881,6 +937,16 @@ const App = {
         View.renderLinkState();
         View.renderArmState();
         this.bindEvents();
+
+        /*
+         * Servida desde la propia ESP: el rover esta al otro extremo de esta
+         * misma conexion, asi que no tiene sentido preguntar IP ni ofrecer el
+         * cable. Se conecta sola al origen.
+         */
+        if (servedFromRover()) {
+            View.el['login-screen']?.classList.add('web-mode');
+            this.connectWifi(location.hostname, location.port || '80');
+        }
     },
 
     bindEvents() {
@@ -925,9 +991,9 @@ const App = {
         }
     },
 
-    async connectWifi() {
-        const ip = View.el['rover-ip'].value.trim() || '192.168.4.1';
-        const port = View.el['rover-port'].value.trim() || '8080';
+    async connectWifi(hostOverride, portOverride) {
+        const ip = hostOverride || View.el['rover-ip'].value.trim() || '192.168.4.1';
+        const port = portOverride || View.el['rover-port'].value.trim() || '80';
         View.setLoginStatus(`Conectando con ${ip}:${port}...`, 'info');
 
         const transport = new WsTransport(
@@ -937,8 +1003,25 @@ const App = {
             await transport.open(ip, port);
             await this.onConnected(transport, 'ws');
         } catch (err) {
-            View.setLoginStatus('Sin respuesta. Revisa la IP o conecta por cable.', 'error');
+            if (servedFromRover()) {
+                // La pagina vino de la ESP, asi que el rover esta ahi: el corte
+                // es del Wi-Fi. Reintenta solo en vez de pedir una IP que el
+                // operario no tiene forma de saber mejor que el navegador.
+                View.setLoginStatus('Reconectando con el rover...', 'info');
+                this.scheduleReconnect();
+            } else {
+                View.setLoginStatus('Sin respuesta. Revisa la IP o conecta por cable.', 'error');
+            }
         }
+    },
+
+    reconnectTimer: null,
+
+    scheduleReconnect() {
+        clearTimeout(this.reconnectTimer);
+        this.reconnectTimer = setTimeout(() => {
+            this.connectWifi(location.hostname, location.port || '80');
+        }, 1500);
     },
 
     async connectDemo() {
@@ -971,6 +1054,7 @@ const App = {
     },
 
     async disconnect() {
+        clearTimeout(this.reconnectTimer);
         Wizard.abort();
         this.emergencyStop();
         Tx.stop();
@@ -992,7 +1076,13 @@ const App = {
         View.renderLinkState();
         View.renderArmState();
         View.showLogin(true);
-        View.setLoginStatus('Enlace cerrado.', 'error');
+
+        if (servedFromRover()) {
+            View.setLoginStatus('Enlace perdido. Reconectando...', 'info');
+            this.scheduleReconnect();
+        } else {
+            View.setLoginStatus('Enlace cerrado.', 'error');
+        }
     },
 
     /* --- Armado --- */
@@ -1065,15 +1155,15 @@ const App = {
         }
     },
 
+    // El angulo mostrado NO se fija aqui: llega de vuelta en la telemetria, que
+    // es lo que el rover tiene puesto de verdad y ademas mantiene sincronizados
+    // a todos los clientes conectados.
     setServo(channel, value) {
-        const angle = Number(value);
-        const ch = Number(channel);
-        State.servoAngles[ch] = angle;
-
-        const label = document.getElementById(`servo-${ch}-val`);
-        if (label) label.textContent = steerLabel(angle);
-
-        Link.sendEvent({ action: 'SERVO_SET', channel: ch, angle });
+        Link.sendEvent({
+            action: 'SERVO_SET',
+            channel: Number(channel),
+            angle: Number(value),
+        });
     },
 
     jogStepper(steps) {
@@ -1186,6 +1276,26 @@ function steerLabel(angle) {
 
 function isTypingTarget(target) {
     return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
+}
+
+/** true si este panel puede actuar: o tiene el mando, o esta libre. */
+function hasControl() {
+    return State.owner === '' || State.owner === CLIENT_ID;
+}
+
+/** true si la ESP sirvio esta pagina (en vez de abrirse desde disco con file://). */
+function servedFromRover() {
+    return location.protocol === 'http:' || location.protocol === 'https:';
+}
+
+function formatUptime(seconds) {
+    const s = Math.max(0, Math.floor(seconds));
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m`;
+    if (m > 0) return `${m}m ${String(sec).padStart(2, '0')}s`;
+    return `${sec}s`;
 }
 
 document.addEventListener('DOMContentLoaded', () => App.init());

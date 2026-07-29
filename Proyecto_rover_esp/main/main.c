@@ -1,9 +1,9 @@
 /*
  * Rover 6x6 - ESP32-S3 (N16R8)
  *
- * 6 motores DC sobre 3 puentes L298N, 5 servos de direccion por PCA9685,
- * un paso a paso DRV8825 y lectura de bateria por ADC1.
- * El mando y la telemetria van por rover_link (UART0 o WebSocket).
+ * 6 motores DC sobre 3 puentes L298N, 5 servos de direccion por PCA9685 y un
+ * paso a paso DRV8825. El mando y la telemetria van por rover_link, que puede
+ * atender a la vez el enlace por cable (UART0) y el addon web (SoftAP + HTTP).
  */
 
 #include "freertos/FreeRTOS.h"
@@ -14,15 +14,15 @@
 #include "mcpwm_motors.h"
 #include "stepper_drv.h"
 #include "pca9685_servo.h"
-#include "telemetry_adc.h"
 #include "rover_link.h"
 
 static const char *TAG = "ROVER";
 
 void app_main(void)
 {
-    ESP_LOGI(TAG, "Rover 6x6 - ESP32-S3 arrancando (%s)",
-             ROVER_LINK_WIRED ? "enlace por cable" : "enlace Wi-Fi");
+    ESP_LOGI(TAG, "Rover 6x6 - ESP32-S3 arrancando (cable: %s, web: %s)",
+             ROVER_LINK_UART ? "si" : "no",
+             ROVER_LINK_HTTP ? "si" : "no");
 
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -36,7 +36,6 @@ void app_main(void)
     ESP_ERROR_CHECK(mcpwm_motors_init());
     ESP_ERROR_CHECK(stepper_drv_init());
     ESP_ERROR_CHECK(pca9685_servo_init());
-    ESP_ERROR_CHECK(telemetry_adc_init());
 
     pca9685_center_all();
 

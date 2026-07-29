@@ -26,9 +26,8 @@ extern "C" {
 #define GPIO_M4_IN2     41  // M4 central der    - sentido
 
 // --- Driver 1 (eje trasero: M5 izquierda, M6 derecha) ---
-// OJO: los GPIO 19 y 20 son las lineas D- y D+ del USB nativo del ESP32-S3.
-// Al usarlos para M5 se inhabilita el puerto USB-Serial-JTAG, por eso el
-// enlace con el panel va por UART0 (GPIO 43/44) a traves del puente USB.
+// M5 se movio de 19/20 a 17/18: los GPIO 19 y 20 son las lineas D- y D+ del
+// USB nativo del ESP32-S3 y ocuparlos inhabilitaba el USB-Serial-JTAG.
 #define GPIO_M5_IN1     17  // M5 trasero izq    - PWM
 #define GPIO_M5_IN2     18  // M5 trasero izq    - sentido
 #define GPIO_M6_IN1     21  // M6 trasero der    - PWM
@@ -44,14 +43,15 @@ extern "C" {
 #define GPIO_I2C_SCL        5
 #define PCA9685_I2C_ADDR    0x40
 
-// --- Telemetria ---
-#define GPIO_BATTERY_ADC    9   // ADC1 canal 8, divisor de bateria (movido del 35: PSRAM octal)
-
 /* --- Reservados: NO USAR ---
  * GPIO 0, 3, 45, 46  strapping del ESP32-S3
+ * GPIO 19, 20        D- y D+ del USB nativo (USB-Serial-JTAG)
  * GPIO 43, 44        consola UART0 (enlace por cable con el panel)
  * GPIO 26..37        flash y PSRAM octal del modulo N16R8
- * GPIO 15            reservado para el receptor Flysky i-BUS (aun sin implementar)
+ *
+ * --- Libres para ampliaciones ---
+ * GPIO 9             ADC1 canal 8 (previsto para un divisor de bateria, sin montar)
+ * GPIO 10..14, 15    GPIO/ADC. El 15 estaba previsto para un receptor Flysky i-BUS.
  */
 
 #ifdef __cplusplus

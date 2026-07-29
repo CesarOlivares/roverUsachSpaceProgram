@@ -30,6 +30,14 @@ esp_err_t pca9685_servo_init(void);
 esp_err_t pca9685_set_angle(uint8_t channel, float angle);
 
 /**
+ * @brief Copia los ultimos angulos de consigna de los primeros @p count canales.
+ *
+ * Es la posicion real que tiene puesta el rover, y va en la telemetria para que
+ * todos los clientes conectados vean lo mismo.
+ */
+void pca9685_get_angles(float *out, uint8_t count);
+
+/**
  * @brief Lleva los 5 servos de direccion a 90 grados (centro).
  */
 esp_err_t pca9685_center_all(void);
