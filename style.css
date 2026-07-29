@@ -1,0 +1,747 @@
+/* ==========================================================================
+   Rover 6x6 Ground Control Station - Modern Light Theme CSS System
+   Inspired by gemini-code-1785019304203.html aesthetic
+   ========================================================================== */
+
+:root {
+    --bg-primary: #F8F9FA;
+    --card-bg: #FFFFFF;
+    --text-main: #1E293B;
+    --text-muted: #64748B;
+    --accent-blue: #2563EB;
+    --accent-purple: #8B5CF6;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --border-color: #E2E8F0;
+    --radius: 12px;
+    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- 1. PANTALLA LOGIN MODAL --- */
+#login-screen {
+    position: fixed;
+    inset: 0;
+    background: rgba(248, 249, 250, 0.96);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.login-card {
+    background: var(--card-bg);
+    padding: 2.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+}
+
+.logo-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.login-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.login-card p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.input-group {
+    margin-bottom: 1.2rem;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+    border-color: var(--accent-blue);
+}
+
+.login-status-msg {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* --- BUTTONS --- */
+.btn {
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+
+.btn:disabled {
+    background: #CBD5E1;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-wizard {
+    background: var(--accent-purple);
+}
+
+.btn-arm {
+    background: var(--danger);
+}
+
+.btn-arm.armed {
+    background: var(--success);
+}
+
+.btn-secondary {
+    background: #475569;
+}
+
+.btn-small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    width: auto;
+}
+
+.btn-yes { background: var(--success); }
+.btn-no { background: var(--danger); }
+
+/* --- 2. HEADER SUPERIOR --- */
+.app-header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-main);
+    display: block;
+}
+
+.brand-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.mode-tabs {
+    display: flex;
+    gap: 0.5rem;
+    background: #F1F5F9;
+    padding: 4px;
+    border-radius: 10px;
+}
+
+.tab-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    border-radius: 7px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: var(--card-bg);
+    color: var(--accent-blue);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.header-badges {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+}
+
+.badge-gray { background: #E2E8F0; color: #475569; }
+.badge-warning { background: #FEF3C7; color: #D97706; }
+.badge-success { background: #D1FAE5; color: #059669; }
+.badge-danger { background: #FEE2E2; color: #DC2626; }
+
+/* --- 3. MAIN DASHBOARD GRID --- */
+.main-container {
+    flex: 1;
+    padding: 1.25rem;
+    overflow-y: auto;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    gap: 1.25rem;
+    height: 100%;
+}
+
+.dashboard-grid.hidden {
+    display: none !important;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: var(--shadow);
+}
+
+.header-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.divider {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Metric Boxes & GPIO Monitor Table */
+.metric-box {
+    background: #F8FAFC;
+    border-radius: 8px;
+    padding: 0.85rem;
+    border: 1px solid #F1F5F9;
+}
+
+.gpio-monitor-box {
+    background: #F8FAFC;
+    border-radius: 10px;
+    padding: 0.75rem;
+    border: 1px solid #E2E8F0;
+    max-height: 380px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.gpio-table-container {
+    overflow-y: auto;
+    max-height: 330px;
+    border-radius: 6px;
+    border: 1px solid #E2E8F0;
+}
+
+.gpio-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+    text-align: left;
+    background: white;
+}
+
+.gpio-table th {
+    background: #F1F5F9;
+    color: var(--text-muted);
+    font-weight: 700;
+    padding: 6px 8px;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.gpio-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #F1F5F9;
+    color: var(--text-main);
+}
+
+.pin-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    display: inline-block;
+}
+
+.pin-active {
+    background: #D1FAE5;
+    color: #059669;
+    border: 1px solid #A7F3D0;
+}
+
+.pin-idle {
+    background: #F1F5F9;
+    color: #64748B;
+    border: 1px solid #E2E8F0;
+}
+
+.pin-i2c {
+    background: #E0F2FE;
+    color: #0284C7;
+    border: 1px solid #BAE6FD;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.metric-value-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.metric-value-row h2 {
+    font-size: 1.6rem;
+    color: var(--text-main);
+}
+
+.progress-bar-bg {
+    background: #E2E8F0;
+    height: 8px;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    background: var(--success);
+    height: 100%;
+    transition: width 0.3s;
+}
+
+.action-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: auto;
+}
+
+/* Input HUD Card */
+.input-hud-card {
+    background: #F1F5F9;
+    padding: 0.75rem;
+    border-radius: 8px;
+}
+
+.hud-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 0.4rem;
+}
+
+.hud-indicators {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.hud-chip {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    background: #CBD5E1;
+    color: #475569;
+    border-radius: 4px;
+}
+
+.hud-chip.active {
+    background: var(--accent-blue);
+    color: white;
+}
+
+/* --- 4. ESQUEMA TOP-DOWN 2D ROVER 6x6 --- */
+.rover-view {
+    position: relative;
+    flex: 1;
+    background: #F1F5F9;
+    border-radius: var(--radius);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px dashed var(--border-color);
+    min-height: 300px;
+}
+
+.rover-chassis {
+    width: 150px;
+    height: 240px;
+    background: #CBD5E1;
+    border-radius: 18px;
+    position: relative;
+    box-shadow: inset 0 0 12px rgba(0,0,0,0.06);
+    border: 2px solid #94A3B8;
+}
+
+.chassis-header {
+    text-align: center;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #475569;
+    margin-top: 6px;
+    letter-spacing: 1px;
+}
+
+/* Ruedas */
+.wheel {
+    width: 26px;
+    height: 48px;
+    background: #475569;
+    border-radius: 7px;
+    position: absolute;
+    border: 2px solid #94A3B8;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.wheel-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #FFFFFF;
+}
+
+.wheel-val {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-main);
+    background: #FFFFFF;
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+}
+
+.wheel-val-left {
+    right: 34px;
+}
+
+.wheel-val-right {
+    left: 34px;
+}
+
+.wheel.active {
+    background: var(--success);
+    border-color: #059669;
+}
+
+.wheel.fault {
+    background: var(--danger);
+    border-color: #B91C1C;
+}
+
+.w-front-left  { top: 12px; left: -30px; }
+.w-front-right { top: 12px; right: -30px; }
+.w-mid-left    { top: 96px; left: -30px; }
+.w-mid-right   { top: 96px; right: -30px; }
+.w-rear-left   { bottom: 12px; left: -30px; }
+.w-rear-right  { bottom: 12px; right: -30px; }
+
+/* PLACEHOLDERS "A FUTURO" */
+.placeholder-card {
+    border: 2px dashed #CBD5E1;
+    background: #F8FAFC;
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.placeholder-full {
+    flex: 1;
+}
+
+.badge-future {
+    background: #E2E8F0;
+    color: #475569;
+    font-size: 0.7rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.cam-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* --- 5. DIAGNÓSTICO PROFUNDO --- */
+.section-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.motor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.motor-control-item {
+    background: #F8FAFC;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid #F1F5F9;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.motor-control-item label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.motor-control-item input[type="range"] {
+    width: 100%;
+}
+
+.val-display {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    text-align: right;
+}
+
+.servo-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.servo-row label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    width: 120px;
+}
+
+.servo-row input {
+    flex: 1;
+}
+
+.stepper-jog-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.info-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+.adc-monitor-box {
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 2rem;
+    text-align: center;
+}
+
+.adc-monitor-box h1 {
+    font-size: 2.5rem;
+    color: var(--accent-blue);
+    margin: 0.5rem 0;
+}
+
+/* --- 6. MODAL PRE-FLIGHT WIZARD --- */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(3px);
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius);
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.wizard-header {
+    margin-bottom: 1rem;
+}
+
+.wizard-step-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    background: var(--accent-purple);
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.wizard-header h3 {
+    margin-top: 0.5rem;
+    font-size: 1.25rem;
+}
+
+.wizard-body {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.wizard-footer {
+    display: flex;
+    gap: 1rem;
+}
+
+/* --- 7. POPOVER INDIVIDUAL MOTOR TEST --- */
+.wheel {
+    cursor: pointer;
+}
+
+.wheel:hover {
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+    transform: scale(1.05);
+}
+
+.motor-popover {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 0.75rem;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 170px;
+    pointer-events: auto;
+    transition: opacity 0.15s ease-in-out;
+}
+
+.motor-popover.hidden {
+    display: none !important;
+}
+
+.popover-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text-main);
+}
+
+.popover-close {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    line-height: 1;
+}
+
+.popover-close:hover {
+    color: var(--danger);
+}
+
+.popover-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-popover {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.78rem;
+    flex: 1;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+}
