@@ -1,6 +1,5 @@
 /* ==========================================================================
-   Rover 6x6 Ground Control Station - Modern Light Theme CSS System
-   Inspired by gemini-code-1785019304203.html aesthetic
+   Rover 6x6 - Estacion de control
    ========================================================================== */
 
 :root {
@@ -14,6 +13,7 @@
     --warning: #F59E0B;
     --danger: #EF4444;
     --border-color: #E2E8F0;
+    --surface-alt: #F8FAFC;
     --radius: 12px;
     --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
 }
@@ -34,7 +34,9 @@ body {
     overflow: hidden;
 }
 
-/* --- 1. PANTALLA LOGIN MODAL --- */
+.hidden { display: none !important; }
+
+/* --- 1. PANTALLA DE CONEXION --- */
 #login-screen {
     position: fixed;
     inset: 0;
@@ -55,59 +57,67 @@ body {
     width: 100%;
     max-width: 420px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
 }
 
-.logo-icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-}
+.logo-icon { font-size: 2.5rem; }
+.login-card h2 { font-size: 1.5rem; }
+.login-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem; }
 
-.login-card h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.25rem;
-}
-
-.login-card p {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
-}
-
-.input-group {
-    margin-bottom: 1.2rem;
+.conn-advanced {
     text-align: left;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
 }
+
+.conn-advanced summary {
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    user-select: none;
+}
+
+.conn-advanced[open] summary { margin-bottom: 0.8rem; }
+
+.input-group { margin-bottom: 0.8rem; }
 
 .input-group label {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.3rem;
     color: var(--text-muted);
     letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .input-group input {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.6rem;
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     outline: none;
     transition: border-color 0.2s;
 }
 
-.input-group input:focus {
-    border-color: var(--accent-blue);
-}
+.input-group input:focus { border-color: var(--accent-blue); }
 
 .login-status-msg {
-    margin-top: 1rem;
+    min-height: 1.2rem;
     font-size: 0.85rem;
     font-weight: 600;
+    color: var(--text-muted);
 }
 
-/* --- BUTTONS --- */
+.login-status-msg[data-kind="info"] { color: var(--warning); }
+.login-status-msg[data-kind="error"] { color: var(--danger); }
+
+/* --- BOTONES --- */
 .btn {
     width: 100%;
     padding: 0.8rem;
@@ -118,46 +128,45 @@ body {
     font-weight: 600;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
-.btn:hover {
-    opacity: 0.92;
-    transform: translateY(-1px);
+.btn:hover:not(:disabled) { opacity: 0.92; transform: translateY(-1px); }
+.btn:disabled { background: #CBD5E1; cursor: not-allowed; transform: none; }
+
+.btn-primary   { background: var(--accent-blue); }
+.btn-secondary { background: #475569; }
+.btn-wizard    { background: var(--accent-purple); }
+.btn-danger    { background: var(--danger); }
+.btn-yes       { background: var(--success); }
+.btn-no        { background: var(--danger); }
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px dashed var(--border-color);
 }
 
-.btn:disabled {
-    background: #CBD5E1;
-    cursor: not-allowed;
-    transform: none;
+.btn-arm { background: var(--danger); }
+.btn-arm.armed { background: var(--success); }
+
+.btn-small { padding: 0.4rem 0.8rem; font-size: 0.85rem; width: auto; }
+
+.btn-icon {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1;
 }
 
-.btn-wizard {
-    background: var(--accent-purple);
-}
+.btn-icon:hover { color: var(--danger); border-color: var(--danger); }
 
-.btn-arm {
-    background: var(--danger);
-}
-
-.btn-arm.armed {
-    background: var(--success);
-}
-
-.btn-secondary {
-    background: #475569;
-}
-
-.btn-small {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
-    width: auto;
-}
-
-.btn-yes { background: var(--success); }
-.btn-no { background: var(--danger); }
-
-/* --- 2. HEADER SUPERIOR --- */
+/* --- 2. CABECERA --- */
 .app-header {
     background: var(--card-bg);
     border-bottom: 1px solid var(--border-color);
@@ -165,19 +174,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 0.75rem 1rem;
+    flex-wrap: wrap;
 }
 
-.brand-title {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: var(--text-main);
-    display: block;
-}
-
-.brand-subtitle {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
+.brand-title { font-size: 1.1rem; font-weight: 800; display: block; }
+.brand-subtitle { font-size: 0.75rem; color: var(--text-muted); }
 
 .mode-tabs {
     display: flex;
@@ -196,19 +198,25 @@ body {
     font-weight: 600;
     color: var(--text-muted);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background 0.2s, color 0.2s;
 }
 
 .tab-btn.active {
     background: var(--card-bg);
     color: var(--accent-blue);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .header-badges {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    /* min-width:0 permite que el bloque se comprima y sus insignias envuelvan
+       en pantallas estrechas, en vez de empujar el ancho de la pagina. */
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .badge {
@@ -216,29 +224,42 @@ body {
     font-weight: 700;
     padding: 0.35rem 0.75rem;
     border-radius: 20px;
+    white-space: nowrap;
 }
 
-.badge-gray { background: #E2E8F0; color: #475569; }
+.badge-gray    { background: #E2E8F0; color: #475569; }
 .badge-warning { background: #FEF3C7; color: #D97706; }
 .badge-success { background: #D1FAE5; color: #059669; }
-.badge-danger { background: #FEE2E2; color: #DC2626; }
+.badge-danger  { background: #FEE2E2; color: #DC2626; }
 
-/* --- 3. MAIN DASHBOARD GRID --- */
-.main-container {
-    flex: 1;
-    padding: 1.25rem;
-    overflow-y: auto;
+/* --- Barra de avisos --- */
+.notice-bar {
+    max-height: 0;
+    overflow: hidden;
+    background: #FEF3C7;
+    color: #92400E;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    transition: max-height 0.2s ease, padding 0.2s ease;
+    padding: 0 1rem;
 }
+
+.notice-bar.visible { max-height: 3rem; padding: 0.6rem 1rem; }
+
+/* --- 3. REJILLA PRINCIPAL --- */
+.main-container { flex: 1; padding: 1.25rem; overflow-y: auto; }
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 320px 1fr 320px;
+    grid-template-columns: 320px minmax(0, 1fr) 340px;
     gap: 1.25rem;
-    height: 100%;
+    align-items: start;
+    min-height: 100%;
 }
 
-.dashboard-grid.hidden {
-    display: none !important;
+@media (max-width: 1200px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
 }
 
 .card {
@@ -255,41 +276,214 @@ body {
 .header-title {
     font-size: 1rem;
     font-weight: 700;
-    color: var(--text-main);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.5rem;
 }
 
-.divider {
-    border: 0;
-    border-top: 1px solid var(--border-color);
+.divider { border: 0; border-top: 1px solid var(--border-color); }
+
+.legend-text { font-size: 0.7rem; color: var(--text-muted); font-weight: 500; }
+
+.dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: 0.4rem;
 }
 
-/* Metric Boxes & GPIO Monitor Table */
+.dot-active { background: var(--success); }
+.dot-idle { background: #CBD5E1; }
+
+.hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.5rem; }
+
+/* --- Metricas --- */
 .metric-box {
-    background: #F8FAFC;
+    background: var(--surface-alt);
     border-radius: 8px;
     padding: 0.85rem;
     border: 1px solid #F1F5F9;
 }
 
-.gpio-monitor-box {
-    background: #F8FAFC;
-    border-radius: 10px;
-    padding: 0.75rem;
-    border: 1px solid #E2E8F0;
-    max-height: 380px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+.metric-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.25rem;
 }
 
+.metric-big { font-size: 1.6rem; font-weight: 800; }
+
+.action-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: auto;
+}
+
+/* --- HUD de entradas --- */
+.input-hud-card { background: #F1F5F9; padding: 0.75rem; border-radius: 8px; }
+
+.hud-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 0.4rem;
+}
+
+.hud-indicators { display: flex; gap: 0.5rem; }
+
+.hud-chip {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    background: #CBD5E1;
+    color: #475569;
+    border-radius: 4px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.hud-chip.active { background: var(--accent-blue); color: white; }
+
+/* --- 4. ESQUEMA TOP-DOWN --- */
+.rover-view {
+    position: relative;
+    background: #F1F5F9;
+    border-radius: var(--radius);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px dashed var(--border-color);
+    min-height: 320px;
+    padding: 1rem 3rem;
+}
+
+.rover-chassis {
+    width: 150px;
+    height: 240px;
+    background: #CBD5E1;
+    border-radius: 18px;
+    position: relative;
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.06);
+    border: 2px solid #94A3B8;
+}
+
+.chassis-header {
+    text-align: center;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #475569;
+    margin-top: 6px;
+    letter-spacing: 1px;
+}
+
+.wheel {
+    --wheel-power: 0%;
+    width: 26px;
+    height: 48px;
+    background: #475569;
+    border-radius: 7px;
+    position: absolute;
+    border: 2px solid #94A3B8;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.wheel:hover { box-shadow: 0 0 10px rgba(37, 99, 235, 0.4); transform: scale(1.06); }
+
+/* La barra interior crece con el modulo de la velocidad. */
+.wheel::after {
+    content: '';
+    position: absolute;
+    inset: auto 2px 2px 2px;
+    height: var(--wheel-power);
+    max-height: calc(100% - 4px);
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.35);
+    transition: height 0.15s linear;
+}
+
+.wheel-label { font-size: 0.65rem; font-weight: 800; color: #FFF; z-index: 1; }
+
+.wheel-val {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-main);
+    background: #FFF;
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+}
+
+.wheel-val-left { right: 34px; }
+.wheel-val-right { left: 34px; }
+
+.wheel.active { background: var(--success); border-color: #059669; }
+.wheel.active.reverse { background: var(--warning); border-color: #D97706; }
+
+.w-front-left  { top: 12px; left: -30px; }
+.w-front-right { top: 12px; right: -30px; }
+.w-mid-left    { top: 96px; left: -30px; }
+.w-mid-right   { top: 96px; right: -30px; }
+.w-rear-left   { bottom: 12px; left: -30px; }
+.w-rear-right  { bottom: 12px; right: -30px; }
+
+/* --- Monitor de enlace --- */
+.link-monitor {
+    background: var(--surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.link-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+}
+
+.link-stats strong { font-size: 0.85rem; font-weight: 700; }
+.link-stats strong[data-state="ok"]   { color: var(--success); }
+.link-stats strong[data-state="warn"] { color: var(--warning); }
+.link-stats strong[data-state="off"]  { color: var(--text-muted); }
+
+.wire-log {
+    background: #0F172A;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-family: 'Cascadia Code', Consolas, monospace;
+    font-size: 0.7rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 4.5rem;
+    overflow-y: auto;
+}
+
+.wire-tx { color: #4ADE80; }
+.wire-rx { color: #60A5FA; }
+
+/* --- 5. TABLA DE PINES --- */
 .gpio-table-container {
     overflow-y: auto;
-    max-height: 330px;
+    max-height: 460px;
     border-radius: 6px;
-    border: 1px solid #E2E8F0;
+    border: 1px solid var(--border-color);
 }
 
 .gpio-table {
@@ -307,13 +501,18 @@ body {
     padding: 6px 8px;
     position: sticky;
     top: 0;
-    border-bottom: 1px solid #E2E8F0;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.gpio-table td {
-    padding: 6px 8px;
-    border-bottom: 1px solid #F1F5F9;
-    color: var(--text-main);
+.gpio-table td { padding: 6px 8px; border-bottom: 1px solid #F1F5F9; }
+
+.table-section {
+    background: #F8FAFC;
+    font-weight: 700;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .pin-badge {
@@ -325,239 +524,19 @@ body {
     display: inline-block;
 }
 
-.pin-active {
-    background: #D1FAE5;
-    color: #059669;
-    border: 1px solid #A7F3D0;
-}
+.pin-active { background: #D1FAE5; color: #059669; border: 1px solid #A7F3D0; }
+.pin-idle   { background: #F1F5F9; color: #64748B; border: 1px solid var(--border-color); }
+.pin-i2c    { background: #E0F2FE; color: #0284C7; border: 1px solid #BAE6FD; }
 
-.pin-idle {
-    background: #F1F5F9;
-    color: #64748B;
-    border: 1px solid #E2E8F0;
-}
+/* --- 6. DIAGNOSTICO --- */
+.section-desc { font-size: 0.85rem; color: var(--text-muted); }
 
-.pin-i2c {
-    background: #E0F2FE;
-    color: #0284C7;
-    border: 1px solid #BAE6FD;
-}
+.sub-section h4 { font-size: 0.85rem; margin-bottom: 0.5rem; }
 
-.metric-label {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    font-weight: 600;
-    display: block;
-    margin-bottom: 0.25rem;
-}
-
-.metric-value-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.metric-value-row h2 {
-    font-size: 1.6rem;
-    color: var(--text-main);
-}
-
-.progress-bar-bg {
-    background: #E2E8F0;
-    height: 8px;
-    border-radius: 4px;
-    margin-top: 0.5rem;
-    overflow: hidden;
-}
-
-.progress-bar-fill {
-    background: var(--success);
-    height: 100%;
-    transition: width 0.3s;
-}
-
-.action-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    margin-top: auto;
-}
-
-/* Input HUD Card */
-.input-hud-card {
-    background: #F1F5F9;
-    padding: 0.75rem;
-    border-radius: 8px;
-}
-
-.hud-title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    display: block;
-    margin-bottom: 0.4rem;
-}
-
-.hud-indicators {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.hud-chip {
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 0.25rem 0.5rem;
-    background: #CBD5E1;
-    color: #475569;
-    border-radius: 4px;
-}
-
-.hud-chip.active {
-    background: var(--accent-blue);
-    color: white;
-}
-
-/* --- 4. ESQUEMA TOP-DOWN 2D ROVER 6x6 --- */
-.rover-view {
-    position: relative;
-    flex: 1;
-    background: #F1F5F9;
-    border-radius: var(--radius);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px dashed var(--border-color);
-    min-height: 300px;
-}
-
-.rover-chassis {
-    width: 150px;
-    height: 240px;
-    background: #CBD5E1;
-    border-radius: 18px;
-    position: relative;
-    box-shadow: inset 0 0 12px rgba(0,0,0,0.06);
-    border: 2px solid #94A3B8;
-}
-
-.chassis-header {
-    text-align: center;
-    font-size: 0.65rem;
-    font-weight: 800;
-    color: #475569;
-    margin-top: 6px;
-    letter-spacing: 1px;
-}
-
-/* Ruedas */
-.wheel {
-    width: 26px;
-    height: 48px;
-    background: #475569;
-    border-radius: 7px;
-    position: absolute;
-    border: 2px solid #94A3B8;
-    transition: all 0.3s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.wheel-label {
-    font-size: 0.65rem;
-    font-weight: 800;
-    color: #FFFFFF;
-}
-
-.wheel-val {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--text-main);
-    background: #FFFFFF;
-    padding: 2px 6px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    white-space: nowrap;
-}
-
-.wheel-val-left {
-    right: 34px;
-}
-
-.wheel-val-right {
-    left: 34px;
-}
-
-.wheel.active {
-    background: var(--success);
-    border-color: #059669;
-}
-
-.wheel.fault {
-    background: var(--danger);
-    border-color: #B91C1C;
-}
-
-.w-front-left  { top: 12px; left: -30px; }
-.w-front-right { top: 12px; right: -30px; }
-.w-mid-left    { top: 96px; left: -30px; }
-.w-mid-right   { top: 96px; right: -30px; }
-.w-rear-left   { bottom: 12px; left: -30px; }
-.w-rear-right  { bottom: 12px; right: -30px; }
-
-/* PLACEHOLDERS "A FUTURO" */
-.placeholder-card {
-    border: 2px dashed #CBD5E1;
-    background: #F8FAFC;
-    border-radius: var(--radius);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: var(--text-muted);
-    text-align: center;
-    padding: 1.5rem;
-}
-
-.placeholder-full {
-    flex: 1;
-}
-
-.badge-future {
-    background: #E2E8F0;
-    color: #475569;
-    font-size: 0.7rem;
-    padding: 0.25rem 0.6rem;
-    border-radius: 20px;
-    font-weight: 800;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-}
-
-.cam-icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-}
-
-/* --- 5. DIAGNÓSTICO PROFUNDO --- */
-.section-desc {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-}
-
-.motor-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-}
+.motor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
 
 .motor-control-item {
-    background: #F8FAFC;
+    background: var(--surface-alt);
     padding: 0.6rem 0.8rem;
     border-radius: 8px;
     border: 1px solid #F1F5F9;
@@ -566,15 +545,8 @@ body {
     gap: 0.25rem;
 }
 
-.motor-control-item label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--text-main);
-}
-
-.motor-control-item input[type="range"] {
-    width: 100%;
-}
+.motor-control-item label { font-size: 0.75rem; font-weight: 700; }
+.motor-control-item input[type="range"] { width: 100%; }
 
 .val-display {
     font-size: 0.75rem;
@@ -590,43 +562,25 @@ body {
     margin-top: 0.5rem;
 }
 
-.servo-row label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    width: 120px;
-}
+.servo-row label { font-size: 0.78rem; font-weight: 600; width: 130px; flex-shrink: 0; }
+.servo-row input { flex: 1; min-width: 0; }
+.servo-row span { font-size: 0.72rem; width: 130px; text-align: right; flex-shrink: 0; }
 
-.servo-row input {
-    flex: 1;
-}
+.stepper-jog-controls { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
 
-.stepper-jog-controls {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-}
-
-.info-text {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-top: 0.5rem;
-}
+.info-text { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; }
 
 .adc-monitor-box {
-    background: #F8FAFC;
+    background: var(--surface-alt);
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
     padding: 2rem;
     text-align: center;
 }
 
-.adc-monitor-box h1 {
-    font-size: 2.5rem;
-    color: var(--accent-blue);
-    margin: 0.5rem 0;
-}
+.adc-monitor-box h1 { font-size: 2.5rem; color: var(--accent-blue); margin: 0.5rem 0; }
 
-/* --- 6. MODAL PRE-FLIGHT WIZARD --- */
+/* --- 7. MODAL PRE-VUELO --- */
 .modal-backdrop {
     position: fixed;
     inset: 0;
@@ -644,11 +598,7 @@ body {
     border-radius: var(--radius);
     max-width: 480px;
     width: 100%;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-}
-
-.wizard-header {
-    margin-bottom: 1rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 .wizard-step-badge {
@@ -661,52 +611,32 @@ body {
     letter-spacing: 0.5px;
 }
 
-.wizard-header h3 {
-    margin-top: 0.5rem;
-    font-size: 1.25rem;
-}
+.wizard-header h3 { margin-top: 0.5rem; font-size: 1.25rem; }
 
 .wizard-body {
     font-size: 0.95rem;
     color: var(--text-muted);
-    margin-bottom: 1.5rem;
+    margin: 1rem 0 1.5rem;
     line-height: 1.5;
+    min-height: 4.5rem;
 }
 
-.wizard-footer {
-    display: flex;
-    gap: 1rem;
-}
+.wizard-footer { display: flex; gap: 1rem; }
 
-/* --- 7. POPOVER INDIVIDUAL MOTOR TEST --- */
-.wheel {
-    cursor: pointer;
-}
-
-.wheel:hover {
-    box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
-    transform: scale(1.05);
-}
-
+/* --- 8. POPOVER DE PRUEBA DE MOTOR --- */
 .motor-popover {
     position: absolute;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.97);
     backdrop-filter: blur(10px);
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
     padding: 0.75rem;
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
+    z-index: 500;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    width: 170px;
-    pointer-events: auto;
-    transition: opacity 0.15s ease-in-out;
-}
-
-.motor-popover.hidden {
-    display: none !important;
+    width: 180px;
 }
 
 .popover-header {
@@ -714,8 +644,8 @@ body {
     justify-content: space-between;
     align-items: center;
     font-weight: 700;
-    font-size: 0.85rem;
-    color: var(--text-main);
+    font-size: 0.8rem;
+    gap: 0.5rem;
 }
 
 .popover-close {
@@ -727,14 +657,9 @@ body {
     line-height: 1;
 }
 
-.popover-close:hover {
-    color: var(--danger);
-}
+.popover-close:hover { color: var(--danger); }
 
-.popover-buttons {
-    display: flex;
-    gap: 0.5rem;
-}
+.popover-buttons { display: flex; gap: 0.5rem; }
 
 .btn-popover {
     padding: 0.5rem 0.25rem;
@@ -742,6 +667,6 @@ body {
     flex: 1;
     border-radius: 6px;
     font-weight: 700;
-    cursor: pointer;
     user-select: none;
+    touch-action: none;
 }
