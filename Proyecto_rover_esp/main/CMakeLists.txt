@@ -1,0 +1,21 @@
+idf_component_register(
+    SRCS 
+        "main.c"
+        "mcpwm_motors.c"
+        "stepper_drv.c"
+        "pca9685_servo.c"
+        "telemetry_adc.c"
+        "websocket_server.c"
+    INCLUDE_DIRS "."
+    REQUIRES 
+        driver
+        esp_driver_gpio
+        esp_driver_ledc
+        esp_driver_i2c
+        esp_adc
+        esp_wifi
+        nvs_flash
+        esp_timer
+        esp_netif
+        esp_http_server
+)
