@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rover 6x6 · Estación de Control</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===================== PANTALLA DE CONEXIÓN ===================== -->
+<div id="login-screen">
+    <div class="login-card">
+        <div class="logo-icon">🛰️</div>
+        <h2>Rover 6×6</h2>
+        <p>Estación de control · ESP32-S3 N16R8</p>
+
+        <button class="btn btn-primary" onclick="App.connectSerial()">
+            🔌 Conectar por cable (USB)
+        </button>
+
+        <details class="conn-advanced">
+            <summary>Conexión inalámbrica</summary>
+            <div class="input-group">
+                <label for="rover-ip">Dirección IP</label>
+                <input type="text" id="rover-ip" value="192.168.4.1" placeholder="192.168.4.1">
+            </div>
+            <div class="input-group">
+                <label for="rover-port">Puerto</label>
+                <input type="text" id="rover-port" value="8080" placeholder="8080">
+            </div>
+            <button class="btn btn-secondary" onclick="App.connectWifi()">
+                📡 Conectar por Wi-Fi
+            </button>
+        </details>
+
+        <button class="btn btn-ghost" onclick="App.connectDemo()">
+            🧪 Simulación (sin hardware)
+        </button>
+
+        <div id="login-status" class="login-status-msg"></div>
+    </div>
+</div>
+
+<!-- ===================== CABECERA ===================== -->
+<header class="app-header">
+    <div class="header-brand">
+        <span class="brand-title">ROVER 6×6</span>
+        <span class="brand-subtitle">Estación de control</span>
+    </div>
+
+    <nav class="mode-tabs">
+        <button class="tab-btn active" id="tab-general" onclick="App.switchMode('general')">🎮 Operación</button>
+        <button class="tab-btn" id="tab-diagnostics" onclick="App.switchMode('diagnostics')">⚙️ Diagnóstico</button>
+    </nav>
+
+    <div class="header-badges">
+        <span id="latency-badge" class="badge badge-gray">Latencia: --</span>
+        <span id="arm-badge" class="badge badge-danger">DESARMADO</span>
+        <span id="status-badge" class="badge badge-danger">● DESCONECTADO</span>
+        <button id="btn-disconnect" class="btn-icon" title="Desconectar" hidden
+                onclick="App.disconnect()">⏏</button>
+    </div>
+</header>
+
+<div id="notice-bar" class="notice-bar"></div>
+
+<main class="main-container">
+
+    <!-- ===================== VISTA: OPERACIÓN ===================== -->
+    <div id="view-general" class="dashboard-grid">
+
+        <!-- Columna izquierda -->
+        <div class="card">
+            <div class="header-title"><span>Estado y seguridad</span><span class="card-icon">⚡</span></div>
+            <hr class="divider">
+
+            <div class="metric-box">
+                <span class="metric-label">Batería</span>
+                <strong id="battery-val" class="metric-big">-- V</strong>
+            </div>
+
+            <div class="input-hud-card">
+                <span class="hud-title">Entradas de conducción</span>
+                <div class="hud-indicators">
+                    <div id="hud-wasd" class="hud-chip">Teclado WASD</div>
+                    <div id="hud-gamepad" class="hud-chip">Mando</div>
+                </div>
+                <p class="hint">Esc o barra espaciadora = parada de emergencia</p>
+            </div>
+
+            <div class="action-stack">
+                <button id="btn-preflight" class="btn btn-wizard" disabled onclick="App.startPreFlight()">
+                    ⚙️ Calibración pre-vuelo
+                </button>
+                <button id="btn-arm-toggle" class="btn btn-arm" disabled onclick="App.toggleArm()">
+                    🛡️ ARMAR ROVER
+                </button>
+                <button class="btn btn-danger" onclick="App.emergencyStop()">
+                    ⛔ PARADA DE EMERGENCIA
+                </button>
+            </div>
+        </div>
+
+        <!-- Columna central -->
+        <div class="card card-center">
+            <div class="header-title">
+                <span>Esquema superior 6×6</span>
+                <span class="legend-text">
+                    <span class="dot dot-active"></span> Activo
+                    <span class="dot dot-idle"></span> Reposo
+                </span>
+            </div>
+
+            <div class="rover-view">
+                <div class="rover-chassis">
+                    <div class="chassis-header">FRENTE</div>
+
+                    <div class="wheel w-front-left" id="m1">
+                        <span class="wheel-label">M1</span><span class="wheel-val wheel-val-left">0%</span>
+                    </div>
+                    <div class="wheel w-front-right" id="m2">
+                        <span class="wheel-label">M2</span><span class="wheel-val wheel-val-right">0%</span>
+                    </div>
+                    <div class="wheel w-mid-left" id="m3">
+                        <span class="wheel-label">M3</span><span class="wheel-val wheel-val-left">0%</span>
+                    </div>
+                    <div class="wheel w-mid-right" id="m4">
+                        <span class="wheel-label">M4</span><span class="wheel-val wheel-val-right">0%</span>
+                    </div>
+                    <div class="wheel w-rear-left" id="m5">
+                        <span class="wheel-label">M5</span><span class="wheel-val wheel-val-left">0%</span>
+                    </div>
+                    <div class="wheel w-rear-right" id="m6">
+                        <span class="wheel-label">M6</span><span class="wheel-val wheel-val-right">0%</span>
+                    </div>
+                </div>
+
+                <div id="motor-test-popover" class="motor-popover hidden">
+                    <div class="popover-header">
+                        <span id="popover-title">Motor</span>
+                        <button class="popover-close" onclick="App.closeMotorPopover()">×</button>
+                    </div>
+                    <div class="popover-buttons">
+                        <button class="btn btn-popover btn-yes" id="btn-popover-forward">Adelante</button>
+                        <button class="btn btn-popover btn-no" id="btn-popover-backward">Atrás</button>
+                    </div>
+                    <p class="hint">Mantén pulsado para mover</p>
+                </div>
+            </div>
+
+            <!-- Monitor de enlace -->
+            <div class="link-monitor">
+                <div class="header-title"><span>📶 Monitor de enlace</span></div>
+                <div class="link-stats">
+                    <div><span class="metric-label">Estado</span><strong id="debug-link-status" data-state="off">Desconectado</strong></div>
+                    <div><span class="metric-label">Tramas OK</span><strong id="debug-rx-ok" data-state="ok">0</strong></div>
+                    <div><span class="metric-label">Tramas con error</span><strong id="debug-rx-err" data-state="ok">0</strong></div>
+                </div>
+                <span class="metric-label">Último envío (TX)</span>
+                <pre id="debug-tx-data" class="wire-log wire-tx">—</pre>
+                <span class="metric-label">Última telemetría (RX)</span>
+                <pre id="debug-rx-data" class="wire-log wire-rx">—</pre>
+            </div>
+        </div>
+
+        <!-- Columna derecha -->
+        <div class="card">
+            <div class="header-title"><span>📍 Mapa de pines</span><span class="card-icon">🔌</span></div>
+            <hr class="divider">
+
+            <div class="gpio-table-container">
+                <table class="gpio-table">
+                    <thead>
+                        <tr><th>GPIO</th><th>Función</th><th>Estado</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>40 / 39</strong></td><td>M1 delantero izq · L298N</td><td><span id="pin-m1-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
+                        <tr><td><strong>38 / 16</strong></td><td>M2 delantero der · L298N</td><td><span id="pin-m2-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
+                        <tr><td><strong>1 / 2</strong></td><td>M3 central izq · L298N</td><td><span id="pin-m3-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
+                        <tr><td><strong>42 / 41</strong></td><td>M4 central der · L298N</td><td><span id="pin-m4-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
+                        <tr><td><strong>19 / 20</strong></td><td>M5 trasero izq · L298N</td><td><span id="pin-m5-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
+                        <tr><td><strong>21 / 47</strong></td><td>M6 trasero der · L298N</td><td><span id="pin-m6-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
+                        <tr><td><strong>6 / 7 / 8</strong></td><td>Paso a paso · DRV8825</td><td><span id="stepper-state-badge" class="pin-badge pin-idle">REPOSO</span></td></tr>
+                        <tr><td><strong>4 / 5</strong></td><td>Bus I2C · PCA9685</td><td><span id="pin-i2c-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
+                        <tr><td><strong>9</strong></td><td>Divisor de batería · ADC1</td><td><span id="pin-adc-badge" class="pin-badge pin-idle">SIN LECTURA</span></td></tr>
+                        <tr><td colspan="3" class="table-section">Servos de dirección · PCA9685</td></tr>
+                        <tr><td><strong>Canal 0</strong></td><td>Servo 1</td><td><span id="servo-dir-0-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                        <tr><td><strong>Canal 1</strong></td><td>Servo 2</td><td><span id="servo-dir-1-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                        <tr><td><strong>Canal 2</strong></td><td>Servo 3</td><td><span id="servo-dir-2-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                        <tr><td><strong>Canal 3</strong></td><td>Servo 4</td><td><span id="servo-dir-3-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                        <tr><td><strong>Canal 4</strong></td><td>Servo 5</td><td><span id="servo-dir-4-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== VISTA: DIAGNÓSTICO ===================== -->
+    <div id="view-diagnostics" class="dashboard-grid hidden">
+
+        <div class="card">
+            <div class="header-title"><span>Motores DC (M1–M6)</span></div>
+            <p class="section-desc">Prueba individual de velocidad y sentido en cada canal L298N.</p>
+
+            <div class="motor-grid">
+                <div class="motor-control-item" data-motor="0">
+                    <label>M1 · Delantero izq</label>
+                    <input type="range" min="-100" max="100" value="0" oninput="App.setMotor(0, this.value)">
+                    <span class="val-display">0%</span>
+                </div>
+                <div class="motor-control-item" data-motor="1">
+                    <label>M2 · Delantero der</label>
+                    <input type="range" min="-100" max="100" value="0" oninput="App.setMotor(1, this.value)">
+                    <span class="val-display">0%</span>
+                </div>
+                <div class="motor-control-item" data-motor="2">
+                    <label>M3 · Central izq</label>
+                    <input type="range" min="-100" max="100" value="0" oninput="App.setMotor(2, this.value)">
+                    <span class="val-display">0%</span>
+                </div>
+                <div class="motor-control-item" data-motor="3">
+                    <label>M4 · Central der</label>
+                    <input type="range" min="-100" max="100" value="0" oninput="App.setMotor(3, this.value)">
+                    <span class="val-display">0%</span>
+                </div>
+                <div class="motor-control-item" data-motor="4">
+                    <label>M5 · Trasero izq</label>
+                    <input type="range" min="-100" max="100" value="0" oninput="App.setMotor(4, this.value)">
+                    <span class="val-display">0%</span>
+                </div>
+                <div class="motor-control-item" data-motor="5">
+                    <label>M6 · Trasero der</label>
+                    <input type="range" min="-100" max="100" value="0" oninput="App.setMotor(5, this.value)">
+                    <span class="val-display">0%</span>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="App.stopAllMotors()">Detener todos los motores</button>
+        </div>
+
+        <div class="card">
+            <div class="header-title"><span>Servos y paso a paso</span></div>
+
+            <div class="sub-section">
+                <h4>Servos de dirección · PCA9685</h4>
+                <div class="servo-row">
+                    <label>Servo 1 · canal 0</label>
+                    <input type="range" min="0" max="180" value="90" oninput="App.setServo(0, this.value)">
+                    <span id="servo-0-val">⏺️ CENTRO (90°)</span>
+                </div>
+                <div class="servo-row">
+                    <label>Servo 2 · canal 1</label>
+                    <input type="range" min="0" max="180" value="90" oninput="App.setServo(1, this.value)">
+                    <span id="servo-1-val">⏺️ CENTRO (90°)</span>
+                </div>
+                <div class="servo-row">
+                    <label>Servo 3 · canal 2</label>
+                    <input type="range" min="0" max="180" value="90" oninput="App.setServo(2, this.value)">
+                    <span id="servo-2-val">⏺️ CENTRO (90°)</span>
+                </div>
+                <div class="servo-row">
+                    <label>Servo 4 · canal 3</label>
+                    <input type="range" min="0" max="180" value="90" oninput="App.setServo(3, this.value)">
+                    <span id="servo-3-val">⏺️ CENTRO (90°)</span>
+                </div>
+                <div class="servo-row">
+                    <label>Servo 5 · canal 4</label>
+                    <input type="range" min="0" max="180" value="90" oninput="App.setServo(4, this.value)">
+                    <span id="servo-4-val">⏺️ CENTRO (90°)</span>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="sub-section">
+                <h4>Paso a paso · DRV8825</h4>
+                <div class="stepper-jog-controls">
+                    <button class="btn btn-small" onclick="App.jogStepper(-500)">−500</button>
+                    <button class="btn btn-small" onclick="App.jogStepper(-100)">−100</button>
+                    <button class="btn btn-small" onclick="App.jogStepper(100)">+100</button>
+                    <button class="btn btn-small" onclick="App.jogStepper(500)">+500</button>
+                </div>
+                <p class="info-text">Posición: <strong id="stepper-pos-val">0</strong> pasos</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="header-title"><span>Lectura directa del ADC</span></div>
+            <div class="adc-monitor-box">
+                <span class="metric-label">GPIO 9 · ADC1 canal 8</span>
+                <h1 id="adc-mv-val">0 mV</h1>
+                <p class="info-text">
+                    Tensión en el pin: <span id="adc-pin-v">0.00 V</span> · divisor 4,3×
+                </p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- ===================== MODAL PRE-VUELO ===================== -->
+<div id="calibration-modal" class="modal-backdrop">
+    <div class="modal-content">
+        <div class="wizard-header">
+            <span class="wizard-step-badge" id="modal-step-badge">PASO 1</span>
+            <h3 id="modal-step-title">Enlace y batería</h3>
+        </div>
+        <div class="wizard-body">
+            <p id="modal-step-desc">Verificando enlace...</p>
+        </div>
+        <div class="wizard-footer">
+            <button class="btn btn-no" onclick="App.answerPreFlight(false)">Cancelar</button>
+            <button class="btn btn-yes" id="btn-wizard-yes" onclick="App.answerPreFlight(true)">Sí, confirmar</button>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

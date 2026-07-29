@@ -6,3 +6,5 @@
 .history/
 .idea/
 .DS_Store
+.claude/
+.claude

@@ -6,44 +6,53 @@ extern "C" {
 #endif
 
 /* =========================================================================
- * Strict GPIO Mapping for ESP32-S3 (N16R8) - 6x6 Rover Hardware
+ * Mapa de GPIO del Rover 6x6 - ESP32-S3 (N16R8)
+ *
+ * Cada motor usa dos pines del L298N:
+ *   IN1 -> portadora PWM (canal LEDC fijo, asignado en mcpwm_motors.c)
+ *   IN2 -> sentido (GPIO de salida simple)
  * ========================================================================= */
 
-// --- Motor Driver 3 (Front Axle: Motor 1 Left, Motor 2 Right) ---
-#define GPIO_M1_IN1     40  // Motor 1 Front Left IN1
-#define GPIO_M1_IN2     39  // Motor 1 Front Left IN2
-#define GPIO_M2_IN1     38  // Motor 2 Front Right IN1
-#define GPIO_M2_IN2     16  // Motor 2 Front Right IN2 (Moved from 37 due to Octal PSRAM conflict)
+// --- Driver 3 (eje delantero: M1 izquierda, M2 derecha) ---
+#define GPIO_M1_IN1     40  // M1 delantero izq  - PWM
+#define GPIO_M1_IN2     39  // M1 delantero izq  - sentido
+#define GPIO_M2_IN1     38  // M2 delantero der  - PWM
+#define GPIO_M2_IN2     16  // M2 delantero der  - sentido (movido del 37: choca con la PSRAM octal)
 
-// --- Motor Driver 2 (Middle Axle: Motor 3 Left, Motor 4 Right) ---
-#define GPIO_M3_IN1     1   // Motor 3 Middle Left IN1
-#define GPIO_M3_IN2     2   // Motor 3 Middle Left IN2
-#define GPIO_M4_IN1     42  // Motor 4 Middle Right IN1
-#define GPIO_M4_IN2     41  // Motor 4 Middle Right IN2
+// --- Driver 2 (eje central: M3 izquierda, M4 derecha) ---
+#define GPIO_M3_IN1     1   // M3 central izq    - PWM
+#define GPIO_M3_IN2     2   // M3 central izq    - sentido
+#define GPIO_M4_IN1     42  // M4 central der    - PWM
+#define GPIO_M4_IN2     41  // M4 central der    - sentido
 
-// --- Motor Driver 1 (Rear Axle: Motor 5 Left, Motor 6 Right) ---
-#define GPIO_M5_IN1     19  // Motor 5 Rear Left IN1
-#define GPIO_M5_IN2     20  // Motor 5 Rear Left IN2
-#define GPIO_M6_IN1     21  // Motor 6 Rear Right IN1
-#define GPIO_M6_IN2     47  // Motor 6 Rear Right IN2
+// --- Driver 1 (eje trasero: M5 izquierda, M6 derecha) ---
+// OJO: los GPIO 19 y 20 son las lineas D- y D+ del USB nativo del ESP32-S3.
+// Al usarlos para M5 se inhabilita el puerto USB-Serial-JTAG, por eso el
+// enlace con el panel va por UART0 (GPIO 43/44) a traves del puente USB.
+#define GPIO_M5_IN1     17  // M5 trasero izq    - PWM
+#define GPIO_M5_IN2     18  // M5 trasero izq    - sentido
+#define GPIO_M6_IN1     21  // M6 trasero der    - PWM
+#define GPIO_M6_IN2     47  // M6 trasero der    - sentido
 
-// --- Stepper Motor Driver (DRV8825 Mechanism) ---
-#define GPIO_STEPPER_STEP   6   // Step pulse output (moved from 39)
-#define GPIO_STEPPER_DIR    7   // Direction control (moved from 38)
-#define GPIO_STEPPER_EN     8   // Driver active low enable (moved from 37)
+// --- Paso a paso (DRV8825) ---
+#define GPIO_STEPPER_STEP   6
+#define GPIO_STEPPER_DIR    7
+#define GPIO_STEPPER_EN     8   // activo en bajo
 
-// --- I2C Bus - Servo Driver (PCA9685) ---
-#define GPIO_I2C_SDA        4   // I2C SDA (moved from 41)
-#define GPIO_I2C_SCL        5   // I2C SCL (moved from 40)
+// --- Bus I2C: expansor de servos PCA9685 ---
+#define GPIO_I2C_SDA        4
+#define GPIO_I2C_SCL        5
 #define PCA9685_I2C_ADDR    0x40
 
-// --- Telemetry & ADC ---
-#define GPIO_BATTERY_ADC    9   // ADC1 Channel 8 (Battery voltage sensing) (Moved from 35 due to Octal PSRAM conflict)
-#define GPIO_RC_IBUS_RX     15  // UART1 RX (Flysky i-BUS receiver) (Moved from 36 due to Octal PSRAM conflict)
+// --- Telemetria ---
+#define GPIO_BATTERY_ADC    9   // ADC1 canal 8, divisor de bateria (movido del 35: PSRAM octal)
 
-// --- Reserved / Prohibited GPIOs (DO NOT USE) ---
-// GPIO 0, 3, 45, 46 (ESP32-S3 Strapping pins)
-// GPIO 43, 44 (UART0 Console Default)
+/* --- Reservados: NO USAR ---
+ * GPIO 0, 3, 45, 46  strapping del ESP32-S3
+ * GPIO 43, 44        consola UART0 (enlace por cable con el panel)
+ * GPIO 26..37        flash y PSRAM octal del modulo N16R8
+ * GPIO 15            reservado para el receptor Flysky i-BUS (aun sin implementar)
+ */
 
 #ifdef __cplusplus
 }

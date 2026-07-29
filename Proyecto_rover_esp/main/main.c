@@ -1,24 +1,29 @@
-#include <stdio.h>
+/*
+ * Rover 6x6 - ESP32-S3 (N16R8)
+ *
+ * 6 motores DC sobre 3 puentes L298N, 5 servos de direccion por PCA9685,
+ * un paso a paso DRV8825 y lectura de bateria por ADC1.
+ * El mando y la telemetria van por rover_link (UART0 o WebSocket).
+ */
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "nvs_flash.h"
 #include "esp_log.h"
 
-#include "pinout.h"
 #include "mcpwm_motors.h"
 #include "stepper_drv.h"
 #include "pca9685_servo.h"
 #include "telemetry_adc.h"
-#include "websocket_server.h"
+#include "rover_link.h"
 
-static const char *TAG = "ROVER_MAIN";
+static const char *TAG = "ROVER";
 
-void app_main(void) {
-    ESP_LOGI(TAG, "=========================================================");
-    ESP_LOGI(TAG, "   ESP32-S3 6x6 ROVER WEBSOCKET FIRMWARE (ESP-IDF v5.x)   ");
-    ESP_LOGI(TAG, "=========================================================");
+void app_main(void)
+{
+    ESP_LOGI(TAG, "Rover 6x6 - ESP32-S3 arrancando (%s)",
+             ROVER_LINK_WIRED ? "enlace por cable" : "enlace Wi-Fi");
 
-    // 1. Initialize NVS Flash
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -26,20 +31,21 @@ void app_main(void) {
     }
     ESP_ERROR_CHECK(ret);
 
-    // 2. Initialize Hardware Subsystems
+    // El orden importa: los actuadores tienen que estar en estado seguro antes
+    // de que el enlace empiece a aceptar comandos.
     ESP_ERROR_CHECK(mcpwm_motors_init());
     ESP_ERROR_CHECK(stepper_drv_init());
     ESP_ERROR_CHECK(pca9685_servo_init());
     ESP_ERROR_CHECK(telemetry_adc_init());
 
-    // 3. Start SoftAP & WebSocket Server (Port 8080)
-    ESP_ERROR_CHECK(websocket_server_init());
+    pca9685_center_all();
 
-    ESP_LOGI(TAG, "Rover Subsystems and WebSocket Server Online.");
+    ESP_ERROR_CHECK(rover_link_init());
 
-    while (1) {
-        bool armed = websocket_is_armed();
-        ESP_LOGD(TAG, "Heartbeat Loop | Rover State: %s", armed ? "ARMED" : "DISARMED");
-        vTaskDelay(pdMS_TO_TICKS(5000));
-    }
+    ESP_LOGI(TAG, "Subsistemas en linea.");
+
+    // app_main puede terminar: las tareas del enlace, del stepper y el failsafe
+    // ya corren por su cuenta. Mantenerla viva en un bucle de espera solo
+    // ocuparia su pila de 3.5 KB sin hacer nada.
+    vTaskDelete(NULL);
 }

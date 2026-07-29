@@ -12,34 +12,44 @@ extern "C" {
 #define NUM_MOTORS 6
 
 /**
- * @brief Initialize LEDC PWM and DIR GPIO pins for all 6 DC motors.
- * @return esp_err_t ESP_OK on success
+ * @brief Configura el timer LEDC, los 6 canales PWM y los 6 pines de sentido.
+ *
+ * El enlace canal LEDC <-> GPIO se hace una sola vez aqui. En caliente solo se
+ * escribe duty, de modo que la matriz GPIO nunca se reconfigura.
+ * Es idempotente: llamarla dos veces no hace nada la segunda vez.
  */
 esp_err_t mcpwm_motors_init(void);
 
 /**
- * @brief Set speed and direction for an individual motor (M1..M6).
- * @param motor_index Index 0..5 (0 = M1 FL, 1 = M2 FR, etc.)
- * @param speed Duty percentage -100.0f (full reverse) to +100.0f (full forward)
- * @return esp_err_t ESP_OK on success
+ * @brief Fija velocidad y sentido de un motor individual (M1..M6).
+ * @param motor_index 0..5 (0 = M1 Frontal Izq, 1 = M2 Frontal Der, ...)
+ * @param speed Porcentaje -100.0f (reversa plena) a +100.0f (avance pleno)
  */
 esp_err_t mcpwm_motor_set_speed(int motor_index, float speed);
 
 /**
- * @brief Differential drive kinematic mixing.
- * @param linear Forward/backward throttle (-100.0f to 100.0f)
- * @param angular Steering yaw (-100.0f to 100.0f)
+ * @brief Mezcla cinematica diferencial y la aplica a los 6 motores de forma atomica.
+ * @param linear  Traccion adelante/atras (-100.0f .. 100.0f)
+ * @param angular Guinada / giro (-100.0f .. 100.0f)
  */
 void mcpwm_motors_drive_differential(float linear, float angular);
 
 /**
- * @brief Active brake stop for all 6 motors.
+ * @brief Lleva los 6 motores a 0 % (rueda libre).
  */
 void mcpwm_motors_stop_all(void);
 
 /**
- * @brief Retrieve current duty cycle percentages for all 6 motors.
- * @param speeds Array of 6 floats to populate
+ * @brief Indica si algun motor tiene una consigna distinta de cero.
+ *
+ * Lo usa el failsafe para detectar hardware en movimiento aunque el rover
+ * este desarmado (por ejemplo durante un TEST_MOTOR).
+ */
+bool mcpwm_motors_any_active(void);
+
+/**
+ * @brief Copia las consignas actuales de los 6 motores.
+ * @param speeds Arreglo de 6 float a rellenar
  */
 void mcpwm_motors_get_speeds(float speeds[NUM_MOTORS]);
 
