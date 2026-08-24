@@ -148,7 +148,38 @@ static int linkBuildTelemetry(char *out, size_t cap) {
       (unsigned long)ESP.getFreeHeap());
 }
 
+/*
+ * Emite telemetria solo cuando el estado cambia (armado, mando, traccion,
+ * servos, clientes o errores); si nada cambia, un latido cada
+ * ROVER_TELEMETRY_KEEPALIVE_MS mantiene vivo el enlace sin saturar el puerto.
+ * uptime, heap y rx_ok se excluyen a proposito de la comparacion: cambian
+ * siempre y volverian el filtro inutil.
+ */
 void linkTelemetryTick() {
+  struct Snapshot {
+    bool     armed;
+    char     owner[OWNER_ID_LEN];
+    float    drive;
+    float    servos[STEER_SERVO_COUNT];
+    int      clients;
+    uint32_t rxErr;
+  };
+  static Snapshot last = {};
+  static uint32_t lastTxMs = 0;
+
+  Snapshot now = {};   // = {} tambien pone a cero el padding: memcmp lo compara
+  now.armed = g_state.armed;
+  memcpy(now.owner, g_state.owner, sizeof(now.owner));
+  now.drive = driveGetPercent();
+  for (uint8_t ch = 0; ch < STEER_SERVO_COUNT; ch++) now.servos[ch] = steeringGetAngle(ch);
+  now.clients = webClientCount();
+  now.rxErr = g_state.rxErr;
+
+  bool changed = memcmp(&now, &last, sizeof(now)) != 0;
+  if (!changed && millis() - lastTxMs < ROVER_TELEMETRY_KEEPALIVE_MS) return;
+  last = now;
+  lastTxMs = millis();
+
   char buf[TELEMETRY_BUF_LEN];
   int n = linkBuildTelemetry(buf, sizeof(buf));
   if (n <= 0) return;
@@ -188,7 +219,7 @@ void linkSerialPoll() {
  * cero, asi que no vuelve a disparar hasta que alguien actue de nuevo.
  */
 void linkFailsafeTick() {
-  bool active = g_state.armed || (driveGetPercent() != 0.0f);
+  bool active = g_state.armed || driveIsActive();
   if (!active) return;
   uint32_t silence = millis() - g_state.lastPacketMs;
   if (silence < ROVER_FAILSAFE_TIMEOUT_MS) return;

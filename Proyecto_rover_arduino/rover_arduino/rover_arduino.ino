@@ -40,6 +40,7 @@ void loop() {
 
   linkSerialPoll();
   linkFailsafeTick();
+  driveRampTick();
 
   uint32_t now = millis();
   if (now - lastTelemetry >= 1000 / ROVER_TELEMETRY_HZ) {
@@ -49,5 +50,6 @@ void loop() {
   if (now - lastCleanup >= 1000) {
     lastCleanup = now;
     webCleanupTick();
+    steeringHealthTick();
   }
 }

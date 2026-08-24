@@ -40,6 +40,11 @@
 #define DRIVE_PWM_FREQ      20000
 #define DRIVE_PWM_BITS      10
 
+// Rampa de aceleracion: la consigna real se acerca a la pedida a este ritmo.
+// 6 motores en paralelo arrancando de golpe hunden la fuente; con 150 %/s el
+// 0->100 tarda ~0.7 s. La parada de emergencia y el failsafe cortan en seco.
+#define DRIVE_RAMP_PCT_PER_S    150.0f
+
 // --- Servos de direccion ---
 #define SERVO_FREQ_HZ       50
 #define SERVO_MIN_US        500     // 0 grados
@@ -58,7 +63,11 @@ static const int8_t SERVO_INVERT[STEER_SERVO_COUNT]   = { 1, 1, 1, 1 };  // -1 i
 // --- Enlace ---
 #define AP_SSID                     "Rover_6x6_AP"
 #define AP_PASS                     "Rover6x6Secure"
-#define ROVER_TELEMETRY_HZ          20
+#define ROVER_TELEMETRY_HZ          20    // ritmo al que se EVALUA si hay que emitir
 #define ROVER_FAILSAFE_TIMEOUT_MS   400
+// La telemetria solo se emite cuando cambia el estado; si no cambia nada se
+// manda un latido cada tanto para que el panel no marque el enlace caido
+// (su umbral de "sin datos" es 800 ms).
+#define ROVER_TELEMETRY_KEEPALIVE_MS 500
 
 #endif // PINOUT_H

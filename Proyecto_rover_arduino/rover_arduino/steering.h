@@ -17,8 +17,12 @@
  * marchar recto no debe generar trafico I2C.
  */
 
+// Definido en link.h; se declara aqui porque steering.h se incluye antes.
+static void logLine(const char *fmt, ...);
+
 static Adafruit_PWMServoDriver g_pca(PCA9685_I2C_ADDR);
-static bool  g_pca_ok = false;
+static bool    g_pca_ok = false;
+static uint8_t g_pca_prescale = 0;    // valor esperado del registro PRESCALE
 static float g_servo_deg[STEER_SERVO_COUNT] = { -1.0f, -1.0f, -1.0f, -1.0f };
 
 // Escritura directa de un canal en grados [0..180], sin trim ni inversion.
@@ -71,7 +75,38 @@ void steeringInit() {
   g_pca_ok = g_pca.begin();
   if (g_pca_ok) {
     g_pca.setPWMFreq(SERVO_FREQ_HZ);
+    g_pca_prescale = g_pca.readPrescale();
     steeringCenterAll();
+  }
+}
+
+/*
+ * Watchdog del PCA9685, llamar ~1 vez por segundo desde loop().
+ *
+ * Si la alimentacion se hunde por un pico de corriente, el PCA9685 se resetea
+ * solo y pierde el prescale de 50 Hz: los servos dejan de responder aunque
+ * "nada haya cambiado". Se detecta leyendo el registro PRESCALE; si no
+ * coincide con lo configurado, se reinicializa el chip y se reponen los
+ * angulos que habia.
+ */
+void steeringHealthTick() {
+  if (g_pca_ok && g_pca.readPrescale() == g_pca_prescale) return;
+
+  bool estaba_ok = g_pca_ok;
+  float previos[STEER_SERVO_COUNT];
+  for (uint8_t ch = 0; ch < STEER_SERVO_COUNT; ch++) previos[ch] = steeringGetAngle(ch);
+
+  g_pca_ok = g_pca.begin();
+  if (g_pca_ok) {
+    g_pca.setPWMFreq(SERVO_FREQ_HZ);
+    g_pca_prescale = g_pca.readPrescale();
+    for (uint8_t ch = 0; ch < STEER_SERVO_COUNT; ch++) {
+      g_servo_deg[ch] = -1.0f;                 // invalida la cache: fuerza la escritura
+      steeringSetChannelAngle(ch, previos[ch]);
+    }
+    logLine("PCA9685 se reseteo (caida de alimentacion?): reconfigurado a 50 Hz.");
+  } else if (estaba_ok) {
+    logLine("AVISO: PCA9685 dejo de responder en el bus I2C.");
   }
 }
 
