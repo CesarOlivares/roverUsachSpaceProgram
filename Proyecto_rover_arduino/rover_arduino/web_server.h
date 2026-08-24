@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#include <esp_wifi.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include "pinout.h"
@@ -26,16 +27,30 @@ static AsyncWebSocket g_ws("/ws");
 // Un frame puede traer varias ordenes separadas por '\n'.
 #define WS_FRAME_MAX 512
 
+/*
+ * Contadores de eventos WS. Se incrementan en el task asincrono y los reporta
+ * webLogTick() desde loop(): asi el log nunca se entrelaza con la telemetria.
+ */
+static volatile uint32_t g_ws_connects = 0;
+static volatile uint32_t g_ws_disconnects = 0;
+static volatile uint32_t g_ws_dropped_frames = 0;   // tramas no final/fragmentadas o desbordadas
+
 static void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
                       AwsEventType type, void *arg, uint8_t *data, size_t len) {
   (void)server; (void)client;
+  if (type == WS_EVT_CONNECT)    { g_ws_connects++;    return; }
+  if (type == WS_EVT_DISCONNECT) { g_ws_disconnects++; return; }
   if (type != WS_EVT_DATA) return;
 
   AwsFrameInfo *info = (AwsFrameInfo *)arg;
   // Solo tramas de texto completas en un unico frame; el panel nunca fragmenta.
-  if (!info->final || info->index != 0 || info->len != len) return;
+  if (!info->final || info->index != 0 || info->len != len) {
+    g_ws_dropped_frames++;
+    return;
+  }
   if (info->opcode != WS_TEXT) return;
   if (len == 0 || len >= WS_FRAME_MAX) {
+    g_ws_dropped_frames++;
     g_state.rxErr++;
     return;
   }
@@ -71,6 +86,9 @@ static void sendEmbedded(AsyncWebServerRequest *req, const char *ctype,
 void webInit() {
   WiFi.mode(WIFI_AP);
   WiFi.softAP(AP_SSID, AP_PASS, 1 /*canal*/, 0 /*visible*/, 4 /*clientes max*/);
+  // Igual que el firmware ESP-IDF: sin ahorro de energia WiFi. El modem sleep
+  // mete latencias a rafagas que pueden superar el failsafe de 400 ms.
+  esp_wifi_set_ps(WIFI_PS_NONE);
 
   g_ws.onEvent(onWsEvent);
   g_http.addHandler(&g_ws);
@@ -100,6 +118,16 @@ int webClientCount() {
 // Purga clientes WebSocket muertos; llamar ~1 vez por segundo desde loop().
 void webCleanupTick() {
   g_ws.cleanupClients();
+
+  // Reporta desde loop() los eventos WS acumulados en el task asincrono.
+  static uint32_t seen_con = 0, seen_dis = 0, seen_drop = 0;
+  uint32_t con = g_ws_connects, dis = g_ws_disconnects, drop = g_ws_dropped_frames;
+  if (con != seen_con || dis != seen_dis || drop != seen_drop) {
+    logLine("WS: conexiones=%lu desconexiones=%lu tramas_descartadas=%lu vivos=%u",
+            (unsigned long)con, (unsigned long)dis, (unsigned long)drop,
+            (unsigned)g_ws.count());
+    seen_con = con; seen_dis = dis; seen_drop = drop;
+  }
 }
 
 #endif // WEB_SERVER_H

@@ -190,12 +190,14 @@ void linkSerialPoll() {
 void linkFailsafeTick() {
   bool active = g_state.armed || (driveGetPercent() != 0.0f);
   if (!active) return;
-  if (millis() - g_state.lastPacketMs < ROVER_FAILSAFE_TIMEOUT_MS) return;
+  uint32_t silence = millis() - g_state.lastPacketMs;
+  if (silence < ROVER_FAILSAFE_TIMEOUT_MS) return;
 
   g_state.armed = false;
   roverSafeStop();
   stateReleaseControl();
-  logLine("FAILSAFE: enlace perdido, rover detenido.");
+  logLine("FAILSAFE: %lu ms sin tramas (rx_ok=%lu, clientes WS=%d), rover detenido.",
+          (unsigned long)silence, (unsigned long)g_state.rxOk, webClientCount());
 }
 
 #endif // LINK_H
