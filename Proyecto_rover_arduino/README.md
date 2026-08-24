@@ -4,7 +4,7 @@ Versión rápida en Arduino del firmware del rover, para el hardware actual:
 
 - **Tracción**: 6 motores DC en paralelo sobre **un solo canal** de un puente H **BTS7960 / IBT-2** (una consigna de velocidad para todo el rover).
 - **Dirección**: 4 servos, uno por esquina (FL/FR/RL/RR), en un **PCA9685** (I2C, addr `0x40`, canales 0–3). Giro **4WS coordinado**: los delanteros giran hacia un lado y los traseros hacia el opuesto. El giro es solo por servos (sin diferencial).
-- **Control**: el mismo panel web de siempre (`Proyecto_rover_panel/rover_web_gcs`), embebido en el firmware y servido por SoftAP, más el enlace por Web Serial (USB). Mismo protocolo JSON, telemetría a 20 Hz, failsafe de 400 ms y mando exclusivo.
+- **Control**: el mismo panel web de siempre (`Proyecto_rover_panel/rover_web_gcs`), abierto **desde el computador** (`index.html`), conectado por WiFi al WebSocket del SoftAP o por cable USB (Web Serial). Mismo protocolo JSON, telemetría a 20 Hz, failsafe de 400 ms y mando exclusivo. El firmware ya no sirve la página: solo expone `ws://192.168.4.1/ws`.
 - Sin stepper (el DRV8825 del firmware ESP-IDF se eliminó de esta versión).
 
 ## Conexión
@@ -35,18 +35,13 @@ Servos: FL=canal 0, FR=canal 1, RL=canal 2, RR=canal 3. El centro/sentido de cad
 
 ## Uso
 
-- Conectarse al WiFi **`Rover_6x6_AP`** (clave `Rover6x6Secure`) y abrir **http://192.168.4.1** — el panel se conecta solo.
-- O abrir el panel desde disco (`index.html`) y conectar por **cable USB** (Web Serial, Chrome/Edge).
-- El monitor serie a 115200 muestra la telemetría JSON; los logs van prefijados con `# `.
+1. Abrir `Proyecto_rover_panel\rover_web_gcs\index.html` en **Chrome o Edge** (doble clic, desde disco).
+2. Elegir el enlace:
+   - **WiFi**: conectar el computador al AP **`Rover_6x6_AP`** (clave `Rover6x6Secure`) y en el panel usar *Conexión inalámbrica* con la IP `192.168.4.1` (puerto 80).
+   - **Cable USB**: *Conectar por cable (USB)* y elegir el COM del ESP32 (Web Serial).
+3. El monitor serie a 115200 muestra la telemetría JSON; los logs van prefijados con `# `.
 
-## Panel embebido
-
-Los archivos del panel se embeben en PROGMEM vía `web_pages.h`. Tras editar
-`Proyecto_rover_panel/rover_web_gcs/` hay que regenerarlo:
-
-```
-python Proyecto_rover_arduino/tools/embed_web.py
-```
+Mandos: **W/S** tracción adelante/atrás, **A/D** dirección 4WS (ejes independientes: girar no cambia la velocidad). Esc o barra espaciadora = parada de emergencia.
 
 ## Protocolo (resumen)
 

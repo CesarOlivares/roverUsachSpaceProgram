@@ -2,8 +2,9 @@
  * Rover 6x6 USACH Space Program - firmware Arduino (ESP32-S3 N16R8)
  *
  * Hardware: 6 motores DC en paralelo sobre un canal de BTS7960 (traccion) y
- * 4 servos de esquina en un PCA9685 (direccion 4WS). Control por el panel web
- * embebido (SoftAP "Rover_6x6_AP" -> http://192.168.4.1) o por Web Serial.
+ * 4 servos de esquina en un PCA9685 (direccion 4WS). El panel se abre desde
+ * el computador (index.html) y se conecta al WebSocket del SoftAP
+ * "Rover_6x6_AP" (ws://192.168.4.1/ws) o por cable USB (Web Serial).
  *
  * Placa: "ESP32S3 Dev Module" | Flash 16MB | PSRAM: OPI PSRAM
  * USB CDC On Boot: Enabled (el enlace serie del panel va por el USB nativo)
@@ -29,7 +30,7 @@ void setup() {
 
   webInit();
 
-  logLine("Rover 6x6 listo. AP %s -> http://192.168.4.1", AP_SSID);
+  logLine("Rover 6x6 listo. AP %s -> ws://192.168.4.1/ws", AP_SSID);
   if (!steeringOk()) logLine("AVISO: PCA9685 no responde, direccion inactiva.");
 }
 

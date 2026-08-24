@@ -8,13 +8,17 @@
 #include <ESPAsyncWebServer.h>
 #include "pinout.h"
 #include "link.h"
-#include "web_pages.h"
 
 /*
- * SoftAP + panel embebido + WebSocket de comandos (ESPAsyncWebServer).
+ * SoftAP + WebSocket de comandos (ESPAsyncWebServer).
+ *
+ * El panel NO se sirve desde la ESP: se abre index.html desde el computador
+ * (file://) y se conecta por la opcion inalambrica a ws://192.168.4.1/ws, o
+ * por cable USB. Servir 78 KB de pagina desde aqui cargaba el enlace y
+ * provocaba desconexiones.
  *
  * El AP conserva las credenciales y la IP del firmware ESP-IDF (192.168.4.1,
- * la de fabrica del SoftAP), asi el panel se conecta igual que siempre.
+ * la de fabrica del SoftAP).
  *
  * Los callbacks del servidor son asincronos: dentro solo se parsea JSON y se
  * escriben PWMs (microsegundos). Nada de delay() ni de esperas; la telemetria
@@ -65,24 +69,6 @@ static void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
   }
 }
 
-/*
- * Sirve un archivo embebido usando la sobrecarga con callback de relleno, que
- * es la unica comun a todas las variantes de ESPAsyncWebServer (me-no-dev,
- * ESP32Async, lacamera): las sobrecargas directas con puntero+longitud no
- * existen en las versiones antiguas.
- */
-static void sendEmbedded(AsyncWebServerRequest *req, const char *ctype,
-                         const uint8_t *data, size_t len) {
-  AsyncWebServerResponse *res = req->beginResponse(String(ctype), len,
-      [data, len](uint8_t *buffer, size_t maxLen, size_t index) -> size_t {
-        size_t remaining = len - index;
-        size_t n = (remaining < maxLen) ? remaining : maxLen;
-        memcpy(buffer, data + index, n);
-        return n;
-      });
-  req->send(res);
-}
-
 void webInit() {
   WiFi.mode(WIFI_AP);
   WiFi.softAP(AP_SSID, AP_PASS, 1 /*canal*/, 0 /*visible*/, 4 /*clientes max*/);
@@ -93,14 +79,11 @@ void webInit() {
   g_ws.onEvent(onWsEvent);
   g_http.addHandler(&g_ws);
 
+  // Recordatorio para quien abra la IP en un navegador.
   g_http.on("/", HTTP_GET, [](AsyncWebServerRequest *req) {
-    sendEmbedded(req, "text/html; charset=utf-8", INDEX_HTML, INDEX_HTML_LEN);
-  });
-  g_http.on("/app.js", HTTP_GET, [](AsyncWebServerRequest *req) {
-    sendEmbedded(req, "text/javascript; charset=utf-8", APP_JS, APP_JS_LEN);
-  });
-  g_http.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *req) {
-    sendEmbedded(req, "text/css; charset=utf-8", STYLE_CSS, STYLE_CSS_LEN);
+    req->send(200, "text/plain; charset=utf-8",
+              "Rover 6x6: el panel se abre desde el computador (index.html) y "
+              "se conecta por Wi-Fi a esta IP, o por cable USB.");
   });
 
   g_http.begin();

@@ -439,40 +439,31 @@ const Input = {
         View.setInputChip('hud-wasd', false);
     },
 
-    /** Calcula linear/angular. El mando tiene prioridad sobre el teclado. */
+    /**
+     * Calcula linear/angular como ejes INDEPENDIENTES: W/S es solo traccion y
+     * A/D es solo direccion (los servos 4WS ponen el angulo, la velocidad no
+     * cambia al girar). La mezcla diferencial de la version skid-steer ya no
+     * aplica: con un unico canal de motores generaba angulos fantasma al
+     * combinar teclas. El mando tiene prioridad sobre el teclado, eje a eje.
+     */
     computeDrive() {
-        let left = 0;
-        let right = 0;
+        let linear = 0;
+        let angular = 0;
 
         const { w, a, s, d } = State.keys;
-        if (w !== s) {
-            const fwd = w ? 100 : -100;
-            // Con giro simultaneo se frena la rueda interior en vez de invertirla.
-            if (a !== d) {
-                const inner = 0;
-                if (a) { left = w ? inner : fwd; right = w ? fwd : inner; }
-                else { left = w ? fwd : inner; right = w ? inner : fwd; }
-            } else {
-                left = fwd; right = fwd;
-            }
-        } else if (a !== d) {
-            // Solo giro: rotacion sobre el propio eje.
-            left = a ? -100 : 100;
-            right = a ? 100 : -100;
-        }
+        if (w !== s) linear = w ? 100 : -100;
+        if (a !== d) angular = a ? -100 : 100;   // negativo = izquierda
 
         const gp = navigator.getGamepads?.()[0];
         if (gp) {
             const rawLin = -gp.axes[1];
             const rawAng = gp.axes[0];
-            if (Math.abs(rawLin) > 0.12 || Math.abs(rawAng) > 0.12) {
-                left = clamp((rawLin + rawAng) * 100, -100, 100);
-                right = clamp((rawLin - rawAng) * 100, -100, 100);
-            }
+            if (Math.abs(rawLin) > 0.12) linear = clamp(rawLin * 100, -100, 100);
+            if (Math.abs(rawAng) > 0.12) angular = clamp(rawAng * 100, -100, 100);
         }
 
-        State.drive.linear = (left + right) / 2;
-        State.drive.angular = (left - right) / 2;
+        State.drive.linear = linear;
+        State.drive.angular = angular;
     },
 };
 
