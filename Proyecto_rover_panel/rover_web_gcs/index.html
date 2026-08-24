@@ -190,20 +190,13 @@
                         <tr><th>GPIO</th><th>Función</th><th>Estado</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td><strong>40 / 39</strong></td><td>M1 delantero izq · L298N</td><td><span id="pin-m1-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>38 / 16</strong></td><td>M2 delantero der · L298N</td><td><span id="pin-m2-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>1 / 2</strong></td><td>M3 central izq · L298N</td><td><span id="pin-m3-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>42 / 41</strong></td><td>M4 central der · L298N</td><td><span id="pin-m4-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>17 / 18</strong></td><td>M5 trasero izq · L298N</td><td><span id="pin-m5-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>21 / 47</strong></td><td>M6 trasero der · L298N</td><td><span id="pin-m6-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>6 / 7 / 8</strong></td><td>Paso a paso · DRV8825</td><td><span id="stepper-state-badge" class="pin-badge pin-idle">REPOSO</span></td></tr>
-                        <tr><td><strong>4 / 5</strong></td><td>Bus I2C · PCA9685</td><td><span id="pin-i2c-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
+                        <tr><td><strong>4 / 5 / 6</strong></td><td>Tracción M1–M6 · BTS7960</td><td><span id="pin-drive-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
+                        <tr><td><strong>8 / 9</strong></td><td>Bus I2C · PCA9685</td><td><span id="pin-i2c-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
                         <tr><td colspan="3" class="table-section">Servos de dirección · PCA9685</td></tr>
-                        <tr><td><strong>Canal 0</strong></td><td>Servo 1</td><td><span id="servo-dir-0-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
-                        <tr><td><strong>Canal 1</strong></td><td>Servo 2</td><td><span id="servo-dir-1-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
-                        <tr><td><strong>Canal 2</strong></td><td>Servo 3</td><td><span id="servo-dir-2-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
-                        <tr><td><strong>Canal 3</strong></td><td>Servo 4</td><td><span id="servo-dir-3-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
-                        <tr><td><strong>Canal 4</strong></td><td>Servo 5</td><td><span id="servo-dir-4-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                        <tr><td><strong>Canal 0</strong></td><td>FL · delantero izq</td><td><span id="servo-dir-0-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                        <tr><td><strong>Canal 1</strong></td><td>FR · delantero der</td><td><span id="servo-dir-1-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                        <tr><td><strong>Canal 2</strong></td><td>RL · trasero izq</td><td><span id="servo-dir-2-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                        <tr><td><strong>Canal 3</strong></td><td>RR · trasero der</td><td><span id="servo-dir-3-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -214,88 +207,45 @@
     <div id="view-diagnostics" class="dashboard-grid grid-two hidden">
 
         <div class="card">
-            <div class="header-title"><span>Motores DC (M1–M6)</span></div>
-            <p class="section-desc">Prueba individual de velocidad y sentido en cada canal L298N.</p>
+            <div class="header-title"><span>Tracción (M1–M6)</span></div>
+            <p class="section-desc">Los 6 motores van en paralelo a un canal BTS7960: una sola consigna de velocidad y sentido.</p>
 
             <div class="motor-grid">
                 <div class="motor-control-item" data-motor="0">
-                    <label>M1 · Delantero izq</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(0, this.value)">
-                    <span class="val-display">0%</span>
-                </div>
-                <div class="motor-control-item" data-motor="1">
-                    <label>M2 · Delantero der</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(1, this.value)">
-                    <span class="val-display">0%</span>
-                </div>
-                <div class="motor-control-item" data-motor="2">
-                    <label>M3 · Central izq</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(2, this.value)">
-                    <span class="val-display">0%</span>
-                </div>
-                <div class="motor-control-item" data-motor="3">
-                    <label>M4 · Central der</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(3, this.value)">
-                    <span class="val-display">0%</span>
-                </div>
-                <div class="motor-control-item" data-motor="4">
-                    <label>M5 · Trasero izq</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(4, this.value)">
-                    <span class="val-display">0%</span>
-                </div>
-                <div class="motor-control-item" data-motor="5">
-                    <label>M6 · Trasero der</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(5, this.value)">
+                    <label>Tracción M1–M6 · BTS7960</label>
+                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setDrive(this.value)">
                     <span class="val-display">0%</span>
                 </div>
             </div>
 
-            <button class="btn btn-secondary" data-needs-control onclick="App.stopAllMotors()">Detener todos los motores</button>
+            <button class="btn btn-secondary" data-needs-control onclick="App.stopDrive()">Detener tracción</button>
         </div>
 
         <div class="card">
-            <div class="header-title"><span>Servos y paso a paso</span></div>
+            <div class="header-title"><span>Servos de dirección</span></div>
 
             <div class="sub-section">
-                <h4>Servos de dirección · PCA9685</h4>
+                <h4>Un servo por esquina · PCA9685</h4>
                 <div class="servo-row">
-                    <label>Servo 1 · canal 0</label>
+                    <label>FL · canal 0 (del. izq)</label>
                     <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(0, this.value)">
                     <span id="servo-0-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
-                    <label>Servo 2 · canal 1</label>
+                    <label>FR · canal 1 (del. der)</label>
                     <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(1, this.value)">
                     <span id="servo-1-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
-                    <label>Servo 3 · canal 2</label>
+                    <label>RL · canal 2 (tras. izq)</label>
                     <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(2, this.value)">
                     <span id="servo-2-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
-                    <label>Servo 4 · canal 3</label>
+                    <label>RR · canal 3 (tras. der)</label>
                     <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(3, this.value)">
                     <span id="servo-3-val">⏺️ CENTRO (90°)</span>
                 </div>
-                <div class="servo-row">
-                    <label>Servo 5 · canal 4</label>
-                    <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(4, this.value)">
-                    <span id="servo-4-val">⏺️ CENTRO (90°)</span>
-                </div>
-            </div>
-
-            <hr class="divider">
-
-            <div class="sub-section">
-                <h4>Paso a paso · DRV8825</h4>
-                <div class="stepper-jog-controls">
-                    <button class="btn btn-small" data-needs-control onclick="App.jogStepper(-500)">−500</button>
-                    <button class="btn btn-small" data-needs-control onclick="App.jogStepper(-100)">−100</button>
-                    <button class="btn btn-small" data-needs-control onclick="App.jogStepper(100)">+100</button>
-                    <button class="btn btn-small" data-needs-control onclick="App.jogStepper(500)">+500</button>
-                </div>
-                <p class="info-text">Posición: <strong id="stepper-pos-val">0</strong> pasos</p>
             </div>
         </div>
 

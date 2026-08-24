@@ -21,7 +21,9 @@ const CONFIG = {
     MAX_QUEUED_EVENTS: 32,
     TEST_SPEED: 50,             // % de las pruebas rapidas desde el esquema del rover
     WIZARD_SPEED: 40,           // % de las pruebas del asistente de pre-vuelo
-    STEERING_CHANNELS: 5,
+    STEERING_CHANNELS: 4,       // un servo por esquina: FL, FR, RL, RR
+    // Las 6 ruedas van en paralelo a un solo canal BTS7960: el esquema las
+    // muestra todas, pero solo hay una consigna de traccion.
     MOTOR_COUNT: 6,
 };
 
@@ -32,10 +34,11 @@ const CONFIG = {
  */
 const CLIENT_ID = 'p' + Math.random().toString(36).slice(2, 10);
 
-const MOTOR_NAMES = [
-    'M1 (Delantero Izq)', 'M2 (Delantero Der)',
-    'M3 (Central Izq)', 'M4 (Central Der)',
-    'M5 (Trasero Izq)', 'M6 (Trasero Der)',
+const DRIVE_NAME = 'Tracción (M1–M6)';
+
+const SERVO_NAMES = [
+    'FL (Delantero Izq)', 'FR (Delantero Der)',
+    'RL (Trasero Izq)', 'RR (Trasero Der)',
 ];
 
 /* ========================================================================= */
@@ -60,7 +63,6 @@ const State = {
         // Angulos reales de consigna, publicados por el firmware. No se calculan
         // aqui: con varios clientes conectados cada uno veria algo distinto.
         servos: new Array(CONFIG.STEERING_CHANNELS).fill(90),
-        stepperPos: 0, stepperMoving: false,
         rxOk: 0, rxErr: 0,
         clients: 0, heap: 0,
     },
@@ -183,7 +185,6 @@ class DemoTransport {
         this.armed = false;
         this.motors = new Array(CONFIG.MOTOR_COUNT).fill(0);
         this.servos = new Array(CONFIG.STEERING_CHANNELS).fill(90);
-        this.stepperPos = 0;
         this.uptime = 0;
         this.seq = 0;
         this.rxOk = 0;
@@ -204,8 +205,6 @@ class DemoTransport {
             armed: this.armed,
             motors: this.motors.map((v) => Math.round(v)),
             servos: this.servos.map((v) => Math.round(v)),
-            stepper_pos: this.stepperPos,
-            stepper_moving: false,
             rx_ok: this.rxOk,
             rx_err: 0,
             clients: 1,
@@ -231,20 +230,19 @@ class DemoTransport {
                     break;
                 case 'DRIVE': {
                     if (!this.armed) break;
-                    const left = clamp(cmd.linear + cmd.angular, -100, 100);
-                    const right = clamp(cmd.linear - cmd.angular, -100, 100);
-                    this.motors = [left, right, left, right, left, right];
-                    this.servos.fill(clamp(90 + (cmd.angular / 100) * 45, 45, 135));
+                    // Un solo canal de traccion y direccion 4WS coordinada:
+                    // delanteros y traseros giran en sentido opuesto.
+                    this.motors.fill(clamp(cmd.linear, -100, 100));
+                    const delta = clamp((cmd.angular / 100) * 45, -45, 45);
+                    this.servos[0] = this.servos[1] = 90 + delta;
+                    this.servos[2] = this.servos[3] = 90 - delta;
                     break;
                 }
                 case 'TEST_MOTOR':
-                    this.motors[cmd.motor] = cmd.speed;
+                    this.motors.fill(cmd.speed);    // el indice no distingue nada
                     break;
                 case 'SERVO_SET':
                     if (cmd.channel < this.servos.length) this.servos[cmd.channel] = cmd.angle;
-                    break;
-                case 'STEPPER_JOG':
-                    this.stepperPos += cmd.steps;
                     break;
                 default: break;                 // HEARTBEAT: sin efecto visible
             }
@@ -268,7 +266,7 @@ const Link = {
     /*
      * Dos carriles de salida con un unico escritor en vuelo:
      *
-     *   events  ARM, DISARM, STEPPER_JOG... no se pueden perder -> cola FIFO
+     *   events  ARM, DISARM, SERVO_SET... no se pueden perder -> cola FIFO
      *   frame   DRIVE, TEST_MOTOR, HEARTBEAT: son instantaneas de estado, si
      *           una se retrasa lo correcto es sustituirla, no encolarla
      *
@@ -374,8 +372,6 @@ function applyTelemetry(data) {
     const t = State.telemetry;
 
     t.uptime = num(data.uptime);
-    t.stepperPos = num(data.stepper_pos);
-    t.stepperMoving = Boolean(data.stepper_moving);
     t.rxOk = num(data.rx_ok);
     t.rxErr = num(data.rx_err);
     t.clients = num(data.clients);
@@ -563,21 +559,18 @@ const View = {
             'debug-tx-data', 'debug-rx-data', 'debug-link-status',
             'debug-rx-ok', 'debug-rx-err',
             'uptime-val', 'heap-val', 'clients-val',
-            'stepper-pos-val', 'stepper-state-badge',
             'view-general', 'view-diagnostics', 'tab-general', 'tab-diagnostics',
             'motor-test-popover', 'popover-title',
             'calibration-modal', 'modal-step-badge', 'modal-step-title', 'modal-step-desc',
-            'pin-i2c-badge',
+            'pin-i2c-badge', 'pin-drive-badge',
         ];
         for (const id of ids) this.el[id] = document.getElementById(id);
 
-        this.motorBadges = [];
         this.wheels = [];
         this.wheelVals = [];
         this.servoBadges = [];
         this.servoLabels = [];
         for (let i = 0; i < CONFIG.MOTOR_COUNT; i++) {
-            this.motorBadges[i] = document.getElementById(`pin-m${i + 1}-badge`);
             this.wheels[i] = document.getElementById(`m${i + 1}`);
             this.wheelVals[i] = this.wheels[i]?.querySelector('.wheel-val');
         }
@@ -708,15 +701,19 @@ const View = {
         const errEl = this.el['debug-rx-err'];
         if (errEl) errEl.dataset.state = t.rxErr > 0 ? 'warn' : 'ok';
 
+        // Una sola consigna de traccion: el firmware la repite en las 6
+        // posiciones de "motors", asi que el esquema anima todas las ruedas.
+        const drive = t.motors[0];
+        const driveActive = Math.abs(drive) > 1;
+        const driveBadge = this.el['pin-drive-badge'];
+        if (driveBadge) {
+            driveBadge.className = driveActive ? 'pin-badge pin-active' : 'pin-badge pin-idle';
+            driveBadge.textContent = driveActive ? `${Math.round(drive)} %` : 'INACTIVO';
+        }
+
         for (let i = 0; i < CONFIG.MOTOR_COUNT; i++) {
             const spd = t.motors[i];
             const active = Math.abs(spd) > 1;
-
-            const badge = this.motorBadges[i];
-            if (badge) {
-                badge.className = active ? 'pin-badge pin-active' : 'pin-badge pin-idle';
-                badge.textContent = active ? `${Math.round(spd)} %` : 'INACTIVO';
-            }
 
             setText(this.wheelVals[i], `${Math.round(spd)}%`);
 
@@ -737,13 +734,6 @@ const View = {
                     ? 'pin-badge pin-active' : 'pin-badge pin-i2c';
             }
             setText(this.servoLabels[s], steerLabel(ang));
-        }
-
-        setText(this.el['stepper-pos-val'], String(t.stepperPos));
-        const st = this.el['stepper-state-badge'];
-        if (st) {
-            st.className = t.stepperMoving ? 'pin-badge pin-active' : 'pin-badge pin-idle';
-            st.textContent = t.stepperMoving ? 'EN MOVIMIENTO' : 'REPOSO';
         }
     },
 
@@ -782,7 +772,8 @@ const Wizard = {
     active: false,
     resolveAnswer: null,
 
-    get totalSteps() { return 1 + CONFIG.STEERING_CHANNELS + CONFIG.MOTOR_COUNT; },
+    // Enlace + un barrido por servo + una prueba del canal unico de traccion.
+    get totalSteps() { return 1 + CONFIG.STEERING_CHANNELS + 1; },
 
     async start() {
         const token = ++this.token;
@@ -819,13 +810,13 @@ const Wizard = {
             `Enlace: <strong>${State.link.mode.toUpperCase()}</strong> · ` +
             `latencia <strong>${State.link.latency ?? '--'} ms</strong> · ` +
             `tramas con error: <strong>${State.telemetry.rxErr}</strong><br><br>` +
-            `Se probaran ${CONFIG.STEERING_CHANNELS} servos y ${CONFIG.MOTOR_COUNT} motores ` +
-            `uno a uno. Aparta las manos del chasis antes de continuar.`);
+            `Se probaran los ${CONFIG.STEERING_CHANNELS} servos de esquina y el canal ` +
+            `de traccion. Aparta las manos del chasis antes de continuar.`);
         if (!await this._await(token)) return false;
 
         for (let ch = 0; ch < CONFIG.STEERING_CHANNELS; ch++) {
             if (!alive()) return false;
-            this._render(2 + ch, `Servo ${ch + 1} (canal ${ch})`,
+            this._render(2 + ch, `Servo ${SERVO_NAMES[ch]} · canal ${ch}`,
                 'Barrido izquierda 45° → derecha 135° → centro 90°. ¿Se movio en ambos sentidos?');
 
             this._setBusy(true);
@@ -838,25 +829,24 @@ const Wizard = {
             if (!await this._await(token)) return false;
         }
 
-        for (let m = 0; m < CONFIG.MOTOR_COUNT; m++) {
-            if (!alive()) return false;
-            this._render(2 + CONFIG.STEERING_CHANNELS + m, `Motor ${MOTOR_NAMES[m]}`,
-                `Impulso de avance y retroceso al ${CONFIG.WIZARD_SPEED} %. ¿Giro en ambos sentidos?`);
+        if (!alive()) return false;
+        this._render(2 + CONFIG.STEERING_CHANNELS, DRIVE_NAME,
+            `Impulso de avance y retroceso al ${CONFIG.WIZARD_SPEED} %. ` +
+            '¿Giraron las 6 ruedas en ambos sentidos?');
 
-            this._setBusy(true);
-            for (const speed of [CONFIG.WIZARD_SPEED, -CONFIG.WIZARD_SPEED, 0]) {
-                if (!alive()) { State.manual = null; return false; }
-                if (speed === 0) {
-                    State.manual = null;
-                    Link.sendEvent({ action: 'TEST_MOTOR', motor: m, speed: 0 });
-                } else {
-                    State.manual = { motor: m, speed };
-                }
-                await sleep(700);
+        this._setBusy(true);
+        for (const speed of [CONFIG.WIZARD_SPEED, -CONFIG.WIZARD_SPEED, 0]) {
+            if (!alive()) { State.manual = null; return false; }
+            if (speed === 0) {
+                State.manual = null;
+                Link.sendEvent({ action: 'TEST_MOTOR', motor: 0, speed: 0 });
+            } else {
+                State.manual = { motor: 0, speed };
             }
-            this._setBusy(false);
-            if (!await this._await(token)) return false;
+            await sleep(700);
         }
+        this._setBusy(false);
+        if (!await this._await(token)) return false;
 
         return true;
     },
@@ -1104,7 +1094,7 @@ const App = {
         State.armed ? this.disarm() : this.arm();
     },
 
-    /** Corte total: motores, paso a paso y armado. Tecla Escape o barra espaciadora. */
+    /** Corte total: traccion, direccion y armado. Tecla Escape o barra espaciadora. */
     emergencyStop() {
         State.armed = false;
         State.manual = null;
@@ -1117,42 +1107,40 @@ const App = {
     /* --- Diagnostico --- */
 
     /**
-     * Entra en prueba manual de un motor.
+     * Entra en prueba manual de traccion.
      *
-     * Mientras dura, el lazo TX deja de emitir DRIVE, asi que el firmware
-     * conservaria la ultima consigna de conduccion y las otras cinco ruedas
-     * seguirian girando. Por eso se desarma primero: una prueba individual
-     * solo tiene sentido con el rover quieto.
+     * Mientras dura, el lazo TX deja de emitir DRIVE y manda TEST_MOTOR. Se
+     * desarma primero: una prueba solo tiene sentido con el rover quieto. El
+     * campo "motor" se conserva por compatibilidad de protocolo, pero con las
+     * 6 ruedas en paralelo el firmware lo ignora.
      */
-    beginManualTest(motor, speed) {
+    beginManualTest(speed) {
         if (State.armed) {
             this.disarm();
-            View.flashNotice('Rover desarmado para ejecutar la prueba individual.');
+            View.flashNotice('Rover desarmado para ejecutar la prueba de traccion.');
         }
-        State.manual = { motor: Number(motor), speed: Number(speed) };
+        State.manual = { motor: 0, speed: Number(speed) };
     },
 
-    /** Deslizador de motor del panel de diagnostico. */
-    setMotor(index, value) {
+    /** Deslizador de traccion del panel de diagnostico. */
+    setDrive(value) {
         const speed = Number(value);
-        const el = document.querySelector(`.motor-control-item[data-motor="${index}"] .val-display`);
+        const el = document.querySelector('.motor-control-item .val-display');
         if (el) el.textContent = `${speed}%`;
 
         if (speed === 0) {
             State.manual = null;
-            Link.sendEvent({ action: 'TEST_MOTOR', motor: Number(index), speed: 0 });
+            Link.sendEvent({ action: 'TEST_MOTOR', motor: 0, speed: 0 });
         } else {
-            this.beginManualTest(index, speed);
+            this.beginManualTest(speed);
         }
     },
 
-    stopAllMotors() {
+    stopDrive() {
         State.manual = null;
         document.querySelectorAll('.motor-control-item input[type="range"]').forEach((r) => { r.value = 0; });
         document.querySelectorAll('.motor-control-item .val-display').forEach((d) => { d.textContent = '0%'; });
-        for (let i = 0; i < CONFIG.MOTOR_COUNT; i++) {
-            Link.sendEvent({ action: 'TEST_MOTOR', motor: i, speed: 0 });
-        }
+        Link.sendEvent({ action: 'TEST_MOTOR', motor: 0, speed: 0 });
     },
 
     // El angulo mostrado NO se fija aqui: llega de vuelta en la telemetria, que
@@ -1164,10 +1152,6 @@ const App = {
             channel: Number(channel),
             angle: Number(value),
         });
-    },
-
-    jogStepper(steps) {
-        Link.sendEvent({ action: 'STEPPER_JOG', steps: Number(steps), speed: 1000 });
     },
 
     /* --- Prueba rapida desde el esquema del rover --- */
@@ -1192,7 +1176,7 @@ const App = {
             const start = (e) => {
                 e.preventDefault();
                 if (this.popoverMotor === null) return;
-                this.beginManualTest(this.popoverMotor, sign * CONFIG.TEST_SPEED);
+                this.beginManualTest(sign * CONFIG.TEST_SPEED);
             };
             const stop = (e) => {
                 e.preventDefault();
@@ -1213,6 +1197,9 @@ const App = {
 
     popoverMotor: null,
 
+    // Cualquier rueda abre la misma prueba: con los 6 motores en paralelo no
+    // hay nada individual que probar. El indice solo sirve para posicionar el
+    // popover junto a la rueda pulsada.
     openMotorPopover(index, wheelEl) {
         this.releaseMotorTest();
         this.popoverMotor = index;
@@ -1221,7 +1208,7 @@ const App = {
         const container = document.querySelector('.rover-view');
         if (!popover || !container) return;
 
-        View.el['popover-title'].textContent = MOTOR_NAMES[index];
+        View.el['popover-title'].textContent = DRIVE_NAME;
 
         const wheelRect = wheelEl.getBoundingClientRect();
         const boxRect = container.getBoundingClientRect();
@@ -1244,9 +1231,8 @@ const App = {
     /** Suelta la prueba manual y manda un cero explicito (no depende del failsafe). */
     releaseMotorTest() {
         if (!State.manual) return;
-        const motor = State.manual.motor;
         State.manual = null;
-        Link.sendEvent({ action: 'TEST_MOTOR', motor, speed: 0 });
+        Link.sendEvent({ action: 'TEST_MOTOR', motor: 0, speed: 0 });
     },
 
     /* --- Pre-vuelo --- */

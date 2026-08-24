@@ -576,7 +576,6 @@ body {
 .servo-row input { flex: 1; min-width: 0; }
 .servo-row span { font-size: 0.72rem; width: 130px; text-align: right; flex-shrink: 0; }
 
-.stepper-jog-controls { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
 
 .info-text { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; }
 
