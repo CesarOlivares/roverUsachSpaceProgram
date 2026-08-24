@@ -50,9 +50,21 @@ static void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client,
   }
 }
 
+/*
+ * Sirve un archivo embebido usando la sobrecarga con callback de relleno, que
+ * es la unica comun a todas las variantes de ESPAsyncWebServer (me-no-dev,
+ * ESP32Async, lacamera): las sobrecargas directas con puntero+longitud no
+ * existen en las versiones antiguas.
+ */
 static void sendEmbedded(AsyncWebServerRequest *req, const char *ctype,
                          const uint8_t *data, size_t len) {
-  AsyncWebServerResponse *res = req->beginResponse(200, ctype, data, len);
+  AsyncWebServerResponse *res = req->beginResponse(String(ctype), len,
+      [data, len](uint8_t *buffer, size_t maxLen, size_t index) -> size_t {
+        size_t remaining = len - index;
+        size_t n = (remaining < maxLen) ? remaining : maxLen;
+        memcpy(buffer, data + index, n);
+        return n;
+      });
   req->send(res);
 }
 
