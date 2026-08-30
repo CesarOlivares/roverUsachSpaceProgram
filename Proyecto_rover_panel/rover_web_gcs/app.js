@@ -19,6 +19,9 @@ const CONFIG = {
     STALE_MS: 800,              // sin telemetria durante este tiempo el enlace se marca caido
     BAUD_RATE: 115200,
     MAX_QUEUED_EVENTS: 32,
+    // Eventos por mensaje. El firmware ya trocea por lineas, pero acotar la
+    // rafaga evita mensajes de varios KB cuando se arrastra un deslizador.
+    MAX_EVENTS_PER_MSG: 6,
     TEST_SPEED: 50,             // % de las pruebas rapidas desde el esquema del rover
     WIZARD_SPEED: 40,           // % de las pruebas del asistente de pre-vuelo
     STEERING_CHANNELS: 4,       // un servo por esquina: FL, FR, RL, RR
@@ -259,6 +262,94 @@ class DemoTransport {
 /* Link: cola de salida y recepcion                                          */
 /* ========================================================================= */
 
+/* ========================================================================= */
+/* Grabador de sesion                                                        */
+/* ========================================================================= */
+
+/*
+ * Guarda en memoria todo lo que cruza el enlace: lo enviado, lo recibido y las
+ * lineas de log que manda el firmware. Sirve para diagnosticar cortes que solo
+ * pasan por WiFi, cuando el cable serie no esta enchufado y no hay forma de ver
+ * la consola del rover.
+ *
+ * Se descarga como un .txt plano, una linea por evento con marca de tiempo
+ * relativa al inicio de la grabacion.
+ */
+const Recorder = {
+    entries: [],
+    t0: 0,
+    MAX: 30000,          // ~30 min a 20 Hz de telemetria filtrada; luego rota
+
+    start() {
+        this.entries = [];
+        this.t0 = performance.now();
+        this.push('SYS', `grabacion iniciada ${new Date().toISOString()} · panel ${CLIENT_ID}`);
+    },
+
+    push(kind, text) {
+        if (this.t0 === 0) this.t0 = performance.now();
+        // Rotacion: se descarta lo mas viejo. Lo que interesa es siempre el
+        // tramo justo anterior al fallo, no el arranque de la sesion.
+        if (this.entries.length >= this.MAX) this.entries.splice(0, this.MAX / 10);
+        this.entries.push({ t: performance.now() - this.t0, kind, text });
+        if (kind === 'LOG') View.pushRoverLog(text);
+        View.setRecCount(this.entries.length);
+    },
+
+    toText() {
+        const cab = [
+            '# Registro de sesion - Rover 6x6 (panel web)',
+            `# Generado: ${new Date().toISOString()}`,
+            `# Panel: ${CLIENT_ID}   Eventos: ${this.entries.length}`,
+            '# Marca de tiempo relativa al inicio de la grabacion (mm:ss.mmm)',
+            '#',
+            '# TX  = enviado por el panel al rover',
+            '# RX  = telemetria recibida del rover',
+            '# LOG = linea de log del firmware (llega por WebSocket)',
+            '# SYS = evento del propio panel (conexion, corte, etc.)',
+            '',
+        ];
+        const cuerpo = this.entries.map((e) => {
+            const ms = Math.max(0, Math.round(e.t));
+            const mm = String(Math.floor(ms / 60000)).padStart(2, '0');
+            const ss = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
+            const mmm = String(ms % 1000).padStart(3, '0');
+            return `[${mm}:${ss}.${mmm}] ${e.kind.padEnd(3)} ${e.text}`;
+        });
+        return cab.concat(cuerpo).join('\n') + '\n';
+    },
+
+    download() {
+        if (this.entries.length === 0) {
+            View.flashNotice('No hay nada grabado todavia.');
+            return;
+        }
+        const d = new Date();
+        const p2 = (n) => String(n).padStart(2, '0');
+        const nombre = `rover-log-${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}` +
+                       `-${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}.txt`;
+
+        const blob = new Blob([this.toText()], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombre;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        // Revocar en el mismo tick cancelaria la descarga en algunos navegadores.
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        View.flashNotice(`Registro descargado: ${nombre}`);
+    },
+
+    clear() {
+        this.entries = [];
+        this.t0 = performance.now();
+        View.setRecCount(0);
+        View.flashNotice('Registro vaciado.');
+    },
+};
+
 const Link = {
     transport: null,
     lastRxAt: 0,
@@ -280,6 +371,7 @@ const Link = {
     writing: false,
 
     async connect(transport) {
+        Recorder.start();
         this.transport = transport;
         this.events = [];
         this.frame = null;
@@ -314,18 +406,26 @@ const Link = {
         if (this.writing || !this.transport) return;
         if (this.events.length === 0 && !this.frame) return;
 
-        const batch = this.events;
-        this.events = [];
+        /*
+         * Se envia como mucho MAX_EVENTS_PER_MSG eventos por mensaje; el resto
+         * queda encolado para el siguiente _pump(). La trama de estado
+         * (HEARTBEAT/DRIVE) va SIEMPRE, aunque haya eventos pendientes: si un
+         * lote se perdiera, el latido no puede irse con el o el firmware se
+         * queda sin senal de vida y dispara el failsafe a los 400 ms.
+         */
+        const batch = this.events.splice(0, CONFIG.MAX_EVENTS_PER_MSG);
         if (this.frame) { batch.push(this.frame); this.frame = null; }
 
         const payload = batch.map((o) => JSON.stringify(o)).join('\n') + '\n';
         View.setDebugTx(payload.trim());
+        for (const l of payload.trim().split('\n')) Recorder.push('TX', l);
 
         this.writing = true;
         try {
             await this.transport.send(payload);
         } catch (err) {
             console.error('Fallo de transmision:', err);
+            Recorder.push('SYS', `fallo de transmision: ${err && err.message ? err.message : err}`);
             App.handleTransportClosed();
             return;
         } finally {
@@ -346,7 +446,10 @@ const Link = {
          * se ignora en vez de ensuciar la consola con errores de parseo.
          */
         if (line[0] !== '{') {
+            // Por cable, los logs del firmware comparten puerto con la
+            // telemetria y llegan crudos con prefijo '# '.
             console.debug('[rover]', line);
+            Recorder.push('LOG', line.replace(/^#\s*/, ''));
             return;
         }
 
@@ -354,12 +457,25 @@ const Link = {
         try {
             data = JSON.parse(line);
         } catch (e) {
+            Recorder.push('SYS', `trama ilegible descartada: ${line.slice(0, 160)}`);
             return;                             // trama partida, la siguiente llegara entera
+        }
+
+        /*
+         * Por WiFi los logs llegan envueltos en JSON: es el unico camino de
+         * vuelta cuando el cable no esta puesto. Cuentan como senal de vida del
+         * enlace igual que la telemetria.
+         */
+        if (data.type === 'log') {
+            this.lastRxAt = performance.now();
+            Recorder.push('LOG', `[rover ${data.up} ms] ${data.msg}`);
+            return;
         }
         if (data.type !== 'telemetry') return;
 
         this.lastRxAt = performance.now();
         View.setDebugRx(line);
+        Recorder.push('RX', line);
         applyTelemetry(data);
     },
 };
@@ -548,7 +664,7 @@ const View = {
             'btn-arm-toggle', 'btn-preflight', 'btn-disconnect',
             'hud-wasd', 'hud-gamepad', 'notice-bar',
             'debug-tx-data', 'debug-rx-data', 'debug-link-status',
-            'debug-rx-ok', 'debug-rx-err',
+            'debug-rx-ok', 'debug-rx-err', 'debug-log-data', 'debug-rec-count',
             'uptime-val', 'heap-val', 'clients-val',
             'view-general', 'view-diagnostics', 'tab-general', 'tab-diagnostics',
             'motor-test-popover', 'popover-title',
@@ -584,6 +700,18 @@ const View = {
 
     setDebugTx(text) { if (this.el['debug-tx-data']) this.el['debug-tx-data'].textContent = text; },
     setDebugRx(text) { if (this.el['debug-rx-data']) this.el['debug-rx-data'].textContent = text; },
+
+    // Ultimas lineas de log del rover, en vivo. El historico completo va al
+    // archivo descargable; aqui solo caben las ultimas para no crecer sin fin.
+    roverLogs: [],
+    pushRoverLog(text) {
+        this.roverLogs.push(text);
+        if (this.roverLogs.length > 12) this.roverLogs.shift();
+        if (this.el['debug-log-data']) this.el['debug-log-data'].textContent = this.roverLogs.join('\n');
+    },
+    setRecCount(n) {
+        if (this.el['debug-rec-count']) this.el['debug-rec-count'].textContent = String(n);
+    },
 
     flashNotice(message) {
         const bar = this.el['notice-bar'];

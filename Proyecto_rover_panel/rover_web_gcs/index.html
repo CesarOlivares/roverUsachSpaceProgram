@@ -176,6 +176,13 @@
                 <pre id="debug-tx-data" class="wire-log wire-tx">—</pre>
                 <span class="metric-label">Última telemetría (RX)</span>
                 <pre id="debug-rx-data" class="wire-log wire-rx">—</pre>
+                <span class="metric-label">Registro del rover (logs del firmware)</span>
+                <pre id="debug-log-data" class="wire-log">—</pre>
+                <div class="link-stats">
+                    <div><span class="metric-label">Eventos grabados</span><strong id="debug-rec-count" data-state="ok">0</strong></div>
+                </div>
+                <button class="btn btn-secondary" onclick="Recorder.download()">⬇️ Descargar registro (.txt)</button>
+                <button class="btn btn-secondary" onclick="Recorder.clear()">Vaciar registro</button>
             </div>
         </div>
 

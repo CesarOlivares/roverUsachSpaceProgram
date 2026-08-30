@@ -4,7 +4,7 @@ Versión rápida en Arduino del firmware del rover, para el hardware actual:
 
 - **Tracción**: 6 motores DC en paralelo sobre **un solo canal** de un puente H **BTS7960 / IBT-2** (una consigna de velocidad para todo el rover).
 - **Dirección**: 4 servos, uno por esquina (FL/FR/RL/RR), en un **PCA9685** (I2C, addr `0x40`, canales 0–3). Giro **4WS coordinado**: los delanteros giran hacia un lado y los traseros hacia el opuesto. El giro es solo por servos (sin diferencial).
-- **Control**: el mismo panel web de siempre (`Proyecto_rover_panel/rover_web_gcs`), abierto **desde el computador** (`index.html`), conectado por WiFi al WebSocket del SoftAP o por cable USB (Web Serial). Mismo protocolo JSON, telemetría a 20 Hz, failsafe de 400 ms y mando exclusivo. El firmware ya no sirve la página: solo expone `ws://192.168.4.1/ws`.
+- **Control**: el mismo panel web de siempre (`Proyecto_rover_panel/rover_web_gcs`), abierto **desde el computador** (`index.html`), conectado por WiFi al WebSocket del SoftAP o por cable USB (Web Serial). Mismo protocolo JSON, telemetría a 20 Hz y mando exclusivo. **El failsafe viene DESACTIVADO** (`ROVER_FAILSAFE_ENABLED 0` en `pinout.h`): el silencio del enlace se detecta y se registra, pero no corta la tracción — si el enlace se cae rodando, el rover sigue a la última consigna. Poner a `1` para recuperar el corte a los 400 ms. El firmware ya no sirve la página: solo expone `ws://192.168.4.1/ws`.
 - Sin stepper (el DRV8825 del firmware ESP-IDF se eliminó de esta versión).
 
 ## Conexión

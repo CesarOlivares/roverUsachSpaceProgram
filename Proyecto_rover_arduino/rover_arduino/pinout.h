@@ -64,6 +64,23 @@ static const int8_t SERVO_INVERT[STEER_SERVO_COUNT]   = { 1, 1, 1, 1 };  // -1 i
 #define AP_SSID                     "Rover_6x6_AP"
 #define AP_PASS                     "Rover6x6Secure"
 #define ROVER_TELEMETRY_HZ          20    // ritmo al que se EVALUA si hay que emitir
+/*
+ * Failsafe: corte automatico de potencia cuando el enlace calla.
+ *
+ *   1 = desarma y corta la traccion tras ROVER_FAILSAFE_TIMEOUT_MS sin tramas.
+ *   0 = NO corta nada.
+ *
+ * ATENCION con 0: si el enlace se cae mientras el rover rueda, el rover SIGUE
+ * RODANDO a la ultima consigna recibida hasta que el enlace vuelva o se corte
+ * la alimentacion. No queda ninguna parada automatica; STOP y DISARM solo
+ * llegan si hay enlace. Tener a mano el interruptor de la fuente.
+ *
+ * Con 0 el silencio se sigue DETECTANDO y registrando (lineas ENLACE MUDO /
+ * ENLACE RECUPERADO mas volcado DIAG): se pierde el corte, no el diagnostico.
+ */
+#define ROVER_FAILSAFE_ENABLED      0
+
+// Umbral de silencio. Con el failsafe activo es el corte; con 0, el aviso.
 #define ROVER_FAILSAFE_TIMEOUT_MS   400
 // La telemetria solo se emite cuando cambia el estado; si no cambia nada se
 // manda un latido cada tanto para que el panel no marque el enlace caido
