@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include <RF24.h>
 #include "../controller/CommandController.h"
+#include "../common/RadioProtocol.h"
 
 /*
  * Enlace nRF24L01 con la estacion base. El rover es el receptor (PRX):
@@ -16,7 +17,8 @@
  */
 class RadioLink {
 public:
-    explicit RadioLink(CommandController &ctrl) : ctrl_(ctrl), spi_(FSPI) {}
+    explicit RadioLink(CommandController &ctrl)
+        : ctrl_(ctrl), spi_(FSPI), radio_(radio::kSpiHz) {}
 
     /** false si el modulo no responde por SPI (el rover sigue por cable). */
     bool begin();

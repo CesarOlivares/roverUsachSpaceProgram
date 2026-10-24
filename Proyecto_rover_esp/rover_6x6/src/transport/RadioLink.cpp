@@ -25,7 +25,7 @@ bool RadioLink::begin()
 
     radio_.setChannel(radio::kChannel);
     radio_.setDataRate(dataRate());
-    radio_.setPALevel(RF24_PA_HIGH);
+    radio_.setPALevel(radio::kPaLevel);
     radio_.setCRCLength(RF24_CRC_16);
     radio_.setAutoAck(true);
     radio_.enableDynamicPayloads();

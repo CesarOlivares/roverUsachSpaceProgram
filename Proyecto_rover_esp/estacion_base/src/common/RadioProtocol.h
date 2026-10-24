@@ -40,6 +40,18 @@ constexpr uint8_t kRoverAddress[5] = { 'R', 'V', 'R', '0', '1' };
 // asi que la velocidad sobra. Valores validos: 250, 1000, 2000.
 constexpr uint16_t kDataRateKbps = 250;
 
+// Reloj del bus SPI con el modulo. La libreria usa 10 MHz por defecto, pero
+// con jumpers Dupont de 10-15 cm el flanco se degrada y aparecen lecturas
+// corruptas: el modulo "se cae" a ratos. 4 MHz sobra para 32 bytes a 20 Hz.
+// Si usas cables cortos soldados puedes volver a 10000000.
+constexpr uint32_t kSpiHz = 4000000;
+
+// Potencia de emision: 0 = MIN, 1 = LOW, 2 = HIGH, 3 = MAX.
+// A menos de ~2 m, sobre todo con modulos PA+LNA, HIGH/MAX saturan el
+// receptor del otro lado y se pierden paquetes. Para pruebas en la mesa usa
+// 1 (LOW); para salir a terreno sube a 2 o 3 (y alimenta bien el modulo).
+constexpr uint8_t kPaLevel = 1;
+
 // Reintentos automaticos de la base: espera (n+1) x 250 us entre intentos.
 // A 250 kbps un ACK con 32 bytes de telemetria necesita al menos 1500 us (n = 5).
 constexpr uint8_t kRetryDelay = 5;

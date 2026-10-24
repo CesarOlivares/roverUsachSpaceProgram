@@ -12,6 +12,9 @@ static rf24_datarate_e dataRate()
     }
 }
 
+// SPI mas lento que el de la libreria: tolera los jumpers Dupont.
+RadioTx::RadioTx() : radio_(radio::kSpiHz) {}
+
 bool RadioTx::begin()
 {
     SPI.begin(pins::kNrfSck, pins::kNrfMiso, pins::kNrfMosi, pins::kNrfCsn);
@@ -22,7 +25,7 @@ bool RadioTx::begin()
 
     radio_.setChannel(radio::kChannel);
     radio_.setDataRate(dataRate());
-    radio_.setPALevel(RF24_PA_HIGH);
+    radio_.setPALevel(radio::kPaLevel);
     radio_.setCRCLength(RF24_CRC_16);
     radio_.setAutoAck(true);
     radio_.enableDynamicPayloads();

@@ -10,6 +10,8 @@
  */
 class RadioTx {
 public:
+    RadioTx();
+
     /** false si el modulo no responde por SPI. */
     bool begin();
 
