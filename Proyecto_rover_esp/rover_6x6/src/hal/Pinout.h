@@ -42,15 +42,25 @@ constexpr int     kI2cSda      = 4;
 constexpr int     kI2cScl      = 5;
 constexpr uint8_t kPca9685Addr = 0x40;
 
+// --- Radio nRF24L01 (SPI2 / FSPI) ---
+// 10..13 son los pines IO_MUX nativos de FSPI en el S3: el bus va sin pasar por
+// la matriz GPIO. El modulo va a 3,3 V (NUNCA a 5 V) con un condensador de
+// 10..100 uF entre VCC y GND junto al modulo.
+constexpr int kNrfCsn  = 10;   // CSN / CS
+constexpr int kNrfMosi = 11;
+constexpr int kNrfSck  = 12;
+constexpr int kNrfMiso = 13;
+constexpr int kNrfCe   = 14;
+
 }  // namespace pins
 
 /* --- Reservados: NO USAR ---
  * GPIO 0, 3, 45, 46  strapping del ESP32-S3
  * GPIO 19, 20        D- y D+ del USB nativo (USB-Serial-JTAG)
- * GPIO 43, 44        consola UART0 (enlace por cable con el panel)
+ * GPIO 43, 44        consola UART0 (enlace por cable directo)
  * GPIO 26..37        flash y PSRAM octal del modulo N16R8
  *
  * --- Libres para ampliaciones ---
  * GPIO 9             ADC1 canal 8 (previsto para un divisor de bateria, sin montar)
- * GPIO 10..14, 15    GPIO/ADC. El 15 estaba previsto para un receptor Flysky i-BUS.
+ * GPIO 15            libre (IRQ del nRF24 si algun dia se usa por interrupcion)
  */

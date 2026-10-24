@@ -5,7 +5,7 @@
  * controladores lo modifican y las vistas se suscriben a sus eventos.
  *
  * Eventos:
- *   link       cambio de modo, de frescura o de latencia del enlace
+ *   link       cambio de modo, de frescura, de latencia o del estado de la radio
  *   arm        cambio del armado confirmado o de una orden pendiente
  *   unconfirmed  el rover no confirmo un armado/desarmado a tiempo ({ target })
  *   control    cambio de quien tiene el mando
@@ -20,6 +20,10 @@ class RoverModel extends Emitter {
         super();
 
         this.link = { mode: 'none', stale: true, latency: null };
+
+        // Estado de la estacion base: { rover, lq, at } o null si no hay base
+        // (simulacion o panel enchufado directo al rover).
+        this.radio = null;
 
         /*
          * El armado lo decide el firmware. `armed` es solo lo que la telemetria
@@ -50,6 +54,7 @@ class RoverModel extends Emitter {
             stepperPos: 0, stepperMoving: false,
             rxOk: 0, rxErr: 0,
             clients: 0, heap: 0,
+            radioLq: null,
         };
 
         this.seq = 0;
@@ -68,6 +73,7 @@ class RoverModel extends Emitter {
 
     beginSession(mode) {
         this.link = { mode, stale: true, latency: null };
+        this.radio = null;
         this.armed = false;
         this.armPending = null;
         this.manual = null;
@@ -79,6 +85,7 @@ class RoverModel extends Emitter {
 
     endSession() {
         this.link = { mode: 'none', stale: true, latency: null };
+        this.radio = null;
         this.armed = false;
         this.armPending = null;
         this.manual = null;
@@ -90,6 +97,11 @@ class RoverModel extends Emitter {
 
     /** Recalcula si el enlace esta caido: sin telemetria reciente no se pinta latencia vieja. */
     refreshStale(now) {
+        if (this.radio && now - this.radio.at > CONFIG.BASE_STATUS_STALE_MS) {
+            this.radio = null;                  // la base dejo de informar
+            this.emit('link');
+        }
+
         const stale = this.lastRxAt === 0 || (now - this.lastRxAt) > CONFIG.STALE_MS;
         if (stale === this.link.stale) return;
         this.link.stale = stale;
@@ -144,6 +156,16 @@ class RoverModel extends Emitter {
 
     get keyboardActive() { return Object.values(this.keys).some(Boolean); }
 
+    /** Estado periodico de la estacion base. */
+    applyBaseStatus(s, now) {
+        const prev = this.radio;
+        this.radio = { rover: s.rover, lq: s.lq, at: now };
+        if (!prev || prev.rover !== s.rover || prev.lq !== s.lq) this.emit('link');
+        if (prev && prev.rover && !s.rover) {
+            this.emit('notice', 'La estación base perdió la señal del rover.');
+        }
+    }
+
     /** Ultima trama en cada sentido, para el monitor de enlace. */
     noteWire(dir, text) {
         this.emit('wire', { dir, text });
@@ -162,6 +184,7 @@ class RoverModel extends Emitter {
         tel.rxErr = t.rxErr;
         tel.clients = t.clients;
         tel.heap = t.heap;
+        tel.radioLq = t.radioLq;
         if (t.motors) tel.motors = t.motors;
         if (t.servos) tel.servos = t.servos;
 

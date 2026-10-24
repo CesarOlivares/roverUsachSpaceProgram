@@ -2,7 +2,7 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
-#include "../model/Command.h"
+#include "../common/Command.h"
 #include "../model/RoverModel.h"
 #include "../hal/MotorDriver.h"
 #include "../hal/ServoDriver.h"
@@ -12,7 +12,7 @@
  * Controlador de mando: aplica las reglas (arbitraje, armado, limites) a cada
  * orden, mueve el hardware y deja el modelo al dia.
  *
- * Lo llaman a la vez la tarea RX del cable, el servidor web y el failsafe,
+ * Lo llaman a la vez la tarea RX del cable, la de la radio y el failsafe,
  * repartidos entre los dos nucleos. Un unico mutex serializa todo: asi el
  * arbitraje y la accion que autoriza son atomicos, y el modelo nunca refleja
  * una consigna distinta de la que tiene el hardware.

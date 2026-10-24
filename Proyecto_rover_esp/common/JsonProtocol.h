@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../model/Command.h"
+#include "Command.h"
 
 /*
  * Decodificador del protocolo de mando: una linea JSON plana por orden.

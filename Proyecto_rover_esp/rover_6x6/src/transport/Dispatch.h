@@ -1,9 +1,9 @@
 #pragma once
 
-#include "JsonProtocol.h"
+#include "../common/JsonProtocol.h"
 #include "../controller/CommandController.h"
 
-// Decodifica una linea completa y la entrega al controlador. Comun a los dos transportes.
+// Decodifica una linea JSON completa y la entrega al controlador.
 inline void dispatchLine(CommandController &ctrl, const char *line)
 {
     Command cmd;

@@ -1,13 +1,17 @@
 /**
  * Rover 6x6 - Estacion de control en tierra
  *
- * Estructura (MVC). Son scripts clasicos, no modulos ES, para que el panel siga
- * funcionando abierto desde disco (file://) en modo cable. Se cargan en el
- * orden de index.html y comparten el ambito global:
+ * El panel habla por USB (Web Serial) con la estacion base, que reenvia por
+ * radio nRF24L01 al rover. Tambien puede enchufarse al USB del rover para
+ * pruebas en banco: el protocolo es el mismo.
+ *
+ * Estructura (MVC). Son scripts clasicos, no modulos ES, para que el panel
+ * funcione abierto desde disco (file://). Se cargan en el orden de index.html
+ * y comparten el ambito global:
  *
  *   config.js, util.js   constantes y utilidades
  *   model/               estado (RoverModel), protocolo y cinematica
- *   transport/           serie USB / WebSocket / simulador + cola de salida
+ *   transport/           serie USB / simulador + cola de salida
  *   view/                pintado del DOM; solo emite intenciones del usuario
  *   controller/          reglas: conexion, conduccion, diagnostico, pre-vuelo
  *   main.js              cableado
@@ -28,7 +32,7 @@ const CONFIG = {
     MOTOR_COUNT: 6,
     STEER_CENTER: 90,           // misma geometria que el firmware (RoverConfig.h)
     STEER_THROW: 45,
-    RECONNECT_MS: 1500,
+    BASE_STATUS_STALE_MS: 1500, // la base informa cada 500 ms; sin noticias, no hay base
 };
 
 /*

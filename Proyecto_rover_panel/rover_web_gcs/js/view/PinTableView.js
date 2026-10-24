@@ -15,6 +15,7 @@ class PinTableView {
         }
         this.stepper = Dom.byId('stepper-state-badge');
         this.i2c = Dom.byId('pin-i2c-badge');
+        this.nrf = Dom.byId('pin-nrf-badge');
 
         model.on('telemetry', () => this.render());
         model.on('link', () => this.renderBus());
@@ -24,6 +25,15 @@ class PinTableView {
     renderBus() {
         const live = this.model.connected && !this.model.link.stale;
         Dom.setPinBadge(this.i2c, live ? 'ACTIVO 50 Hz' : 'SIN ENLACE', live ? 'pin-i2c' : 'pin-idle');
+
+        const radio = this.model.radio;
+        if (!radio) {
+            Dom.setPinBadge(this.nrf, this.model.connected ? 'SIN BASE' : 'SIN ENLACE', 'pin-idle');
+        } else if (!radio.rover) {
+            Dom.setPinBadge(this.nrf, 'SIN ROVER', 'pin-idle');
+        } else {
+            Dom.setPinBadge(this.nrf, `ENLACE ${radio.lq}%`, 'pin-active');
+        }
     }
 
     render() {

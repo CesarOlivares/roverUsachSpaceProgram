@@ -222,6 +222,10 @@ Tras las respuestas del equipo, el firmware pasó a un **sketch de Arduino en C+
 - **Pendiente:** §2.4 (geometría de 4 esquinas tipo Perseverance). Cambia el comportamiento, así que se dejó para cuando el equipo lo decida.
 - **Panel:** el panel son scripts clásicos (no módulos ES) para que siga abriéndose desde disco con el acceso directo `.url`.
 
+### 6.1 Cambio de enlace: Wi-Fi → nRF24L01
+
+El SoftAP y el servidor web del rover se sustituyeron por una radio nRF24L01. Una segunda ESP32 (`estacion_base/`), conectada al PC por USB, hace de puente: recibe el mismo JSON que antes y lo envía por radio en paquetes binarios. La telemetría vuelve dentro del ACK. El panel ya no se sirve desde el rover: se abre siempre desde disco. El código común a los dos sketches está en `Proyecto_rover_esp/common/`. Detalles y cableado en `Proyecto_rover_esp/README.md`.
+
 ## 7. Preguntas abiertas para el equipo (respondidas)
 1. ¿Qué mueve el 5.º servo y qué el paso a paso (¿mástil?, ¿brazo?)? Afecta al modelo de dominio.
 2. ¿El panel tiene que seguir funcionando abierto desde disco (`file://`) para el modo cable? Decide entre módulos ES y bundler (§4.2).

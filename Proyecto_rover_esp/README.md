@@ -1,68 +1,118 @@
-# Firmware del Rover 6×6 (Arduino, ESP32-S3 N16R8)
+# Firmware del Rover 6×6: rover + estación base (Arduino, nRF24L01)
 
-Sketch de Arduino en C++ con estructura MVC. Controla 6 motores DC (3 × L298N), 5 servos (PCA9685) y un paso a paso (DRV8825). Recibe órdenes y envía telemetría por cable (Serial) y por Wi-Fi (SoftAP + WebSocket).
+```
+ PC (panel en el navegador)
+   │  USB · líneas JSON (Web Serial, 115200)
+   ▼
+ ESP32 estación base   ── estacion_base/
+   │  nRF24L01 · paquetes binarios de ≤32 bytes, canal 110 (2,510 GHz)
+   ▼
+ ESP32-S3 del rover    ── rover_6x6/
+     6 motores (L298N) · 5 servos (PCA9685) · paso a paso (DRV8825)
+```
+
+- **Panel:** habla con la estación base exactamente igual que si estuviera enchufado al rover. No sabe que hay una radio en medio.
+- **Estación base:** traduce cada línea JSON a un paquete binario y lo envía por radio. El rover devuelve la telemetría dentro del ACK automático del nRF24, y la base la convierte otra vez en JSON para el panel.
+- **Pruebas en banco:** el panel también se puede enchufar directamente al USB del rover. El protocolo es el mismo, solo que sin radio.
+
+## Material
+
+| | Estación base | Rover |
+|---|---|---|
+| Placa | ESP32 (DevKit/WROOM-32) o ESP32-S3 | ESP32-S3 N16R8 |
+| Radio | nRF24L01 o nRF24L01+PA+LNA | nRF24L01 o nRF24L01+PA+LNA |
+
+**Alimentación del nRF24L01:**
+- Se alimenta a **3,3 V. Nunca a 5 V.**
+- Pon un **condensador de 10 a 100 µF** entre VCC y GND, soldado lo más cerca posible del módulo. Sin él, los picos de corriente al transmitir provocan paquetes perdidos o un módulo que no responde.
+- La versión **PA+LNA** consume más de lo que da el regulador de muchas placas. Aliméntala con su propio regulador de 3,3 V o con un adaptador para nRF24.
+
+## Conexiones del nRF24L01
+
+| nRF24L01 | Rover (ESP32-S3) | Base: ESP32 clásico | Base: ESP32-S3 |
+|---|---|---|---|
+| VCC | 3V3 | 3V3 | 3V3 |
+| GND | GND | GND | GND |
+| CE | GPIO 14 | GPIO 4 | GPIO 14 |
+| CSN | GPIO 10 | GPIO 5 | GPIO 10 |
+| SCK | GPIO 12 | GPIO 18 | GPIO 12 |
+| MOSI | GPIO 11 | GPIO 23 | GPIO 11 |
+| MISO | GPIO 13 | GPIO 19 | GPIO 13 |
+| IRQ | sin conectar | sin conectar | sin conectar |
+
+La estación base elige sola los pines según la placa para la que compiles (`estacion_base/src/config/BaseConfig.h`).
 
 ## Subir el firmware
 
-1. **Core:** en *Herramientas → Placa → Gestor de placas*, instala **esp32 de Espressif 3.x**. Está probado con la 3.3.12. No hace falta ninguna librería extra.
-2. **Credenciales del Wi-Fi:** copia `rover_6x6/src/config/Secrets.example.h` como `Secrets.h` en la misma carpeta y cambia la clave (mínimo 8 caracteres). Git ignora `Secrets.h`. Si no lo creas, el sketch compila igual, pero usa la clave pública del repositorio y avisa al compilar.
-3. Abre `rover_6x6/rover_6x6.ino` y configura *Herramientas* así:
+1. **Core:** en *Herramientas → Placa → Gestor de placas*, instala **esp32 de Espressif 3.x**. Está probado con la 3.3.12.
+2. **Librería:** en *Programa → Incluir librería → Gestionar librerías*, instala **RF24 de TMRh20**. Está probado con la 1.6.2.
+3. **Rover:** abre `rover_6x6/rover_6x6.ino` y configura *Herramientas* así:
 
    | Opción | Valor |
    |---|---|
    | Placa | ESP32S3 Dev Module |
    | Flash Size | 16MB (128Mb) |
    | PSRAM | OPI PSRAM |
-   | Partition Scheme | 16M Flash (3MB APP/9.9MB FATFS) |
-   | Core Debug Level | None (el log del core ensuciaría el enlace por cable) |
-   | USB CDC On Boot | Disabled si conectas al puerto UART/COM de la placa · Enabled si usas el USB nativo |
+   | Partition Scheme | 16M Flash (3MB APP/9.9MB FATFS), o la de por defecto (el binario ocupa ~360 KB) |
+   | Core Debug Level | None |
+   | USB CDC On Boot | Disabled si usas el puerto UART/COM de la placa · Enabled si usas el USB nativo |
 
-4. Pulsa **Subir**. Con estas opciones el binario ocupa ~1 MB (32 %).
+4. **Estación base:** abre `estacion_base/estacion_base.ino`. Elige la placa que tengas (*ESP32 Dev Module* o *ESP32S3 Dev Module*), pon *Core Debug Level* en **None** y súbelo.
+5. **Uso:**
+   1. Enchufa la base al PC.
+   2. Abre el panel (`Proyecto_rover_panel/rover_web_gcs/index.html`) en Chrome o Edge.
+   3. Pulsa **Conectar estación base (USB)** y elige el puerto de la base.
+   4. En la cabecera tiene que aparecer `📻 RADIO nRF24 · NN%`.
 
-Después de subirlo, el panel queda disponible en **http://192.168.4.1/** al conectarte a la red `Rover_6x6_AP`.
+## Si cambias el protocolo
 
-## Si cambias el panel web
-
-Arduino no tiene un equivalente a `EMBED_FILES`, así que el panel se mete dentro del firmware como un header generado. La única fuente de verdad sigue siendo `Proyecto_rover_panel/rover_web_gcs/`. Tras editar cualquier archivo del panel, regenera el header y vuelve a subir:
+El código común a los dos sketches está en `common/`: las órdenes, el JSON del panel, la telemetría y el protocolo de radio. Arduino solo compila lo que hay dentro de la carpeta del sketch, así que `common/` se copia a `src/common/` de cada uno. **Edita siempre `common/`, nunca las copias**, y después:
 
 ```bash
-powershell -ExecutionPolicy Bypass -File Proyecto_rover_esp/tools/embed_web.ps1
+powershell -ExecutionPolicy Bypass -File Proyecto_rover_esp/tools/sync_common.ps1
 ```
 
-Ese comando reescribe `rover_6x6/src/transport/WebAssets.h`. No lo edites a mano.
+Vuelve a subir **los dos** sketches. Si cambias el formato de los paquetes, sube también `radio::kVersion`: así, un extremo con la versión antigua descarta los paquetes en vez de interpretarlos mal.
 
-## Estructura
+**Emparejamiento:** el canal (`kChannel`) y la dirección (`kRoverAddress`) están en `common/RadioProtocol.h`. Si hay otro rover u otro equipo con nRF24 cerca, cambia la dirección y vuelve a subir ambos.
+
+> **Seguridad:** el nRF24L01 no cifra. Cualquiera con otro nRF24 en el mismo canal y con la misma dirección podría enviar órdenes al rover. Para un entorno de pruebas es aceptable. Si el rover va a salir a sitios con público, conviene añadir una firma a los paquetes.
+
+## Estructura (MVC)
 
 ```
-rover_6x6/
-├── rover_6x6.ino            arranque: crea y conecta las piezas
-└── src/
-    ├── config/              RoverConfig.h (parámetros), Secrets.h (clave Wi-Fi)
-    ├── model/               MODELO: estado del rover, órdenes y cinemática, sin hardware
-    │   ├── RoverModel       armado, mando, salud del enlace, consignas vigentes
-    │   ├── Command.h        orden ya decodificada (el controlador no ve JSON)
-    │   └── Kinematics       mezcla diferencial y ángulo de dirección
-    ├── view/
-    │   └── TelemetryView    VISTA: el estado tal como lo ven los paneles (JSON)
-    ├── controller/          CONTROLADOR
-    │   ├── CommandController  reglas: arbitraje del mando, armado, límites
-    │   └── SafetyController   failsafe de pérdida de enlace
-    ├── hal/                 drivers: MotorDriver (LEDC), ServoDriver (Wire), StepperDriver, Pinout.h
-    ├── transport/           bytes <-> órdenes/telemetría: SerialLink, WebLink, JsonProtocol
-    └── util/Log             log por Serial que no rompe las tramas
+common/                     protocolo compartido (fuente de verdad)
+├── Command.h               orden ya decodificada
+├── JsonProtocol            línea JSON del panel -> Command
+├── Telemetry               estado del rover -> línea JSON para el panel
+└── RadioProtocol           Command / telemetría <-> paquetes nRF24 de ≤32 B
+
+rover_6x6/src/
+├── model/                  MODELO: RoverModel (armado, mando, enlace, consignas), Kinematics
+├── view/TelemetryView      VISTA: telemetría en JSON (cable) y en binario (ACK de radio)
+├── controller/             CONTROLADOR: CommandController (reglas), SafetyController (failsafe)
+├── hal/                    drivers: MotorDriver, ServoDriver, StepperDriver, Pinout.h
+└── transport/              RadioLink (nRF24, receptor) y SerialLink (USB directo)
+
+estacion_base/src/
+├── model/BaseModel         última telemetría del rover, calidad del enlace, id del panel
+├── view/PcView             lo que recibe el panel por USB
+├── controller/BridgeController  reenvía cada orden por radio y recoge la telemetría
+└── transport/              PcSerialLink (USB) y RadioTx (nRF24, transmisor)
 ```
 
-Reglas de dependencia:
-- `model` no incluye nada de hardware.
-- `view` solo lee el modelo.
-- `controller` es el único que toca `model` y `hal` a la vez, y todo pasa por su mutex.
-- `transport` solo habla con `controller` y `view`.
+## Seguridad del enlace
 
-Un transporte nuevo (por ejemplo, un receptor i-BUS en el GPIO 15) solo tiene que producir `Command`.
+- **La base nunca repite ni encola órdenes.** Solo reenvía lo que llega del panel, en el momento en que llega. Si una orden no llega al rover tras los reintentos del hardware, se descarta: no sale más tarde.
+- **Failsafe:** si el panel se cierra, se desenchufa la base o se pierde la radio, deja de llegar tráfico. Pasados 400 ms, el rover se desarma, para y libera el mando.
+- **Indicadores del panel:**
+  - `BASE OK · SIN SEÑAL DEL ROVER`: la base funciona pero no recibe ACK del rover.
+  - `SIN DATOS`: no llega telemetría.
+  - El porcentaje es la calidad del enlace: el porcentaje de los últimos 20 envíos que recibieron confirmación.
 
-## Protocolo
+## Protocolo del panel (JSON por USB)
 
-Cada orden es una línea JSON plana: `{"action":"…","client":"…","seq":N, …}`.
+Cada orden es una línea: `{"action":"…","client":"…","seq":N, …}`.
 
 | Acción | Campos | Necesita el mando | Necesita estar armado |
 |---|---|---|---|
@@ -72,10 +122,10 @@ Cada orden es una línea JSON plana: `{"action":"…","client":"…","seq":N, �
 | `DRIVE` | `linear`, `angular` (-100..100) | sí | sí |
 | `TEST_MOTOR` | `motor` (0..5), `speed` (-100..100) | sí | no |
 | `SERVO_SET` | `channel` (0..15), `angle` (0..180) | sí | no |
-| `STEPPER_JOG` | `steps` (±100000), `speed` (Hz, opcional) | sí | no |
+| `STEPPER_JOG` | `steps` (±100000), `speed` (Hz, 0..65535) | sí | no |
 
-La telemetría sale a 20 Hz y su formato es el mismo de siempre.
+**Desde la estación base el panel recibe:**
+- **La telemetría de siempre**, más el campo `radio_lq`.
+- **Cada 500 ms, un estado de la base:** `{"type":"base","rover":true,"lq":95,"tx_ok":N,"tx_fail":N}`.
 
-**Failsafe:** si el operador que tiene el mando pasa 400 ms sin enviar nada, el rover se desarma, para y libera el mando. Los latidos de los paneles observadores no cuentan para este temporizador.
-
-**Servo 5 (canal 4):** está en suspensión. `DRIVE` mueve solo los canales 0..3, y el canal 4 solo se mueve desde diagnóstico. Para reactivarlo, cambia `kSteeringServosInDrive` en `RoverConfig.h` y `STEERING_SERVOS` en `js/config.js`.
+**Servo 5 (canal 4):** está en suspensión. `DRIVE` mueve solo los canales 0..3. Para reactivarlo, cambia `kSteeringServosInDrive` en `rover_6x6/src/config/RoverConfig.h` y `STEERING_SERVOS` en `js/config.js`.

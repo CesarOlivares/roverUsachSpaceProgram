@@ -43,12 +43,27 @@ const Format = {
         return `⏺️ CENTRO (${a}°)`;
     },
 
-    linkLabel(mode) {
-        return {
-            serial: '🔌 CABLE USB',
-            ws: '📡 WI-FI',
-            demo: '🧪 SIMULACION',
-            none: '● DESCONECTADO',
-        }[mode];
+    /**
+     * Resumen del enlace para las vistas: texto, clase de badge y estado
+     * (off / warn / ok). Por USB puede haber una estacion base con radio en
+     * medio (llega su estado) o el rover enchufado directo (no llega).
+     */
+    linkStatus(model) {
+        const { mode, stale } = model.link;
+        const radio = model.radio;
+
+        if (mode === 'none') return { text: '● DESCONECTADO', cls: 'badge-danger', state: 'off' };
+
+        let label = mode === 'demo' ? '🧪 SIMULACION' : '🔌 CABLE DIRECTO';
+        if (radio) {
+            if (!radio.rover) {
+                return { text: '📻 BASE OK · SIN SEÑAL DEL ROVER', cls: 'badge-warning', state: 'warn' };
+            }
+            label = `📻 RADIO nRF24 · ${radio.lq}%`;
+        }
+
+        if (stale) return { text: `${label} · SIN DATOS`, cls: 'badge-warning', state: 'warn' };
+        if (radio && radio.lq < 70) return { text: label, cls: 'badge-warning', state: 'warn' };
+        return { text: label, cls: 'badge-success', state: 'ok' };
     },
 };

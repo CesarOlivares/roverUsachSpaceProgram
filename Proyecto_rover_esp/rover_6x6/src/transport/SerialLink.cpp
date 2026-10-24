@@ -84,7 +84,7 @@ void SerialLink::telemetryLoop()
     TickType_t last_wake = xTaskGetTickCount();
 
     while (true) {
-        size_t len = TelemetryView::render(ctrl_.snapshot(), 0, buf, sizeof(buf));
+        size_t len = TelemetryView::renderJson(ctrl_.snapshot(), buf, sizeof(buf));
         // Una sola escritura por linea: el log no puede colarse en medio.
         if (len > 0) Serial.write((const uint8_t *)buf, len);
 

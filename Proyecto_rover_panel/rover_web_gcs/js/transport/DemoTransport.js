@@ -1,9 +1,9 @@
 'use strict';
 
 /**
- * Simulador. Habla el mismo protocolo que el firmware y usa la misma
- * cinematica, asi que el resto de la aplicacion no distingue si hay un rover
- * al otro lado.
+ * Simulador. Habla el mismo protocolo que la estacion base (incluido su estado
+ * de radio) y usa la misma cinematica que el rover, asi que el resto de la
+ * aplicacion no distingue si hay hardware al otro lado.
  */
 class DemoTransport {
     constructor(onLine) {
@@ -16,6 +16,7 @@ class DemoTransport {
         this.uptime = 0;
         this.seq = 0;
         this.rxOk = 0;
+        this.ticks = 0;
         this.timer = null;
     }
 
@@ -40,7 +41,15 @@ class DemoTransport {
             rx_err: 0,
             clients: 1,
             heap: 280000,
+            radio_lq: 100,
         }));
+
+        // Estado de la "estacion base" cada 500 ms, como la de verdad.
+        if (++this.ticks % Math.round(CONFIG.TX_HZ / 2) === 0) {
+            this.onLine(JSON.stringify({
+                type: 'base', rover: true, lq: 100, tx_ok: this.rxOk, tx_fail: 0,
+            }));
+        }
     }
 
     _stopAll() {

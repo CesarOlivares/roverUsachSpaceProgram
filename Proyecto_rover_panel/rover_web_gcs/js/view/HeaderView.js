@@ -46,21 +46,9 @@ class HeaderView extends Emitter {
     }
 
     renderLink() {
-        const { mode, stale } = this.model.link;
-
-        if (mode === 'none') {
-            Dom.setBadge(this.status, Format.linkLabel('none'), 'badge-danger');
-        } else if (stale) {
-            Dom.setBadge(this.status, `${Format.linkLabel(mode)} · SIN DATOS`, 'badge-warning');
-        } else {
-            Dom.setBadge(this.status, Format.linkLabel(mode), 'badge-success');
-        }
-
-        // Servida desde la ESP no hay nada que desconectar a mano: la pagina
-        // llega por el mismo enlace y se reconecta sola.
-        if (this.disconnectBtn) {
-            this.disconnectBtn.hidden = mode === 'none' || servedFromRover();
-        }
+        const s = Format.linkStatus(this.model);
+        Dom.setBadge(this.status, s.text, s.cls);
+        if (this.disconnectBtn) this.disconnectBtn.hidden = !this.model.connected;
     }
 
     renderLatency() {

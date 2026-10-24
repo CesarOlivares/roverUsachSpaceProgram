@@ -13,7 +13,7 @@ class OperationView extends Emitter {
 
         this.uptime = Dom.byId('uptime-val');
         this.heap = Dom.byId('heap-val');
-        this.clients = Dom.byId('clients-val');
+        this.radioLq = Dom.byId('radio-lq-val');
         this.chipWasd = Dom.byId('hud-wasd');
         this.chipGamepad = Dom.byId('hud-gamepad');
         this.armBtn = Dom.byId('btn-arm-toggle');
@@ -36,7 +36,8 @@ class OperationView extends Emitter {
         const t = this.model.telemetry;
         Dom.setText(this.uptime, Format.uptime(t.uptime));
         Dom.setText(this.heap, `${Math.round(t.heap / 1024)} KB`);
-        Dom.setText(this.clients, String(t.clients));
+        // Sin estacion base (cable directo o simulacion) no hay radio que medir.
+        Dom.setText(this.radioLq, t.radioLq === null ? '--' : `${t.radioLq}%`);
     }
 
     renderInputs() {

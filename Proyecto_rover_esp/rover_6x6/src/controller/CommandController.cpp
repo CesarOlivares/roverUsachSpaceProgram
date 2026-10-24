@@ -167,6 +167,8 @@ RoverSnapshot CommandController::snapshot()
     s.stepperPos    = stepper_.position();
     s.stepperMoving = stepper_.isMoving();
     s.freeHeap      = (uint32_t)esp_get_free_heap_size();
+    s.clients       = 0;   // la base pone los suyos al reconstruir la telemetria
+    s.radioLq       = -1;  // la calidad del enlace la mide la base, no el rover
     return s;
 }
 

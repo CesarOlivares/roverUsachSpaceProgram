@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "../config/RoverConfig.h"
+#include "../common/Telemetry.h"
 
 /*
  * Estado unico del rover: armado, mando, salud del enlace y consignas vigentes
@@ -13,19 +14,8 @@
  * como parametro para que el modelo no dependa del reloj de la placa.
  */
 
-struct RoverSnapshot {
-    uint32_t seq;
-    uint32_t uptimeS;
-    bool     armed;
-    char     owner[cfg::kOwnerIdLen];
-    float    motors[cfg::kMotorCount];
-    float    servos[cfg::kServoCount];
-    int32_t  stepperPos;
-    bool     stepperMoving;
-    uint32_t rxOk;
-    uint32_t rxErr;
-    uint32_t freeHeap;
-};
+// Foto del estado para la telemetria. Es el formato comun con la estacion base.
+using RoverSnapshot = TelemetryData;
 
 class RoverModel {
 public:

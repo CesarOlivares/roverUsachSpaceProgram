@@ -1,6 +1,9 @@
 'use strict';
 
-/** Abre, cierra y recupera el enlace con el rover por cualquiera de los transportes. */
+/**
+ * Abre y cierra el enlace: USB con la estacion base (o directo al rover para
+ * pruebas en banco) o el simulador.
+ */
 class ConnectionController {
     constructor(model, link, loginView, { drive, preflight, safety }) {
         this.model = model;
@@ -9,21 +12,14 @@ class ConnectionController {
         this.drive = drive;
         this.preflight = preflight;
         this.safety = safety;
-        this.reconnectTimer = null;
 
         link.on('telemetry', ({ data, line }) => {
             model.noteWire('rx', line);
             model.applyTelemetry(data, performance.now());
         });
+        link.on('base', (status) => model.applyBaseStatus(status, performance.now()));
         link.on('tx', (payload) => model.noteWire('tx', payload));
         link.on('failed', () => this.handleClosed());
-    }
-
-    /** Servida desde la propia ESP, el rover esta al otro extremo: se conecta sola. */
-    autoConnect() {
-        if (!servedFromRover()) return;
-        this.login.setWebMode();
-        this.connectWifi(location.hostname, location.port || '80');
     }
 
     async connectSerial() {
@@ -39,27 +35,6 @@ class ConnectionController {
         }
     }
 
-    async connectWifi(ip, port) {
-        this.login.setStatus(`Conectando con ${ip}:${port}...`, 'info');
-
-        const transport = new WsTransport(
-            (line) => this.link.handleLine(line),
-            () => this._onTransportClosed(transport));
-        try {
-            await transport.open(ip, port);
-            await this._onConnected(transport, 'ws');
-        } catch (err) {
-            if (servedFromRover()) {
-                // La pagina vino de la ESP, asi que el rover esta ahi: el corte
-                // es del Wi-Fi. Reintenta solo en vez de pedir una IP.
-                this.login.setStatus('Reconectando con el rover...', 'info');
-                this._scheduleReconnect();
-            } else {
-                this.login.setStatus('Sin respuesta. Revisa la IP o conecta por cable.', 'error');
-            }
-        }
-    }
-
     async connectDemo() {
         const transport = new DemoTransport((line) => this.link.handleLine(line));
         await transport.open();
@@ -67,7 +42,6 @@ class ConnectionController {
     }
 
     async disconnect() {
-        clearTimeout(this.reconnectTimer);
         this.preflight.abort();
         this.safety.emergencyStop();
         this.drive.stop();
@@ -84,13 +58,7 @@ class ConnectionController {
         this.link.detach();
         this.model.endSession();
         this.login.show(true);
-
-        if (servedFromRover()) {
-            this.login.setStatus('Enlace perdido. Reconectando...', 'info');
-            this._scheduleReconnect();
-        } else {
-            this.login.setStatus('Enlace cerrado.', 'error');
-        }
+        this.login.setStatus('Enlace cerrado. Si se desenchufó la estación base, vuelve a conectarla.', 'error');
     }
 
     async _onConnected(transport, mode) {
@@ -117,13 +85,5 @@ class ConnectionController {
     _onTransportClosed(transport) {
         if (this.link.transport !== transport) return;
         this.handleClosed();
-    }
-
-    _scheduleReconnect() {
-        clearTimeout(this.reconnectTimer);
-        this.reconnectTimer = setTimeout(() => {
-            if (this.model.connected) return;   // ya se reconecto por otro camino
-            this.connectWifi(location.hostname, location.port || '80');
-        }, CONFIG.RECONNECT_MS);
     }
 }

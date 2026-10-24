@@ -60,7 +60,7 @@ class PreflightController {
         const m = this.model;
 
         this._step(1, 'Comprobación del enlace',
-            `Enlace: <strong>${m.link.mode.toUpperCase()}</strong> · ` +
+            `Enlace: <strong>${m.radio ? `RADIO nRF24 (${m.radio.lq}%)` : m.link.mode.toUpperCase()}</strong> · ` +
             `latencia <strong>${m.link.latency ?? '--'} ms</strong> · ` +
             `tramas con error: <strong>${m.telemetry.rxErr}</strong><br><br>` +
             `Se probarán ${CONFIG.STEERING_SERVOS} servos y ${CONFIG.MOTOR_COUNT} motores ` +

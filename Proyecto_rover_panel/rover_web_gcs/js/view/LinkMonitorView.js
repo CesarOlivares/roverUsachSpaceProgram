@@ -20,12 +20,9 @@ class LinkMonitorView {
 
     renderLink() {
         if (!this.status) return;
-        const { mode, stale } = this.model.link;
-        const label = Format.linkLabel(mode);
-        this.status.textContent = mode === 'none' ? 'Desconectado'
-                                : stale ? `${label} (sin telemetria)`
-                                : label;
-        this.status.dataset.state = mode === 'none' ? 'off' : stale ? 'warn' : 'ok';
+        const s = Format.linkStatus(this.model);
+        this.status.textContent = this.model.connected ? s.text : 'Desconectado';
+        this.status.dataset.state = s.state;
     }
 
     renderCounters() {

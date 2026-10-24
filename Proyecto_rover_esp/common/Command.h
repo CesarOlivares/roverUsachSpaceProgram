@@ -1,31 +1,39 @@
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
-#include "../config/RoverConfig.h"
 
 /*
- * Orden de mando ya decodificada. Es lo unico que el controlador conoce del
- * protocolo: los transportes traducen bytes a Command y el formato de cable
- * (JSON hoy, i-BUS manana) no sale de transport/.
+ * Orden de mando ya decodificada. Es lo unico que el controlador del rover
+ * conoce del protocolo: los transportes traducen bytes a Command y el formato
+ * de cable (JSON por USB, binario por nRF24) no sale de transport/.
  */
 
+namespace proto {
+
+constexpr int    kMotorCount  = 6;
+constexpr int    kServoCount  = 5;    // canales de servo que publica la telemetria
+constexpr size_t kClientIdLen = 24;   // id de cliente con terminador
+
+}  // namespace proto
+
 enum class CommandType : uint8_t {
-    Heartbeat,
-    Arm,
-    Disarm,
-    Stop,
-    Drive,
-    TestMotor,
-    ServoSet,
-    StepperJog,
-    Unknown,
+    Heartbeat  = 0,
+    Arm        = 1,
+    Disarm     = 2,
+    Stop       = 3,
+    Drive      = 4,
+    TestMotor  = 5,
+    ServoSet   = 6,
+    StepperJog = 7,
+    Unknown    = 0xFF,
 };
 
 struct Command {
     CommandType type = CommandType::Unknown;
 
     // Id del cliente, saneado a alfanumericos. Cadena vacia = consola anonima.
-    char client[cfg::kOwnerIdLen] = {0};
+    char client[proto::kClientIdLen] = {0};
 
     bool     hasSeq = false;
     uint32_t seq    = 0;

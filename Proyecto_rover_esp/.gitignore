@@ -1,6 +1,3 @@
-# Credenciales del SoftAP: cada equipo tiene la suya (plantilla en Secrets.example.h)
-rover_6x6/src/config/Secrets.h
-
 # Salidas de compilacion de Arduino IDE / arduino-cli
 build/
 *.bin

@@ -2,7 +2,8 @@
 
 /*
  * Contrato con el firmware. Las acciones y campos tienen que coincidir con
- * src/transport/JsonProtocol.cpp y src/view/TelemetryView.cpp del sketch.
+ * Proyecto_rover_esp/common/JsonProtocol.cpp y common/Telemetry.cpp, que usan
+ * por igual la estacion base y el rover.
  */
 const Action = Object.freeze({
     HEARTBEAT: 'HEARTBEAT',
@@ -30,12 +31,13 @@ const Protocol = {
     encode(obj) { return JSON.stringify(obj); },
 
     /**
-     * Decodifica una linea entrante. Devuelve la telemetria normalizada o null.
+     * Decodifica una linea entrante.
+     * @return { kind: 'telemetry'|'base', data } o null.
      *
-     * En modo cable el log del firmware comparte puerto con la telemetria: todo
-     * lo que no empiece por '{' es un log, no una trama.
+     * El log del firmware comparte puerto con la telemetria: todo lo que no
+     * empiece por '{' es un log, no una trama.
      */
-    decodeTelemetry(line) {
+    decode(line) {
         if (!line || line[0] !== '{') return null;
 
         let data;
@@ -44,7 +46,22 @@ const Protocol = {
         } catch (e) {
             return null;                        // trama partida, la siguiente llegara entera
         }
-        if (data.type !== 'telemetry') return null;
+        if (data.type === 'telemetry') return { kind: 'telemetry', data: this._telemetry(data) };
+        if (data.type === 'base') return { kind: 'base', data: this._baseStatus(data) };
+        return null;
+    },
+
+    /** Estado propio de la estacion base: si oye al rover y con que calidad. */
+    _baseStatus(data) {
+        return {
+            rover: Boolean(data.rover),
+            lq: num(data.lq),
+            txOk: num(data.tx_ok),
+            txFail: num(data.tx_fail),
+        };
+    },
+
+    _telemetry(data) {
 
         const list = (arr, n, fallback) => {
             const out = new Array(n).fill(fallback);
@@ -65,6 +82,8 @@ const Protocol = {
             rxErr: num(data.rx_err),
             clients: num(data.clients),
             heap: num(data.heap),
+            // Solo llega a traves de la estacion base; null = cable directo al rover.
+            radioLq: typeof data.radio_lq === 'number' ? data.radio_lq : null,
         };
     },
 };

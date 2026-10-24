@@ -6,6 +6,7 @@
  * Eventos:
  *   tx         payload que acaba de salir (texto)
  *   telemetry  { data, line } telemetria decodificada
+ *   base       estado de la estacion base (radio)
  *   failed     el transporte fallo al escribir
  */
 class Link extends Emitter {
@@ -66,7 +67,8 @@ class Link extends Emitter {
 
     /**
      * Envio inmediato saltandose la cola, para la parada al cerrar la pestana:
-     * no hay tiempo de esperar a que termine la escritura en curso.
+     * no hay tiempo de esperar a que termine la escritura en curso. Por la
+     * radio es lo mismo: la base lo reenvia en cuanto le llega la linea.
      */
     sendNow(obj) {
         if (!this.transport) return;
@@ -104,11 +106,12 @@ class Link extends Emitter {
         const line = rawLine.trim();
         if (!line) return;
 
-        const data = Protocol.decodeTelemetry(line);
-        if (!data) {
+        const msg = Protocol.decode(line);
+        if (!msg) {
             if (line[0] !== '{') console.debug('[rover]', line);
             return;
         }
-        this.emit('telemetry', { data, line });
+        if (msg.kind === 'telemetry') this.emit('telemetry', { data: msg.data, line });
+        else this.emit('base', msg.data);
     }
 }
