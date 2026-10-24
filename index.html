@@ -8,6 +8,8 @@
 </head>
 <body>
 
+<!-- Vista pura: sin onclick. Los eventos los enlazan las vistas de js/view/. -->
+
 <!-- ===================== PANTALLA DE CONEXIÓN ===================== -->
 <div id="login-screen">
     <div class="login-card">
@@ -18,7 +20,7 @@
         <!-- Estas opciones se ocultan cuando la propia ESP sirve la página:
              en ese caso el enlace ya existe y se conecta sola. -->
         <div class="conn-options">
-            <button class="btn btn-primary" onclick="App.connectSerial()">
+            <button id="btn-connect-serial" class="btn btn-primary">
                 🔌 Conectar por cable (USB)
             </button>
 
@@ -32,12 +34,12 @@
                     <label for="rover-port">Puerto</label>
                     <input type="text" id="rover-port" value="80" placeholder="80">
                 </div>
-                <button class="btn btn-secondary" onclick="App.connectWifi()">
+                <button id="btn-connect-wifi" class="btn btn-secondary">
                     📡 Conectar por Wi-Fi
                 </button>
             </details>
 
-            <button class="btn btn-ghost" onclick="App.connectDemo()">
+            <button id="btn-connect-demo" class="btn btn-ghost">
                 🧪 Simulación (sin hardware)
             </button>
         </div>
@@ -54,8 +56,8 @@
     </div>
 
     <nav class="mode-tabs">
-        <button class="tab-btn active" id="tab-general" onclick="App.switchMode('general')">🎮 Operación</button>
-        <button class="tab-btn" id="tab-diagnostics" onclick="App.switchMode('diagnostics')">⚙️ Diagnóstico</button>
+        <button class="tab-btn active" id="tab-general">🎮 Operación</button>
+        <button class="tab-btn" id="tab-diagnostics">⚙️ Diagnóstico</button>
     </nav>
 
     <div class="header-badges">
@@ -63,8 +65,7 @@
         <span id="control-badge" class="badge badge-warning" hidden>OBSERVADOR</span>
         <span id="arm-badge" class="badge badge-danger">DESARMADO</span>
         <span id="status-badge" class="badge badge-danger">● DESCONECTADO</span>
-        <button id="btn-disconnect" class="btn-icon" title="Desconectar" hidden
-                onclick="App.disconnect()">⏏</button>
+        <button id="btn-disconnect" class="btn-icon" title="Desconectar" hidden>⏏</button>
     </div>
 </header>
 
@@ -105,13 +106,13 @@
             </div>
 
             <div class="action-stack">
-                <button id="btn-preflight" class="btn btn-wizard" data-needs-control disabled onclick="App.startPreFlight()">
+                <button id="btn-preflight" class="btn btn-wizard" data-needs-control disabled>
                     ⚙️ Calibración pre-vuelo
                 </button>
-                <button id="btn-arm-toggle" class="btn btn-arm" data-needs-control disabled onclick="App.toggleArm()">
+                <button id="btn-arm-toggle" class="btn btn-arm" data-needs-control disabled>
                     🛡️ ARMAR ROVER
                 </button>
-                <button class="btn btn-danger" onclick="App.emergencyStop()">
+                <button id="btn-estop" class="btn btn-danger">
                     ⛔ PARADA DE EMERGENCIA
                 </button>
             </div>
@@ -154,7 +155,7 @@
                 <div id="motor-test-popover" class="motor-popover hidden">
                     <div class="popover-header">
                         <span id="popover-title">Motor</span>
-                        <button class="popover-close" onclick="App.closeMotorPopover()">×</button>
+                        <button id="btn-popover-close" class="popover-close">×</button>
                     </div>
                     <div class="popover-buttons">
                         <button class="btn btn-popover btn-yes" data-needs-control id="btn-popover-forward">Adelante</button>
@@ -203,7 +204,7 @@
                         <tr><td><strong>Canal 1</strong></td><td>Servo 2</td><td><span id="servo-dir-1-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
                         <tr><td><strong>Canal 2</strong></td><td>Servo 3</td><td><span id="servo-dir-2-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
                         <tr><td><strong>Canal 3</strong></td><td>Servo 4</td><td><span id="servo-dir-3-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
-                        <tr><td><strong>Canal 4</strong></td><td>Servo 5</td><td><span id="servo-dir-4-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                        <tr><td><strong>Canal 4</strong></td><td>Servo 5 · en suspensión</td><td><span id="servo-dir-4-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -220,37 +221,37 @@
             <div class="motor-grid">
                 <div class="motor-control-item" data-motor="0">
                     <label>M1 · Delantero izq</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(0, this.value)">
+                    <input type="range" min="-100" max="100" value="0" data-needs-control>
                     <span class="val-display">0%</span>
                 </div>
                 <div class="motor-control-item" data-motor="1">
                     <label>M2 · Delantero der</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(1, this.value)">
+                    <input type="range" min="-100" max="100" value="0" data-needs-control>
                     <span class="val-display">0%</span>
                 </div>
                 <div class="motor-control-item" data-motor="2">
                     <label>M3 · Central izq</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(2, this.value)">
+                    <input type="range" min="-100" max="100" value="0" data-needs-control>
                     <span class="val-display">0%</span>
                 </div>
                 <div class="motor-control-item" data-motor="3">
                     <label>M4 · Central der</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(3, this.value)">
+                    <input type="range" min="-100" max="100" value="0" data-needs-control>
                     <span class="val-display">0%</span>
                 </div>
                 <div class="motor-control-item" data-motor="4">
                     <label>M5 · Trasero izq</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(4, this.value)">
+                    <input type="range" min="-100" max="100" value="0" data-needs-control>
                     <span class="val-display">0%</span>
                 </div>
                 <div class="motor-control-item" data-motor="5">
                     <label>M6 · Trasero der</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control oninput="App.setMotor(5, this.value)">
+                    <input type="range" min="-100" max="100" value="0" data-needs-control>
                     <span class="val-display">0%</span>
                 </div>
             </div>
 
-            <button class="btn btn-secondary" data-needs-control onclick="App.stopAllMotors()">Detener todos los motores</button>
+            <button id="btn-stop-all-motors" class="btn btn-secondary" data-needs-control>Detener todos los motores</button>
         </div>
 
         <div class="card">
@@ -260,27 +261,27 @@
                 <h4>Servos de dirección · PCA9685</h4>
                 <div class="servo-row">
                     <label>Servo 1 · canal 0</label>
-                    <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(0, this.value)">
+                    <input type="range" min="0" max="180" value="90" data-needs-control data-servo="0">
                     <span id="servo-0-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
                     <label>Servo 2 · canal 1</label>
-                    <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(1, this.value)">
+                    <input type="range" min="0" max="180" value="90" data-needs-control data-servo="1">
                     <span id="servo-1-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
                     <label>Servo 3 · canal 2</label>
-                    <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(2, this.value)">
+                    <input type="range" min="0" max="180" value="90" data-needs-control data-servo="2">
                     <span id="servo-2-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
                     <label>Servo 4 · canal 3</label>
-                    <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(3, this.value)">
+                    <input type="range" min="0" max="180" value="90" data-needs-control data-servo="3">
                     <span id="servo-3-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
-                    <label>Servo 5 · canal 4</label>
-                    <input type="range" min="0" max="180" value="90" data-needs-control oninput="App.setServo(4, this.value)">
+                    <label>Servo 5 · canal 4 (en suspensión)</label>
+                    <input type="range" min="0" max="180" value="90" data-needs-control data-servo="4">
                     <span id="servo-4-val">⏺️ CENTRO (90°)</span>
                 </div>
             </div>
@@ -290,10 +291,10 @@
             <div class="sub-section">
                 <h4>Paso a paso · DRV8825</h4>
                 <div class="stepper-jog-controls">
-                    <button class="btn btn-small" data-needs-control onclick="App.jogStepper(-500)">−500</button>
-                    <button class="btn btn-small" data-needs-control onclick="App.jogStepper(-100)">−100</button>
-                    <button class="btn btn-small" data-needs-control onclick="App.jogStepper(100)">+100</button>
-                    <button class="btn btn-small" data-needs-control onclick="App.jogStepper(500)">+500</button>
+                    <button class="btn btn-small" data-needs-control data-jog="-500">−500</button>
+                    <button class="btn btn-small" data-needs-control data-jog="-100">−100</button>
+                    <button class="btn btn-small" data-needs-control data-jog="100">+100</button>
+                    <button class="btn btn-small" data-needs-control data-jog="500">+500</button>
                 </div>
                 <p class="info-text">Posición: <strong id="stepper-pos-val">0</strong> pasos</p>
             </div>
@@ -313,12 +314,36 @@
             <p id="modal-step-desc">Verificando enlace...</p>
         </div>
         <div class="wizard-footer">
-            <button class="btn btn-no" onclick="App.answerPreFlight(false)">Cancelar</button>
-            <button class="btn btn-yes" id="btn-wizard-yes" onclick="App.answerPreFlight(true)">Sí, confirmar</button>
+            <button id="btn-wizard-no" class="btn btn-no">Cancelar</button>
+            <button id="btn-wizard-yes" class="btn btn-yes">Sí, confirmar</button>
         </div>
     </div>
 </div>
 
-<script src="app.js"></script>
+<!-- El orden importa: cada script usa lo declarado por los anteriores. -->
+<script src="js/config.js"></script>
+<script src="js/util.js"></script>
+<script src="js/model/protocol.js"></script>
+<script src="js/model/kinematics.js"></script>
+<script src="js/model/RoverModel.js"></script>
+<script src="js/transport/SerialTransport.js"></script>
+<script src="js/transport/WsTransport.js"></script>
+<script src="js/transport/DemoTransport.js"></script>
+<script src="js/transport/Link.js"></script>
+<script src="js/view/dom.js"></script>
+<script src="js/view/LoginView.js"></script>
+<script src="js/view/HeaderView.js"></script>
+<script src="js/view/OperationView.js"></script>
+<script src="js/view/SchematicView.js"></script>
+<script src="js/view/PinTableView.js"></script>
+<script src="js/view/LinkMonitorView.js"></script>
+<script src="js/view/DiagnosticsView.js"></script>
+<script src="js/view/PreflightView.js"></script>
+<script src="js/controller/DriveController.js"></script>
+<script src="js/controller/SafetyController.js"></script>
+<script src="js/controller/DiagnosticsController.js"></script>
+<script src="js/controller/PreflightController.js"></script>
+<script src="js/controller/ConnectionController.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
