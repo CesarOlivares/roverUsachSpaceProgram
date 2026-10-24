@@ -17,27 +17,12 @@
         <h2>Rover 6×6</h2>
         <p>Estación de control · ESP32-S3 N16R8</p>
 
-        <!-- Estas opciones se ocultan cuando la propia ESP sirve la página:
-             en ese caso el enlace ya existe y se conecta sola. -->
         <div class="conn-options">
             <button id="btn-connect-serial" class="btn btn-primary">
-                🔌 Conectar por cable (USB)
+                📻 Conectar estación base (USB)
             </button>
-
-            <details class="conn-advanced">
-                <summary>Conexión inalámbrica</summary>
-                <div class="input-group">
-                    <label for="rover-ip">Dirección IP</label>
-                    <input type="text" id="rover-ip" value="192.168.4.1" placeholder="192.168.4.1">
-                </div>
-                <div class="input-group">
-                    <label for="rover-port">Puerto</label>
-                    <input type="text" id="rover-port" value="80" placeholder="80">
-                </div>
-                <button id="btn-connect-wifi" class="btn btn-secondary">
-                    📡 Conectar por Wi-Fi
-                </button>
-            </details>
+            <p class="hint">Elige el puerto de la ESP32 de la estación base. Para pruebas en banco
+                puedes elegir el USB del propio rover: funciona igual, sin radio.</p>
 
             <button id="btn-connect-demo" class="btn btn-ghost">
                 🧪 Simulación (sin hardware)
@@ -91,8 +76,8 @@
                     <strong id="heap-val" class="metric-big">--</strong>
                 </div>
                 <div class="metric-box">
-                    <span class="metric-label">Clientes web</span>
-                    <strong id="clients-val" class="metric-big">0</strong>
+                    <span class="metric-label">Enlace radio</span>
+                    <strong id="radio-lq-val" class="metric-big">--</strong>
                 </div>
             </div>
 
@@ -199,6 +184,7 @@
                         <tr><td><strong>21 / 47</strong></td><td>M6 trasero der · L298N</td><td><span id="pin-m6-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
                         <tr><td><strong>6 / 7 / 8</strong></td><td>Paso a paso · DRV8825</td><td><span id="stepper-state-badge" class="pin-badge pin-idle">REPOSO</span></td></tr>
                         <tr><td><strong>4 / 5</strong></td><td>Bus I2C · PCA9685</td><td><span id="pin-i2c-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
+                        <tr><td><strong>10–14</strong></td><td>Radio nRF24L01 · SPI</td><td><span id="pin-nrf-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
                         <tr><td colspan="3" class="table-section">Servos de dirección · PCA9685</td></tr>
                         <tr><td><strong>Canal 0</strong></td><td>Servo 1</td><td><span id="servo-dir-0-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
                         <tr><td><strong>Canal 1</strong></td><td>Servo 2</td><td><span id="servo-dir-1-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
@@ -327,7 +313,6 @@
 <script src="js/model/kinematics.js"></script>
 <script src="js/model/RoverModel.js"></script>
 <script src="js/transport/SerialTransport.js"></script>
-<script src="js/transport/WsTransport.js"></script>
 <script src="js/transport/DemoTransport.js"></script>
 <script src="js/transport/Link.js"></script>
 <script src="js/view/dom.js"></script>

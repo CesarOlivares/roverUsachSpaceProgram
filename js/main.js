@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Intenciones -> controladores
     login.on('serial', () => connection.connectSerial());
-    login.on('wifi', ({ ip, port }) => connection.connectWifi(ip, port));
     login.on('demo', () => connection.connectDemo());
 
     header.on('disconnect', () => connection.disconnect());
@@ -46,6 +45,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     diagView.on('servo', ({ channel, angle }) => diagnostics.setServo(channel, angle));
     diagView.on('jog', ({ steps }) => diagnostics.jogStepper(steps));
-
-    connection.autoConnect();
 });
