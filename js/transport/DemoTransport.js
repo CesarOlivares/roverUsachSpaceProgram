@@ -89,15 +89,15 @@ class DemoTransport {
                     break;
                 case Action.DRIVE: {
                     if (!this.armed) break;
-                    const { left, right } = Kinematics.mixDifferential(cmd.linear, cmd.angular);
-                    this.motors = [left, right, left, right, left, right];
+                    this.motors.fill(Kinematics.tractionSpeed(cmd.linear));
                     const steer = Kinematics.steeringAngle(cmd.angular);
                     for (let ch = 0; ch < CONFIG.STEERING_SERVOS; ch++) this.servos[ch] = steer;
                     break;
                 }
                 case Action.TEST_MOTOR:
+                    // Todas las ruedas comparten puente H: probar una mueve las seis.
                     if (cmd.motor >= 0 && cmd.motor < CONFIG.MOTOR_COUNT) {
-                        this.motors[cmd.motor] = clamp(cmd.speed, -100, 100);
+                        this.motors.fill(clamp(cmd.speed, -100, 100));
                     }
                     break;
                 case Action.SERVO_SET:

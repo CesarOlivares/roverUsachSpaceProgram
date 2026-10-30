@@ -66,7 +66,8 @@ class SchematicView extends Emitter {
         const wheel = this.wheels[index];
         if (!this.popover || !this.container || !wheel) return;
 
-        Dom.setText(this.popoverTitle, MOTOR_NAMES[index]);
+        // Cualquier rueda abre la misma prueba: las 6 comparten puente H.
+        Dom.setText(this.popoverTitle, TRACTION_NAME);
 
         const wheelRect = wheel.getBoundingClientRect();
         const boxRect = this.container.getBoundingClientRect();

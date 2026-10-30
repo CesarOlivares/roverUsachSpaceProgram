@@ -29,7 +29,7 @@ const CONFIG = {
     WIZARD_SPEED: 40,           // % de las pruebas del asistente de pre-vuelo
     SERVO_COUNT: 5,             // canales de servo que publica la telemetria
     STEERING_SERVOS: 4,         // servos que siguen la direccion; el 5.o esta en suspension
-    MOTOR_COUNT: 6,
+    MOTOR_COUNT: 6,             // ruedas que dibuja el panel; todas las mueve un unico BTS7960
     STEER_CENTER: 90,           // misma geometria que el firmware (RoverConfig.h)
     STEER_THROW: 45,
     BASE_STATUS_STALE_MS: 1500, // la base informa cada 500 ms; sin noticias, no hay base
@@ -42,8 +42,5 @@ const CONFIG = {
  */
 const CLIENT_ID = 'p' + Math.random().toString(36).slice(2, 10);
 
-const MOTOR_NAMES = [
-    'M1 (Delantero Izq)', 'M2 (Delantero Der)',
-    'M3 (Central Izq)', 'M4 (Central Der)',
-    'M5 (Trasero Izq)', 'M6 (Trasero Der)',
-];
+// Nombre de la unica traccion: la prueba de cualquier rueda mueve todas.
+const TRACTION_NAME = 'Tracción (las 6 ruedas)';

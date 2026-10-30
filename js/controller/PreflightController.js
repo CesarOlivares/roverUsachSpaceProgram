@@ -27,13 +27,13 @@ class PreflightController {
         view.on('answer', (confirmed) => this.answer(confirmed));
     }
 
-    get totalSteps() { return 1 + CONFIG.STEERING_SERVOS + CONFIG.MOTOR_COUNT; }
+    get totalSteps() { return 1 + CONFIG.STEERING_SERVOS + 1; }   // enlace + servos + traccion
 
     async start() {
         const token = ++this.token;
         this.active = true;
 
-        // El pre-vuelo mueve servos y motores uno a uno: nunca con el rover armado.
+        // El pre-vuelo mueve servos y traccion: nunca con el rover armado.
         if (this.model.armed || this.model.armPending?.target) this.drive.disarm();
 
         this.view.show(true);
@@ -63,8 +63,8 @@ class PreflightController {
             `Enlace: <strong>${m.radio ? `RADIO nRF24 (${m.radio.lq}%)` : m.link.mode.toUpperCase()}</strong> · ` +
             `latencia <strong>${m.link.latency ?? '--'} ms</strong> · ` +
             `tramas con error: <strong>${m.telemetry.rxErr}</strong><br><br>` +
-            `Se probarán ${CONFIG.STEERING_SERVOS} servos y ${CONFIG.MOTOR_COUNT} motores ` +
-            `uno a uno. Aparta las manos del chasis antes de continuar.`);
+            `Se probarán ${CONFIG.STEERING_SERVOS} servos uno a uno y después la tracción ` +
+            `de las 6 ruedas. Aparta las manos del chasis antes de continuar.`);
         if (!await this._await(token)) return false;
 
         // Solo los servos de direccion: el 5.o esta en suspension.
@@ -83,25 +83,24 @@ class PreflightController {
             if (!await this._await(token)) return false;
         }
 
-        for (let mot = 0; mot < CONFIG.MOTOR_COUNT; mot++) {
-            if (!alive()) return false;
-            this._step(2 + CONFIG.STEERING_SERVOS + mot, `Motor ${MOTOR_NAMES[mot]}`,
-                `Impulso de avance y retroceso al ${CONFIG.WIZARD_SPEED} %. ¿Giró en ambos sentidos?`);
+        // Un unico puente H: una sola prueba mueve las 6 ruedas.
+        if (!alive()) return false;
+        this._step(2 + CONFIG.STEERING_SERVOS, TRACTION_NAME,
+            `Impulso de avance y retroceso al ${CONFIG.WIZARD_SPEED} %. ¿Giraron las 6 ruedas en ambos sentidos?`);
 
-            this.view.setBusy(true);
-            for (const speed of [CONFIG.WIZARD_SPEED, -CONFIG.WIZARD_SPEED, 0]) {
-                if (!alive()) { m.setManual(null); return false; }
-                if (speed === 0) {
-                    m.setManual(null);
-                    this.link.sendEvent(Protocol.testMotor(mot, 0));
-                } else {
-                    m.setManual({ motor: mot, speed });
-                }
-                await sleep(700);
+        this.view.setBusy(true);
+        for (const speed of [CONFIG.WIZARD_SPEED, -CONFIG.WIZARD_SPEED, 0]) {
+            if (!alive()) { m.setManual(null); return false; }
+            if (speed === 0) {
+                m.setManual(null);
+                this.link.sendEvent(Protocol.testMotor(0, 0));
+            } else {
+                m.setManual({ motor: 0, speed });
             }
-            this.view.setBusy(false);
-            if (!await this._await(token)) return false;
+            await sleep(700);
         }
+        this.view.setBusy(false);
+        if (!await this._await(token)) return false;
 
         return true;
     }
