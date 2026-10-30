@@ -12,10 +12,17 @@
 namespace pins {
 
 // --- Traccion: BTS7960 (IBT-2) ---
-// R_EN y L_EN van cableados fijos a 5 V: el puente siempre esta habilitado y
-// el firmware solo gobierna las dos entradas PWM. Nunca se activan a la vez.
+// Las dos entradas PWM nunca se activan a la vez.
+// OJO: la version Arduino que funcionaba (rama feature/arduino-4ws-single-drive)
+// tenia RPWM en el 4 y LPWM en el 5. Si el rover avanza cuando pides atras,
+// intercambia estos dos valores.
 constexpr int kTractionRpwm = 5;   // RPWM - adelante
 constexpr int kTractionLpwm = 4;   // LPWM - atras
+
+// R_EN + L_EN unidos. -1 = cableados fijos a 5 V (el puente siempre habilitado).
+// Si van a un GPIO (en la rama de referencia era el 6), pon aqui su numero: el
+// firmware lo pone en alto al arrancar. Con R_EN/L_EN al aire el puente NO mueve.
+constexpr int kTractionEn = -1;
 
 // --- Bus I2C: expansor de servos PCA9685 ---
 constexpr int     kI2cSda      = 8;

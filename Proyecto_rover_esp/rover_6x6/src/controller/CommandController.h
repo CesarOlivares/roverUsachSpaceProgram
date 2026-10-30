@@ -55,6 +55,7 @@ private:
     void driveLocked(float linear, float angular);
     void setTractionLocked(float speed);
     void setServoLocked(int ch, float angle);
+    void centerServosLocked();
 
     RoverModel       &model_;
     TractionDriver   &traction_;

@@ -39,12 +39,21 @@ bool CommandController::begin()
 
 void CommandController::safeStopLocked()
 {
-    traction_.stop();
+    traction_.stopNow();                         // en seco, sin rampa
     model_.setTraction(0.0f);
 
     stepper_.stop();                             // sin montar: no hace nada
 
-    for (int ch = 0; ch < cfg::kServoCount; ch++) setServoLocked(ch, cfg::kSteerCenterDeg);
+    centerServosLocked();
+}
+
+void CommandController::centerServosLocked()
+{
+    float angles[cfg::kSteeringServosInDrive];
+    kinematics::steeringAngles(0.0f, angles);    // centro con el trim de cada esquina
+    for (int ch = 0; ch < cfg::kServoCount; ch++) {
+        setServoLocked(ch, ch < cfg::kSteeringServosInDrive ? angles[ch] : cfg::kSteerCenterDeg);
+    }
 }
 
 void CommandController::setServoLocked(int ch, float angle)
@@ -55,7 +64,8 @@ void CommandController::setServoLocked(int ch, float angle)
 
 void CommandController::setTractionLocked(float speed)
 {
-    float applied = traction_.apply(speed);
+    // Consigna: la rampa del driver la alcanza en ~0,7 s de 0 a 100.
+    float applied = traction_.setTarget(speed);
     if (!isnan(applied)) model_.setTraction(applied);
 }
 
@@ -63,10 +73,12 @@ void CommandController::driveLocked(float linear, float angular)
 {
     setTractionLocked(kinematics::tractionSpeed(linear, angular));
 
-    // ServoDriver filtra los angulos repetidos, asi que en marcha recta esto
-    // no genera trafico I2C. El servo en suspension no sigue la direccion.
-    float steer = kinematics::steeringAngle(angular);
-    for (int ch = 0; ch < cfg::kSteeringServosInDrive; ch++) setServoLocked(ch, steer);
+    // Solo se apuntan consignas: la escritura I2C la hace la tarea del
+    // ServoDriver, asi que esto vuelve en microsegundos y la radio no espera.
+    // El servo en suspension no sigue la direccion.
+    float angles[cfg::kSteeringServosInDrive];
+    kinematics::steeringAngles(angular, angles);
+    for (int ch = 0; ch < cfg::kSteeringServosInDrive; ch++) setServoLocked(ch, angles[ch]);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -149,7 +161,7 @@ void CommandController::handle(const Command &cmd)
 void CommandController::centerServos()
 {
     Lock lock(mtx_);
-    for (int ch = 0; ch < cfg::kServoCount; ch++) setServoLocked(ch, cfg::kSteerCenterDeg);
+    centerServosLocked();
 }
 
 /* ------------------------------------------------------------------------ */

@@ -18,6 +18,15 @@ void SerialLink::openPort()
     Serial.setRxBufferSize(SERIAL_RX_BUF_LEN);
     Serial.setTxBufferSize(SERIAL_TX_BUF_LEN);
     Serial.begin(cfg::kSerialBaud);
+#if ARDUINO_USB_CDC_ON_BOOT
+    /*
+     * Con "USB CDC On Boot: Enabled", Serial es el USB nativo y, si nadie lee
+     * el puerto (el rover va por radio, sin cable), cada write() de telemetria
+     * o de log bloquea hasta 100 ms al llenarse el buffer. Con 0 se descarta lo
+     * que no quepa. Medida tomada de la version Arduino que funcionaba.
+     */
+    Serial.setTxTimeoutMs(0);
+#endif
 }
 
 bool SerialLink::begin()

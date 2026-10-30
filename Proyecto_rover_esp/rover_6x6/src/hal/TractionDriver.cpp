@@ -1,8 +1,11 @@
 #include "TractionDriver.h"
 
 #include <math.h>
+#include "freertos/task.h"
+#include "driver/gpio.h"
 #include "driver/ledc.h"
 #include "Pinout.h"
+#include "../config/RoverConfig.h"
 #include "../util/Log.h"
 
 /*
@@ -19,6 +22,8 @@
 #define CH_RPWM         LEDC_CHANNEL_0      // adelante
 #define CH_LPWM         LEDC_CHANNEL_1      // atras
 
+#define RAMP_PERIOD_MS  10
+
 /*
  * Accionamiento del BTS7960:
  *
@@ -27,7 +32,8 @@
  *     Parado   : RPWM = 0,        LPWM = 0      (los dos lados bajos: freno)
  *
  * Las dos entradas nunca llevan PWM a la vez: al cambiar de sentido primero se
- * apaga la que estaba activa y despues se enciende la otra.
+ * apaga la que estaba activa y despues se enciende la otra. Ademas la rampa
+ * pasa siempre por 0 al invertir el sentido.
  *
  * Los canales se enlazan a sus pines una sola vez en begin(); en caliente solo
  * se escribe duty, asi la matriz GPIO no se reconfigura y no quedan senales
@@ -59,10 +65,13 @@ bool attach(ledc_channel_t ch, int pin)
 
 bool TractionDriver::begin()
 {
-    if (initialized_) return true;
+    if (mtx_) return true;
 
-    Log::info("TRACTION", "Inicializando BTS7960 (RPWM %d, LPWM %d) a %d Hz...",
-              pins::kTractionRpwm, pins::kTractionLpwm, LEDC_FREQUENCY);
+    Log::info("TRACTION", "Inicializando BTS7960 (RPWM %d, LPWM %d, EN %d) a %d Hz...",
+              pins::kTractionRpwm, pins::kTractionLpwm, pins::kTractionEn, LEDC_FREQUENCY);
+
+    mtx_ = xSemaphoreCreateMutex();
+    if (!mtx_) return false;
 
     ledc_timer_config_t timer_cfg = {};
     timer_cfg.speed_mode      = LEDC_MODE;
@@ -78,18 +87,27 @@ bool TractionDriver::begin()
     if (!attach(CH_RPWM, pins::kTractionRpwm)) return false;
     if (!attach(CH_LPWM, pins::kTractionLpwm)) return false;
 
-    initialized_ = true;
-    Log::info("TRACTION", "Traccion lista (parada).");
+    // Con las dos entradas ya a 0, se habilita la etapa de potencia.
+    if (pins::kTractionEn >= 0) {
+        gpio_config_t en = {};
+        // La guarda evita un desplazamiento negativo cuando kTractionEn = -1.
+        en.pin_bit_mask = 1ULL << (pins::kTractionEn >= 0 ? pins::kTractionEn : 0);
+        en.mode         = GPIO_MODE_OUTPUT;
+        if (gpio_config(&en) != ESP_OK) return false;
+        gpio_set_level((gpio_num_t)pins::kTractionEn, 1);
+    }
+
+    if (xTaskCreatePinnedToCore(task, "traction_ramp", 2048, this, 5, nullptr, 1) != pdPASS) {
+        return false;
+    }
+
+    Log::info("TRACTION", "Traccion lista (parada, rampa %.0f %%/s).", cfg::kTractionRampPctPerS);
     return true;
 }
 
-float TractionDriver::apply(float speed)
+void TractionDriver::writeOutput(float speed)
 {
-    if (!initialized_) return NAN;
-    if (isnan(speed)) return NAN;
-
-    if (speed >  100.0f) speed =  100.0f;
-    if (speed < -100.0f) speed = -100.0f;
+    current_ = speed;
 
     uint32_t magnitude = (uint32_t)((fabsf(speed) / 100.0f) * LEDC_DUTY_MAX + 0.5f);
     if (magnitude > LEDC_DUTY_MAX) magnitude = LEDC_DUTY_MAX;
@@ -104,10 +122,53 @@ float TractionDriver::apply(float speed)
         setDuty(CH_RPWM, 0);
         setDuty(CH_LPWM, 0);
     }
+}
+
+float TractionDriver::setTarget(float speed)
+{
+    if (!mtx_ || isnan(speed)) return NAN;
+    if (speed >  100.0f) speed =  100.0f;
+    if (speed < -100.0f) speed = -100.0f;
+
+    xSemaphoreTake(mtx_, portMAX_DELAY);
+    target_ = speed;
+    xSemaphoreGive(mtx_);
     return speed;
 }
 
-void TractionDriver::stop()
+void TractionDriver::stopNow()
 {
-    apply(0.0f);
+    if (!mtx_) return;
+    // Mismo mutex que la rampa: tras volver de aqui, ninguna escritura vieja
+    // de la tarea puede reactivar el puente.
+    xSemaphoreTake(mtx_, portMAX_DELAY);
+    target_ = 0.0f;
+    writeOutput(0.0f);
+    xSemaphoreGive(mtx_);
+}
+
+void TractionDriver::task(void *arg) { static_cast<TractionDriver *>(arg)->loop(); }
+
+void TractionDriver::loop()
+{
+    const float step = cfg::kTractionRampPctPerS * (RAMP_PERIOD_MS / 1000.0f);
+    TickType_t last_wake = xTaskGetTickCount();
+
+    while (true) {
+        xSemaphoreTake(mtx_, portMAX_DELAY);
+        if (current_ != target_) {
+            float next = current_;
+            if (next < target_) {
+                next += step;
+                if (next > target_) next = target_;
+            } else {
+                next -= step;
+                if (next < target_) next = target_;
+            }
+            writeOutput(next);
+        }
+        xSemaphoreGive(mtx_);
+
+        vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(RAMP_PERIOD_MS));
+    }
 }

@@ -28,7 +28,11 @@
 | Enlace USB directo | UART0 TX / RX | 43 / 44 |
 
 - **Tracción:** un solo BTS7960 mueve las 6 ruedas. No hay tracción diferencial, así que el rover gira solo con los servos y no puede girar sobre su propio eje.
-- **Servos:** los canales 0 a 3 del PCA9685 siguen la dirección. El canal 4 está en suspensión.
+  - **Rampa:** la tracción acelera a 150 %/s (de 0 a 100 en ~0,7 s) para no hundir la fuente al arrancar los 6 motores. STOP, DISARM y el failsafe cortan en seco.
+  - **Pines a comprobar:** en la versión Arduino de referencia (rama `feature/arduino-4ws-single-drive`) RPWM era el **4** y LPWM el **5**, al revés que aquí. Si el rover avanza cuando pides atrás, intercambia `kTractionRpwm` y `kTractionLpwm` en `Pinout.h`.
+  - **R_EN/L_EN:** en esa misma rama iban al **GPIO 6**. Si en tu rover no están fijos a 5 V, pon el pin en `kTractionEn`; sin habilitar, el puente no mueve las ruedas.
+- **Dirección 4WS:** canal 0 = FL, 1 = FR, 2 = RL, 3 = RR. Los delanteros giran hacia un lado y los traseros hacia el otro para cerrar el radio de giro. El centro y el sentido de cada servo se ajustan en `kServoTrimDeg` y `kServoInvert` (`RoverConfig.h`). El canal 4 está en suspensión.
+- **Servos sin bloquear la radio:** el controlador solo apunta los ángulos; una tarea propia del `ServoDriver` es la única que escribe por I2C. Antes, cada escritura de servos frenaba la recepción de la radio y saltaba el failsafe. Además, cada segundo comprueba que el PCA9685 siga a 50 Hz y lo reconfigura si un pico de corriente lo reseteó.
 - **Paso a paso (DRV8825):** no está montado y su driver queda desactivado (`kStepperMounted = false` en `RoverConfig.h`). Si se vuelve a montar, hay que asignarle pines libres, porque su antiguo EN (GPIO 8) ahora es el SDA.
 
 - **Panel:** habla con la estación base exactamente igual que si estuviera enchufado al rover. No sabe que hay una radio en medio.
