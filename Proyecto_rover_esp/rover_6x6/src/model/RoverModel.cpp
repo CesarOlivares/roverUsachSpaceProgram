@@ -3,10 +3,9 @@
 #include <string.h>
 
 RoverModel::RoverModel()
-    : armed_(false), lastControlUs_(0), rxOk_(0), rxErr_(0), lastSeq_(0)
+    : armed_(false), lastControlUs_(0), rxOk_(0), rxErr_(0), lastSeq_(0), traction_(0.0f)
 {
     owner_[0] = '\0';
-    for (int i = 0; i < cfg::kMotorCount; i++) motors_[i] = 0.0f;
     for (int i = 0; i < cfg::kServoCount; i++) servos_[i] = cfg::kSteerCenterDeg;
 }
 
@@ -40,19 +39,6 @@ void RoverModel::notePacket(const char *client, bool hasSeq, uint32_t seq, int64
     }
 }
 
-void RoverModel::setMotor(int idx, float speed)
-{
-    if (idx >= 0 && idx < cfg::kMotorCount) motors_[idx] = speed;
-}
-
-bool RoverModel::anyMotorActive() const
-{
-    for (int i = 0; i < cfg::kMotorCount; i++) {
-        if (motors_[i] != 0.0f) return true;
-    }
-    return false;
-}
-
 void RoverModel::setServo(int ch, float angle)
 {
     if (ch >= 0 && ch < cfg::kServoCount) servos_[ch] = angle;
@@ -63,7 +49,9 @@ void RoverModel::fillSnapshot(RoverSnapshot &out) const
     out.seq   = lastSeq_;
     out.armed = armed_;
     memcpy(out.owner, owner_, sizeof(out.owner));
-    memcpy(out.motors, motors_, sizeof(out.motors));
+    // La telemetria conserva las 6 ruedas: todas van a la misma consigna
+    // porque las mueve el mismo puente H.
+    for (int i = 0; i < cfg::kWheelCount; i++) out.motors[i] = traction_;
     memcpy(out.servos, servos_, sizeof(out.servos));
     out.rxOk  = rxOk_;
     out.rxErr = rxErr_;

@@ -8,8 +8,28 @@
    │  nRF24L01 · paquetes binarios de ≤32 bytes, canal 110 (2,510 GHz)
    ▼
  ESP32-S3 del rover    ── rover_6x6/
-     6 motores (L298N) · 5 servos (PCA9685) · paso a paso (DRV8825)
+     tracción de las 6 ruedas (1× BTS7960) · dirección por servos (PCA9685)
 ```
+
+## Pinout del rover (ESP32-S3)
+
+| Componente | Señal | GPIO |
+|---|---|---|
+| BTS7960 (tracción de las 6 ruedas) | RPWM (adelante) | **5** |
+| | LPWM (atrás) | **4** |
+| | R_EN y L_EN | a **5 V** fijos, sin GPIO |
+| PCA9685 (servos de dirección) | SDA | **8** |
+| | SCL | **9** |
+| nRF24L01 | CE | **14** |
+| | CSN | **10** |
+| | SCK | **12** |
+| | MOSI | **11** |
+| | MISO | **13** |
+| Enlace USB directo | UART0 TX / RX | 43 / 44 |
+
+- **Tracción:** un solo BTS7960 mueve las 6 ruedas. No hay tracción diferencial, así que el rover gira solo con los servos y no puede girar sobre su propio eje.
+- **Servos:** los canales 0 a 3 del PCA9685 siguen la dirección. El canal 4 está en suspensión.
+- **Paso a paso (DRV8825):** no está montado y su driver queda desactivado (`kStepperMounted = false` en `RoverConfig.h`). Si se vuelve a montar, hay que asignarle pines libres, porque su antiguo EN (GPIO 8) ahora es el SDA.
 
 - **Panel:** habla con la estación base exactamente igual que si estuviera enchufado al rover. No sabe que hay una radio en medio.
 - **Estación base:** traduce cada línea JSON a un paquete binario y lo envía por radio. El rover devuelve la telemetría dentro del ACK automático del nRF24, y la base la convierte otra vez en JSON para el panel.
@@ -91,7 +111,7 @@ rover_6x6/src/
 ├── model/                  MODELO: RoverModel (armado, mando, enlace, consignas), Kinematics
 ├── view/TelemetryView      VISTA: telemetría en JSON (cable) y en binario (ACK de radio)
 ├── controller/             CONTROLADOR: CommandController (reglas), SafetyController (failsafe)
-├── hal/                    drivers: MotorDriver, ServoDriver, StepperDriver, Pinout.h
+├── hal/                    drivers: TractionDriver (BTS7960), ServoDriver, StepperDriver (sin montar), Pinout.h
 └── transport/              RadioLink (nRF24, receptor) y SerialLink (USB directo)
 
 estacion_base/src/
@@ -120,9 +140,9 @@ Cada orden es una línea: `{"action":"…","client":"…","seq":N, …}`.
 | `STOP`, `DISARM` | — | no (cualquiera puede parar) | no |
 | `ARM` | — | sí | no |
 | `DRIVE` | `linear`, `angular` (-100..100) | sí | sí |
-| `TEST_MOTOR` | `motor` (0..5), `speed` (-100..100) | sí | no |
+| `TEST_MOTOR` | `motor` (0..5), `speed` (-100..100); cualquier rueda mueve la tracción entera | sí | no |
 | `SERVO_SET` | `channel` (0..15), `angle` (0..180) | sí | no |
-| `STEPPER_JOG` | `steps` (±100000), `speed` (Hz, 0..65535) | sí | no |
+| `STEPPER_JOG` | `steps` (±100000), `speed` (Hz, 0..65535); sin efecto mientras el paso a paso no esté montado | sí | no |
 
 **Desde la estación base el panel recibe:**
 - **La telemetría de siempre**, más el campo `radio_lq`.

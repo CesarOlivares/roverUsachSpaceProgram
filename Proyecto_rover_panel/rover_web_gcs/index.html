@@ -146,7 +146,7 @@
                         <button class="btn btn-popover btn-yes" data-needs-control id="btn-popover-forward">Adelante</button>
                         <button class="btn btn-popover btn-no" data-needs-control id="btn-popover-backward">Atrás</button>
                     </div>
-                    <p class="hint">Mantén pulsado para mover</p>
+                    <p class="hint">Mantén pulsado: se mueven las 6 ruedas</p>
                 </div>
             </div>
 
@@ -176,14 +176,8 @@
                         <tr><th>GPIO</th><th>Función</th><th>Estado</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td><strong>40 / 39</strong></td><td>M1 delantero izq · L298N</td><td><span id="pin-m1-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>38 / 16</strong></td><td>M2 delantero der · L298N</td><td><span id="pin-m2-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>1 / 2</strong></td><td>M3 central izq · L298N</td><td><span id="pin-m3-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>42 / 41</strong></td><td>M4 central der · L298N</td><td><span id="pin-m4-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>17 / 18</strong></td><td>M5 trasero izq · L298N</td><td><span id="pin-m5-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>21 / 47</strong></td><td>M6 trasero der · L298N</td><td><span id="pin-m6-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>6 / 7 / 8</strong></td><td>Paso a paso · DRV8825</td><td><span id="stepper-state-badge" class="pin-badge pin-idle">REPOSO</span></td></tr>
-                        <tr><td><strong>4 / 5</strong></td><td>Bus I2C · PCA9685</td><td><span id="pin-i2c-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
+                        <tr><td><strong>5 / 4</strong></td><td>Tracción 6 ruedas · BTS7960 (RPWM / LPWM)</td><td><span id="pin-traction-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
+                        <tr><td><strong>8 / 9</strong></td><td>Bus I2C · PCA9685 (SDA / SCL)</td><td><span id="pin-i2c-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
                         <tr><td><strong>10–14</strong></td><td>Radio nRF24L01 · SPI</td><td><span id="pin-nrf-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
                         <tr><td colspan="3" class="table-section">Servos de dirección · PCA9685</td></tr>
                         <tr><td><strong>Canal 0</strong></td><td>Servo 1</td><td><span id="servo-dir-0-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
@@ -201,47 +195,22 @@
     <div id="view-diagnostics" class="dashboard-grid grid-two hidden">
 
         <div class="card">
-            <div class="header-title"><span>Motores DC (M1–M6)</span></div>
-            <p class="section-desc">Prueba individual de velocidad y sentido en cada canal L298N.</p>
+            <div class="header-title"><span>Tracción · BTS7960</span></div>
+            <p class="section-desc">Un único puente H mueve las 6 ruedas a la vez: velocidad y sentido de toda la tracción.</p>
 
             <div class="motor-grid">
                 <div class="motor-control-item" data-motor="0">
-                    <label>M1 · Delantero izq</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control>
-                    <span class="val-display">0%</span>
-                </div>
-                <div class="motor-control-item" data-motor="1">
-                    <label>M2 · Delantero der</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control>
-                    <span class="val-display">0%</span>
-                </div>
-                <div class="motor-control-item" data-motor="2">
-                    <label>M3 · Central izq</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control>
-                    <span class="val-display">0%</span>
-                </div>
-                <div class="motor-control-item" data-motor="3">
-                    <label>M4 · Central der</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control>
-                    <span class="val-display">0%</span>
-                </div>
-                <div class="motor-control-item" data-motor="4">
-                    <label>M5 · Trasero izq</label>
-                    <input type="range" min="-100" max="100" value="0" data-needs-control>
-                    <span class="val-display">0%</span>
-                </div>
-                <div class="motor-control-item" data-motor="5">
-                    <label>M6 · Trasero der</label>
+                    <label>Tracción (6 ruedas)</label>
                     <input type="range" min="-100" max="100" value="0" data-needs-control>
                     <span class="val-display">0%</span>
                 </div>
             </div>
 
-            <button id="btn-stop-all-motors" class="btn btn-secondary" data-needs-control>Detener todos los motores</button>
+            <button id="btn-stop-all-motors" class="btn btn-secondary" data-needs-control>Detener la tracción</button>
         </div>
 
         <div class="card">
-            <div class="header-title"><span>Servos y paso a paso</span></div>
+            <div class="header-title"><span>Servos de dirección</span></div>
 
             <div class="sub-section">
                 <h4>Servos de dirección · PCA9685</h4>
@@ -272,18 +241,6 @@
                 </div>
             </div>
 
-            <hr class="divider">
-
-            <div class="sub-section">
-                <h4>Paso a paso · DRV8825</h4>
-                <div class="stepper-jog-controls">
-                    <button class="btn btn-small" data-needs-control data-jog="-500">−500</button>
-                    <button class="btn btn-small" data-needs-control data-jog="-100">−100</button>
-                    <button class="btn btn-small" data-needs-control data-jog="100">+100</button>
-                    <button class="btn btn-small" data-needs-control data-jog="500">+500</button>
-                </div>
-                <p class="info-text">Posición: <strong id="stepper-pos-val">0</strong> pasos</p>
-            </div>
         </div>
 
     </div>

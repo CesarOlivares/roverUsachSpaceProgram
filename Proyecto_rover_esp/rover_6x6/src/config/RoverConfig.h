@@ -41,12 +41,21 @@ constexpr size_t kOwnerIdLen = proto::kClientIdLen;
 
 /* --- Actuadores --------------------------------------------------------- */
 
-constexpr int kMotorCount = proto::kMotorCount;
+// Las 6 ruedas las mueve un unico BTS7960: una sola consigna de traccion. La
+// telemetria sigue publicando las 6 (iguales) para que el panel las dibuje.
+constexpr int kWheelCount = proto::kMotorCount;
 constexpr int kServoCount = proto::kServoCount;   // canales 0..4, todos en la telemetria
+
+// El paso a paso (DRV8825) no esta montado: su EN chocaba con el SDA del PCA9685.
+// STEPPER_JOG se acepta pero no mueve nada mientras esto sea false.
+constexpr bool kStepperMounted = false;
 
 // Servos que sigue la direccion en modo DRIVE. El 5.o (canal 4) esta en
 // suspension hasta nuevo aviso: queda centrado y solo se mueve desde diagnostico.
 constexpr int kSteeringServosInDrive = 4;
+
+// TEST_MOTOR acepta cualquier rueda 0..5, pero todas comparten traccion:
+// probar una mueve las seis.
 
 // Geometria de direccion: 45 grados izq <- 90 centro -> 135 der.
 constexpr float kSteerCenterDeg = 90.0f;

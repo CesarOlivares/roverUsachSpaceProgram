@@ -53,9 +53,11 @@ public:
     void    resetControlTimer(int64_t nowUs) { lastControlUs_ = nowUs; }
 
     /* --- Consignas vigentes de los actuadores --- */
-    void  setMotor(int idx, float speed);
-    float motor(int idx) const { return motors_[idx]; }
-    bool  anyMotorActive() const;
+
+    // Un solo puente H mueve todas las ruedas: hay una unica consigna de traccion.
+    void  setTraction(float speed) { traction_ = speed; }
+    float traction() const { return traction_; }
+    bool  tractionActive() const { return traction_ != 0.0f; }
     void  setServo(int ch, float angle);
 
     /** Rellena la parte del snapshot que vive en el modelo. */
@@ -68,6 +70,6 @@ private:
     uint32_t rxOk_;
     uint32_t rxErr_;
     uint32_t lastSeq_;    // secuencia del cliente, se devuelve para medir RTT
-    float    motors_[cfg::kMotorCount];
+    float    traction_;
     float    servos_[cfg::kServoCount];
 };

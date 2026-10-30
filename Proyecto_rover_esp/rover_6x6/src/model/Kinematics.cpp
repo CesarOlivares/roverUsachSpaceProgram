@@ -1,21 +1,15 @@
 #include "Kinematics.h"
 
-#include <math.h>
 #include "../config/RoverConfig.h"
 
 namespace kinematics {
 
-SideSpeeds mixDifferential(float linear, float angular)
+float tractionSpeed(float linear, float angular)
 {
-    float left  = linear + angular;
-    float right = linear - angular;
-
-    float peak = fabsf(left) > fabsf(right) ? fabsf(left) : fabsf(right);
-    if (peak > 100.0f) {
-        left  = (left  / peak) * 100.0f;
-        right = (right / peak) * 100.0f;
-    }
-    return { left, right };
+    (void)angular;                               // el giro lo hacen los servos
+    if (linear >  100.0f) return  100.0f;
+    if (linear < -100.0f) return -100.0f;
+    return linear;
 }
 
 float steeringAngle(float angular)

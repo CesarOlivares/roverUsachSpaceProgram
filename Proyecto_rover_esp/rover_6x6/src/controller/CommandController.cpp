@@ -21,9 +21,9 @@ private:
 
 }  // namespace
 
-CommandController::CommandController(RoverModel &model, MotorDriver &motors,
+CommandController::CommandController(RoverModel &model, TractionDriver &traction,
                                      ServoDriver &servos, StepperDriver &stepper)
-    : model_(model), motors_(motors), servos_(servos), stepper_(stepper)
+    : model_(model), traction_(traction), servos_(servos), stepper_(stepper)
 {
 }
 
@@ -39,10 +39,10 @@ bool CommandController::begin()
 
 void CommandController::safeStopLocked()
 {
-    motors_.stopAll();
-    for (int i = 0; i < cfg::kMotorCount; i++) model_.setMotor(i, 0.0f);
+    traction_.stop();
+    model_.setTraction(0.0f);
 
-    stepper_.stop();
+    stepper_.stop();                             // sin montar: no hace nada
 
     for (int ch = 0; ch < cfg::kServoCount; ch++) setServoLocked(ch, cfg::kSteerCenterDeg);
 }
@@ -53,15 +53,15 @@ void CommandController::setServoLocked(int ch, float angle)
     if (!isnan(applied)) model_.setServo(ch, applied);
 }
 
+void CommandController::setTractionLocked(float speed)
+{
+    float applied = traction_.apply(speed);
+    if (!isnan(applied)) model_.setTraction(applied);
+}
+
 void CommandController::driveLocked(float linear, float angular)
 {
-    kinematics::SideSpeeds s = kinematics::mixDifferential(linear, angular);
-
-    // Indices pares = lado izquierdo (M1, M3, M5), impares = derecho.
-    for (int i = 0; i < cfg::kMotorCount; i++) {
-        float applied = motors_.apply(i, (i % 2 == 0) ? s.left : s.right);
-        if (!isnan(applied)) model_.setMotor(i, applied);
-    }
+    setTractionLocked(kinematics::tractionSpeed(linear, angular));
 
     // ServoDriver filtra los angulos repetidos, asi que en marcha recta esto
     // no genera trafico I2C. El servo en suspension no sigue la direccion.
@@ -123,11 +123,11 @@ void CommandController::handle(const Command &cmd)
         driveLocked(cmd.linear, cmd.angular);
         break;
 
-    case CommandType::TestMotor: {
-        float applied = motors_.apply(cmd.motor, cmd.speed);
-        if (!isnan(applied)) model_.setMotor(cmd.motor, applied);
+    case CommandType::TestMotor:
+        // Cualquier rueda valida prueba la traccion entera: comparten puente H.
+        if (cmd.motor < 0 || cmd.motor >= cfg::kWheelCount) return;
+        setTractionLocked(cmd.speed);
         break;
-    }
 
     case CommandType::ServoSet:
         setServoLocked(cmd.channel, cmd.angle);
@@ -184,7 +184,7 @@ bool CommandController::controlLinkLost(int64_t timeoutUs)
     bool moving = stepper_.isMoving();
 
     Lock lock(mtx_);
-    bool guarded = model_.armed() || model_.anyMotorActive() || moving || model_.hasOwner();
+    bool guarded = model_.armed() || model_.tractionActive() || moving || model_.hasOwner();
     return guarded && model_.controlSilenceUs(esp_timer_get_time()) > timeoutUs;
 }
 

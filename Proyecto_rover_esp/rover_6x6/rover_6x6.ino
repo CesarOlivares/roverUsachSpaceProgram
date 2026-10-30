@@ -1,8 +1,9 @@
 /*
  * Rover 6x6 - ESP32-S3 (N16R8)
  *
- * 6 motores DC sobre 3 puentes L298N, 5 servos por PCA9685 y un paso a paso
- * DRV8825. El mando llega por radio nRF24L01 desde la estacion base conectada
+ * Traccion: las 6 ruedas con un unico puente H BTS7960. Direccion: servos en un
+ * PCA9685. El paso a paso DRV8825 esta sin montar (cfg::kStepperMounted).
+ * El mando llega por radio nRF24L01 desde la estacion base conectada
  * al PC (sketch estacion_base), o por cable USB directo para pruebas en banco.
  *
  * Estructura (MVC):
@@ -19,7 +20,7 @@
 
 #include "src/config/RoverConfig.h"
 #include "src/model/RoverModel.h"
-#include "src/hal/MotorDriver.h"
+#include "src/hal/TractionDriver.h"
 #include "src/hal/ServoDriver.h"
 #include "src/hal/StepperDriver.h"
 #include "src/controller/CommandController.h"
@@ -29,10 +30,10 @@
 #include "src/util/Log.h"
 
 static RoverModel        model;
-static MotorDriver       motors;
+static TractionDriver    traction;
 static ServoDriver       servos;
 static StepperDriver     stepper;
-static CommandController controller(model, motors, servos, stepper);
+static CommandController controller(model, traction, servos, stepper);
 static SafetyController  safety(controller);
 static SerialLink        serialLink(controller);
 static RadioLink         radioLink(controller);
@@ -53,8 +54,9 @@ void setup()
 
     // El orden importa: los actuadores tienen que estar en estado seguro antes
     // de que los enlaces empiecen a aceptar ordenes.
-    if (!motors.begin())     haltOnError("los motores");
-    if (!stepper.begin())    haltOnError("el paso a paso");
+    if (!traction.begin())   haltOnError("la traccion");
+    // Sin montar, el driver no se inicia y todas sus llamadas son inocuas.
+    if (cfg::kStepperMounted && !stepper.begin()) haltOnError("el paso a paso");
     servos.begin();          // no fatal: el rover rueda aunque falte la placa de servos
     if (!controller.begin()) haltOnError("el controlador");
 

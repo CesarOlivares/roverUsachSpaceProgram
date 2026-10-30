@@ -43,11 +43,10 @@ class DiagnosticsController {
         }
     }
 
+    /** Para la traccion: un solo puente H, una sola orden. */
     stopAllMotors() {
         this.model.setManual(null);
-        for (let i = 0; i < CONFIG.MOTOR_COUNT; i++) {
-            this.link.sendEvent(Protocol.testMotor(i, 0));
-        }
+        this.link.sendEvent(Protocol.testMotor(0, 0));
     }
 
     setServo(channel, angle) {

@@ -98,39 +98,29 @@ class DriveController {
         this.model.setKey(e.code[3].toLowerCase(), down);
     }
 
-    /** Calcula linear/angular. El mando tiene prioridad sobre el teclado. */
+    /**
+     * Calcula linear/angular. El mando tiene prioridad sobre el teclado.
+     *
+     * Conduccion tipo coche: un unico puente H mueve las 6 ruedas, asi que el
+     * avance (W/S) y el giro de los servos (A/D) son ejes independientes. Ya no
+     * hay giro sobre el propio eje: A o D solas solo orientan las ruedas.
+     */
     computeDrive() {
-        let left = 0;
-        let right = 0;
-
         const { w, a, s, d } = this.model.keys;
-        if (w !== s) {
-            const fwd = w ? 100 : -100;
-            // Con giro simultaneo se frena la rueda interior en vez de invertirla.
-            if (a !== d) {
-                const inner = 0;
-                if (a) { left = w ? inner : fwd; right = w ? fwd : inner; }
-                else { left = w ? fwd : inner; right = w ? inner : fwd; }
-            } else {
-                left = fwd; right = fwd;
-            }
-        } else if (a !== d) {
-            // Solo giro: rotacion sobre el propio eje.
-            left = a ? -100 : 100;
-            right = a ? 100 : -100;
-        }
+        let linear = w === s ? 0 : (w ? 100 : -100);
+        let angular = a === d ? 0 : (d ? 100 : -100);
 
         const gp = navigator.getGamepads?.()[0];
         if (gp) {
             const rawLin = -gp.axes[1];
             const rawAng = gp.axes[0];
             if (Math.abs(rawLin) > 0.12 || Math.abs(rawAng) > 0.12) {
-                left = clamp((rawLin + rawAng) * 100, -100, 100);
-                right = clamp((rawLin - rawAng) * 100, -100, 100);
+                linear = clamp(rawLin * 100, -100, 100);
+                angular = clamp(rawAng * 100, -100, 100);
             }
         }
 
-        this.model.drive.linear = (left + right) / 2;
-        this.model.drive.angular = (left - right) / 2;
+        this.model.drive.linear = linear;
+        this.model.drive.angular = angular;
     }
 }

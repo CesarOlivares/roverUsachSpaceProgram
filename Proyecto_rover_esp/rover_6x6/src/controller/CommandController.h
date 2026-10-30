@@ -4,7 +4,7 @@
 #include "freertos/semphr.h"
 #include "../common/Command.h"
 #include "../model/RoverModel.h"
-#include "../hal/MotorDriver.h"
+#include "../hal/TractionDriver.h"
 #include "../hal/ServoDriver.h"
 #include "../hal/StepperDriver.h"
 
@@ -19,7 +19,7 @@
  */
 class CommandController {
 public:
-    CommandController(RoverModel &model, MotorDriver &motors,
+    CommandController(RoverModel &model, TractionDriver &traction,
                       ServoDriver &servos, StepperDriver &stepper);
 
     bool begin();
@@ -53,10 +53,11 @@ public:
 private:
     void safeStopLocked();
     void driveLocked(float linear, float angular);
+    void setTractionLocked(float speed);
     void setServoLocked(int ch, float angle);
 
     RoverModel       &model_;
-    MotorDriver      &motors_;
+    TractionDriver   &traction_;
     ServoDriver      &servos_;
     StepperDriver    &stepper_;
     SemaphoreHandle_t mtx_ = nullptr;
