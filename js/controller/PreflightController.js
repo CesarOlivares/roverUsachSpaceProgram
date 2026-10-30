@@ -70,7 +70,7 @@ class PreflightController {
         // Solo los servos de direccion: el 5.o esta en suspension.
         for (let ch = 0; ch < CONFIG.STEERING_SERVOS; ch++) {
             if (!alive()) return false;
-            this._step(2 + ch, `Servo ${ch + 1} (canal ${ch})`,
+            this._step(2 + ch, `Servo ${['FL', 'FR', 'RL', 'RR'][ch]} (canal ${ch})`,
                 'Barrido izquierda 45° → derecha 135° → centro 90°. ¿Se movió en ambos sentidos?');
 
             this.view.setBusy(true);

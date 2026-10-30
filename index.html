@@ -180,10 +180,10 @@
                         <tr><td><strong>8 / 9</strong></td><td>Bus I2C · PCA9685 (SDA / SCL)</td><td><span id="pin-i2c-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
                         <tr><td><strong>10–14</strong></td><td>Radio nRF24L01 · SPI</td><td><span id="pin-nrf-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
                         <tr><td colspan="3" class="table-section">Servos de dirección · PCA9685</td></tr>
-                        <tr><td><strong>Canal 0</strong></td><td>Servo 1</td><td><span id="servo-dir-0-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
-                        <tr><td><strong>Canal 1</strong></td><td>Servo 2</td><td><span id="servo-dir-1-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
-                        <tr><td><strong>Canal 2</strong></td><td>Servo 3</td><td><span id="servo-dir-2-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
-                        <tr><td><strong>Canal 3</strong></td><td>Servo 4</td><td><span id="servo-dir-3-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                        <tr><td><strong>Canal 0</strong></td><td>Del. izq (FL)</td><td><span id="servo-dir-0-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                        <tr><td><strong>Canal 1</strong></td><td>Del. der (FR)</td><td><span id="servo-dir-1-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                        <tr><td><strong>Canal 2</strong></td><td>Tras. izq (RL)</td><td><span id="servo-dir-2-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
+                        <tr><td><strong>Canal 3</strong></td><td>Tras. der (RR)</td><td><span id="servo-dir-3-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
                         <tr><td><strong>Canal 4</strong></td><td>Servo 5 · en suspensión</td><td><span id="servo-dir-4-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
                     </tbody>
                 </table>
@@ -215,22 +215,22 @@
             <div class="sub-section">
                 <h4>Servos de dirección · PCA9685</h4>
                 <div class="servo-row">
-                    <label>Servo 1 · canal 0</label>
+                    <label>FL · del. izq · canal 0</label>
                     <input type="range" min="0" max="180" value="90" data-needs-control data-servo="0">
                     <span id="servo-0-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
-                    <label>Servo 2 · canal 1</label>
+                    <label>FR · del. der · canal 1</label>
                     <input type="range" min="0" max="180" value="90" data-needs-control data-servo="1">
                     <span id="servo-1-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
-                    <label>Servo 3 · canal 2</label>
+                    <label>RL · tras. izq · canal 2</label>
                     <input type="range" min="0" max="180" value="90" data-needs-control data-servo="2">
                     <span id="servo-2-val">⏺️ CENTRO (90°)</span>
                 </div>
                 <div class="servo-row">
-                    <label>Servo 4 · canal 3</label>
+                    <label>RR · tras. der · canal 3</label>
                     <input type="range" min="0" max="180" value="90" data-needs-control data-servo="3">
                     <span id="servo-3-val">⏺️ CENTRO (90°)</span>
                 </div>

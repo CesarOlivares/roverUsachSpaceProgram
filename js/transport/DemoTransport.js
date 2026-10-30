@@ -90,8 +90,7 @@ class DemoTransport {
                 case Action.DRIVE: {
                     if (!this.armed) break;
                     this.motors.fill(Kinematics.tractionSpeed(cmd.linear));
-                    const steer = Kinematics.steeringAngle(cmd.angular);
-                    for (let ch = 0; ch < CONFIG.STEERING_SERVOS; ch++) this.servos[ch] = steer;
+                    Kinematics.steeringAngles(cmd.angular).forEach((a, ch) => { this.servos[ch] = a; });
                     break;
                 }
                 case Action.TEST_MOTOR:

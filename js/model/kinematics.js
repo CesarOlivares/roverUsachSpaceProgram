@@ -12,9 +12,12 @@ const Kinematics = {
         return clamp(linear, -100, 100);
     },
 
-    steeringAngle(angular) {
-        return clamp(CONFIG.STEER_CENTER + (angular / 100) * CONFIG.STEER_THROW,
-                     CONFIG.STEER_CENTER - CONFIG.STEER_THROW,
-                     CONFIG.STEER_CENTER + CONFIG.STEER_THROW);
+    /**
+     * Direccion 4WS: [FL, FR, RL, RR]. Delanteros 90+delta, traseros 90-delta.
+     * (El firmware ademas aplica el trim e inversion de cada servo.)
+     */
+    steeringAngles(angular) {
+        const delta = (clamp(angular, -100, 100) / 100) * CONFIG.STEER_THROW;
+        return [0, 1, 2, 3].map((ch) => CONFIG.STEER_CENTER + (ch < 2 ? delta : -delta));
     },
 };
