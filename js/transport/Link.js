@@ -71,9 +71,10 @@ class Link extends Emitter {
      * radio es lo mismo: la base lo reenvia en cuanto le llega la linea.
      */
     sendNow(obj) {
-        if (!this.transport) return;
+        if (!this.transport) return Promise.resolve();
         const payload = Protocol.encode({ ...obj, client: CLIENT_ID }) + '\n';
-        this.transport.send(payload).catch(() => { /* la pagina se esta cerrando */ });
+        this.emit('tx', payload.trim());
+        return this.transport.send(payload).catch(() => { /* la pagina se esta cerrando */ });
     }
 
     async _pump() {

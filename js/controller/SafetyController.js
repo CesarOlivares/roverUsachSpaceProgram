@@ -34,6 +34,7 @@ class SafetyController {
         this.model.requestDisarm(performance.now());
         this.model.releaseKeys();
         this.link.sendEvent(Protocol.stop());
+        this.model.emit('estop');                 // corta gestos en curso (asentir)
         this.model.emit('notice', 'PARADA DE EMERGENCIA enviada.');
     }
 }

@@ -51,13 +51,23 @@ const Protocol = {
         return null;
     },
 
-    /** Estado propio de la estacion base: si oye al rover y con que calidad. */
+    /**
+     * Estado propio de la estacion base: si oye al rover y con que calidad.
+     * Los campos de diagnostico (arc, retry, reinit, chip, up) solo los manda
+     * el firmware nuevo de la base: con uno antiguo quedan en null.
+     */
     _baseStatus(data) {
+        const opt = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
         return {
             rover: Boolean(data.rover),
             lq: num(data.lq),
             txOk: num(data.tx_ok),
             txFail: num(data.tx_fail),
+            arc: opt(data.arc) === null ? null : data.arc / 10,   // retransmisiones medias por envio
+            retry: opt(data.retry),                                // intento de reconexion de la base
+            reinit: opt(data.reinit),                              // reconfiguraciones de su radio
+            chip: typeof data.chip === 'boolean' ? data.chip : null,
+            up: opt(data.up),                                      // segundos desde que arranco la base
         };
     },
 

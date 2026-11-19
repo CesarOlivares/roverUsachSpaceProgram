@@ -1,5 +1,9 @@
 'use strict';
 
+// Rueda del esquema (m1..m6 = indices 0..5) -> canal de su servo de direccion.
+// Las centrales (M3/M4) no giran. Mismo orden que el firmware: FL, FR, RL, RR.
+const STEER_CHANNEL_BY_WHEEL = { 0: 0, 1: 1, 4: 2, 5: 3 };
+
 /**
  * Esquema superior 6x6 y popover de prueba rapida de un motor.
  * Intenciones: 'hold' { motor, sign } al mantener pulsado, 'release' al soltar
@@ -34,7 +38,33 @@ class SchematicView extends Emitter {
         this._bindHold('btn-popover-forward', 1);
         this._bindHold('btn-popover-backward', -1);
 
+        this.gauge = Dom.byId('traction-gauge');
+        this.needle = Dom.byId('gauge-needle');
+        this.arcFwd = Dom.byId('gauge-arc-fwd');
+        this.arcRev = Dom.byId('gauge-arc-rev');
+        this.tractionVal = Dom.byId('traction-val');
+        this.tractionDir = Dom.byId('traction-dir');
+
+        this.vehicle = document.querySelector('.vehicle-layout');
+
         model.on('telemetry', () => this.render());
+        model.on('link', () => this.renderLost());
+    }
+
+    /**
+     * Sin enlace, la ultima telemetria ya no es verdad: el rover corto la
+     * traccion por su cuenta. Se atenua el esquema y el medidor lo dice.
+     */
+    renderLost() {
+        const lost = Boolean(this.model.reconnect);
+        if (this.vehicle) this.vehicle.dataset.lost = lost ? 'true' : 'false';
+        if (lost) {
+            Dom.setText(this.tractionVal, '—');
+            Dom.setText(this.tractionDir, 'SIN ENLACE · TRACCIÓN CORTADA');
+            if (this.gauge) this.gauge.dataset.dir = 'idle';
+        } else {
+            this.render();
+        }
     }
 
     _bindHold(id, sign) {
@@ -88,19 +118,39 @@ class SchematicView extends Emitter {
     }
 
     render() {
-        const motors = this.model.telemetry.motors;
+        const { motors, servos } = this.model.telemetry;
         for (let i = 0; i < CONFIG.MOTOR_COUNT; i++) {
             const spd = motors[i];
             const active = Math.abs(spd) > 1;
 
-            Dom.setText(this.wheelVals[i], `${Math.round(spd)}%`);
-
             const wheel = this.wheels[i];
-            if (wheel) {
-                wheel.classList.toggle('active', active);
-                wheel.classList.toggle('reverse', spd < -1);
-                wheel.style.setProperty('--wheel-power', `${Math.abs(spd)}%`);
+            if (!wheel) continue;
+            wheel.classList.toggle('active', active);
+            wheel.classList.toggle('reverse', spd < -1);
+            wheel.style.setProperty('--wheel-power', `${Math.abs(spd)}%`);
+
+            // Las esquinas giran con su servo; las centrales son fijas.
+            const ch = STEER_CHANNEL_BY_WHEEL[i];
+            if (ch === undefined) {
+                Dom.setText(this.wheelVals[i], 'FIJA');
+            } else {
+                const delta = Math.round(servos[ch] - CONFIG.STEER_CENTER);
+                wheel.style.setProperty('--steer', `${delta}deg`);
+                Dom.setText(this.wheelVals[i], `${delta > 0 ? '+' : ''}${delta}°`);
             }
         }
+        this.renderGauge(motors[0]);
+    }
+
+    /** Medidor de traccion: aguja de -100 (izquierda) a +100 (derecha). */
+    renderGauge(speed) {
+        if (this.model.reconnect) return;
+        const v = clamp(Math.round(speed), -100, 100);
+        this.needle?.setAttribute('transform', `rotate(${v * 0.9} 110 120)`);
+        this.arcFwd?.setAttribute('stroke-dashoffset', String(100 - Math.max(0, v)));
+        this.arcRev?.setAttribute('stroke-dashoffset', String(100 - Math.max(0, -v)));
+        Dom.setText(this.tractionVal, `${v}%`);
+        Dom.setText(this.tractionDir, v > 1 ? 'AVANCE' : v < -1 ? 'RETROCESO' : 'DETENIDO');
+        if (this.gauge) this.gauge.dataset.dir = v > 1 ? 'fwd' : v < -1 ? 'rev' : 'idle';
     }
 }
