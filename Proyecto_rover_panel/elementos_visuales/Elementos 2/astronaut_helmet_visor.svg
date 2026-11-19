@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Outer Helmet Dome -->
+  <path d="M 40 128 C 24 116 20 86 24 60 C 30 28 54 16 80 16 C 106 16 130 28 136 60 C 140 86 136 116 120 128" stroke-width="3" />
+  <!-- Helmet Collar Base Rim -->
+  <rect x="36" y="128" width="88" height="12" rx="4" fill="currentColor" fill-opacity="0.15" stroke-width="2.5" />
+  <line x1="48" y1="134" x2="112" y2="134" stroke-width="1.8" />
+  <!-- Visor Bubble Window (Smooth Curved Béziers) -->
+  <path d="M 42 66 C 42 46 58 40 80 40 C 102 40 118 46 118 66 C 118 94 104 108 80 108 C 56 108 42 94 42 66 Z" fill="currentColor" fill-opacity="0.25" stroke-width="3" />
+  <!-- Visor Reflection Flare (Crescent Glare) -->
+  <path d="M 54 54 C 64 48 80 48 94 52 C 90 56 78 56 64 62 C 58 64 54 60 54 54 Z" fill="currentColor" stroke="none" />
+  <!-- Comms Audio Antenna Earpiece (Right) -->
+  <rect x="134" y="68" width="8" height="24" rx="2" fill="currentColor" stroke="none" />
+  <line x1="138" y1="68" x2="148" y2="34" stroke-width="2.5" />
+  <circle cx="148" cy="34" r="3" fill="currentColor" stroke="none" />
+  <!-- Oxygen Vent Port Details (Left) -->
+  <circle cx="34" cy="88" r="4" fill="currentColor" stroke="none" />
+  <line x1="28" y1="88" x2="34" y2="88" stroke-width="2" />
+</svg>

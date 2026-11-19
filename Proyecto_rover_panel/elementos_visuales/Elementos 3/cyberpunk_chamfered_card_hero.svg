@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" fill="none" stroke="currentColor">
+  <!-- Outer Chamfered Cyber Frame -->
+  <polygon points="44,16 304,16 304,156 272,188 16,188 16,44" stroke-width="2.5" />
+  <!-- Top-Left Corner Cutout Tab -->
+  <polygon points="16,44 44,16 68,16 68,44 16,44" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5" />
+  <!-- Red/Accent Diagonal Warning Hatch inside Tab -->
+  <g stroke="currentColor" stroke-width="2">
+    <line x1="24" y1="40" x2="40" y2="24" />
+    <line x1="34" y1="40" x2="50" y2="24" />
+    <line x1="44" y1="40" x2="60" y2="24" />
+  </g>
+  <!-- Framing Inset Guide -->
+  <polygon points="50,26 294,26 294,150 266,178 26,178 26,50" stroke-width="1" stroke-dasharray="5 3" opacity="0.6" />
+  <!-- Corner Gripper Brackets -->
+  <polyline points="290,36 300,36 300,46" stroke-width="3" stroke-linecap="round" />
+  <polyline points="300,146 300,156 290,166" stroke-width="3" stroke-linecap="round" />
+  <polyline points="36,188 16,188 16,168" stroke-width="3" stroke-linecap="round" />
+  <!-- Terminal Target Icon (Bottom Right) -->
+  <rect x="238" y="148" width="18" height="18" stroke-width="1.5" />
+  <line x1="238" y1="148" x2="256" y2="166" stroke-width="1.5" />
+  <line x1="256" y1="148" x2="238" y2="166" stroke-width="1.5" />
+</svg>

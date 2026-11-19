@@ -12,6 +12,6 @@
 namespace PcView {
 
 void sendTelemetry(const BaseModel &model);
-void sendStatus(const BaseModel &model, uint32_t nowMs);
+void sendStatus(const BaseModel &model, bool chipOk, uint32_t nowMs);
 
 }  // namespace PcView

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 120" fill="none" stroke="currentColor">
+  <!-- Left Hazard Wings -->
+  <g fill="currentColor" stroke="none">
+    <polygon points="14,88 32,46 44,46 26,88" />
+    <polygon points="34,88 52,46 64,46 46,88" />
+    <polygon points="54,88 72,46 84,46 66,88" />
+    <polygon points="74,88 92,46 104,46 86,88" />
+  </g>
+  <!-- Right Hazard Wings -->
+  <g fill="currentColor" stroke="none">
+    <polygon points="176,88 194,46 206,46 188,88" />
+    <polygon points="196,88 214,46 226,46 208,88" />
+    <polygon points="216,88 234,46 246,46 228,88" />
+    <polygon points="236,88 254,46 266,46 248,88" />
+  </g>
+  <!-- Central Hex Warning Base -->
+  <polygon points="112,46 168,46 182,72 168,98 112,98 98,72" fill="#070913" stroke="currentColor" stroke-width="3" />
+  <!-- Exclamation Mark -->
+  <line x1="140" y1="56" x2="140" y2="76" stroke="currentColor" stroke-width="5" stroke-linecap="round" />
+  <circle cx="140" cy="88" r="3.5" fill="currentColor" stroke="none" />
+</svg>

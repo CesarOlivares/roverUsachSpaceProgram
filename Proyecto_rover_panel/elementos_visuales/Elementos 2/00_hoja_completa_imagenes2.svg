@@ -1,0 +1,615 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 1800" fill="currentColor">
+  <!-- Master Vector Sheet: Imagenes 2 (Curvas Bézier Matemáticas Puras) -->
+  <!-- Cometa Meteorito con Estela de Velocidad -->
+  <g id="comet_meteor_fireball" transform="translate(20, 20)">
+    <!-- Outer U-Turn Trail Envelope -->
+  <path d="M 170 18 L 48 18 C 24 18 10 32 10 55 C 10 78 24 92 48 92 L 180 92" stroke-width="2.5" />
+  <path d="M 195 24 L 56 24 C 36 24 20 36 20 55 C 20 74 36 86 56 86 L 190 86" stroke-width="1.8" />
+  <!-- Meteor Rock Head -->
+  <polygon points="34,42 56,32 78,44 82,72 58,84 36,70" fill="currentColor" fill-opacity="0.15" stroke-width="2.2" />
+  <!-- Crater Indentations inside Rock -->
+  <ellipse cx="48" cy="46" rx="4" ry="3" fill="currentColor" stroke="none" />
+  <ellipse cx="64" cy="54" rx="5" ry="4" fill="currentColor" stroke="none" />
+  <ellipse cx="46" cy="68" rx="3" ry="2.5" fill="currentColor" stroke="none" />
+  <ellipse cx="70" cy="72" rx="3.5" ry="3" fill="currentColor" stroke="none" />
+  <!-- Trailing Horizontal Speedlines -->
+  <line x1="88" y1="36" x2="220" y2="36" stroke-width="2.2" />
+  <line x1="94" y1="44" x2="250" y2="44" stroke-width="1.8" />
+  <line x1="88" y1="52" x2="270" y2="52" stroke-width="2.5" />
+  <line x1="92" y1="60" x2="235" y2="60" stroke-width="1.6" stroke-dasharray="8 6" />
+  <line x1="88" y1="68" x2="255" y2="68" stroke-width="2.2" />
+  <line x1="94" y1="76" x2="210" y2="76" stroke-width="1.8" />
+  </g>
+
+  <!-- Estallido Estelar con Orbitas Cruzadas y Brujula -->
+  <g id="atomic_stellar_starburst" transform="translate(340, 20)">
+    <!-- Core Point -->
+  <circle cx="120" cy="70" r="3" fill="currentColor" stroke="none" />
+  <!-- 4 Overlapping Elliptical Orbits (0, 45, 90, 135 deg) -->
+  <ellipse cx="120" cy="70" rx="46" ry="14" stroke-width="1.8" />
+  <ellipse cx="120" cy="70" rx="46" ry="14" stroke-width="1.8" transform="rotate(45 120 70)" />
+  <ellipse cx="120" cy="70" rx="46" ry="14" stroke-width="1.8" transform="rotate(90 120 70)" />
+  <ellipse cx="120" cy="70" rx="46" ry="14" stroke-width="1.8" transform="rotate(135 120 70)" />
+  <!-- Cardinal Spire Needles -->
+  <line x1="120" y1="8" x2="120" y2="132" stroke-width="2" stroke-linecap="round" />
+  <line x1="58" y1="70" x2="182" y2="70" stroke-width="2" stroke-linecap="round" />
+  <!-- Flanking 4-Point Diamonds -->
+  <path d="M 36 54 Q 36.96 68.72 48 70 Q 36.96 71.28 36 86 Q 35.04 71.28 24 70 Q 35.04 68.72 36 54 Z" fill="currentColor" stroke="none" />
+  <path d="M 204 54 Q 204.96 68.72 216 70 Q 204.96 71.28 204 86 Q 203.04 71.28 192 70 Q 203.04 68.72 204 54 Z" fill="currentColor" stroke="none" />
+  <path d="M 120 6 Q 120.4 13.36 125 14 Q 120.4 14.64 120 22 Q 119.6 14.64 115 14 Q 119.6 13.36 120 6 Z" fill="currentColor" stroke="none" />
+  <path d="M 120 118 Q 120.4 125.36 125 126 Q 120.4 126.64 120 134 Q 119.6 126.64 115 126 Q 119.6 125.36 120 118 Z" fill="currentColor" stroke="none" />
+  </g>
+
+  <!-- Sistema Solar Minimalista con Nodos Orbitales (No. 617) -->
+  <g id="solar_system_orbit_minimal" transform="translate(660, 20)">
+    <!-- Sun Core -->
+  <circle cx="70" cy="70" r="7" stroke-width="2.5" />
+  <!-- Orbit 1 -->
+  <circle cx="70" cy="70" r="18" stroke-width="1.5" />
+  <circle cx="70" cy="52" r="3" fill="currentColor" stroke="none" />
+  <!-- Orbit 2 -->
+  <circle cx="70" cy="70" r="32" stroke-width="1.5" />
+  <circle cx="98" cy="84" r="3.5" fill="currentColor" stroke="none" />
+  <!-- Orbit 3 -->
+  <circle cx="70" cy="70" r="48" stroke-width="1.5" />
+  <circle cx="28" cy="70" r="4" fill="currentColor" stroke="none" />
+  <circle cx="118" cy="70" r="2.5" fill="#fff" stroke="currentColor" stroke-width="1.5" />
+  </g>
+
+  <!-- Planeta Gaseoso con Olas Fluidas y Mancha de Tormenta -->
+  <g id="planet_fluid_waves" transform="translate(980, 20)">
+    <defs>
+    <clipPath id="planet-circle-clip">
+      <circle cx="70" cy="70" r="50" />
+    </clipPath>
+  </defs>
+  <!-- Planet Core with Base Fill -->
+  <circle cx="70" cy="70" r="50" fill="currentColor" />
+  <!-- Fluid Wave Bands clipped inside planet -->
+  <g clip-path="url(#planet-circle-clip)" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round">
+    <path d="M 15 50 C 40 40 60 70 90 45 C 110 30 125 55 135 50" />
+    <path d="M 15 75 C 45 65 65 95 95 70 C 115 55 130 80 135 75" />
+    <path d="M 15 98 C 45 88 65 118 95 95 C 115 80 130 102 135 98" />
+  </g>
+  <!-- Great Storm Spot -->
+  <circle cx="85" cy="94" r="5.5" fill="#fff" />
+  </g>
+
+  <!-- Planeta con Doble Anillo Orbital Cruzado y Satelites -->
+  <g id="planet_intersecting_rings" transform="translate(20, 240)">
+    <!-- Central Sphere -->
+  <circle cx="80" cy="70" r="38" />
+  <!-- Ring 1 (Tilted 30 deg) -->
+  <ellipse cx="80" cy="70" rx="58" ry="18" transform="rotate(-32 80 70)" />
+  <circle cx="128" cy="38" r="3.5" fill="currentColor" stroke="none" />
+  <!-- Ring 2 (Tilted -25 deg) -->
+  <ellipse cx="80" cy="70" rx="56" ry="16" transform="rotate(28 80 70)" />
+  <circle cx="118" cy="94" r="4.5" fill="#fff" stroke="currentColor" stroke-width="2" />
+  </g>
+
+  <!-- Planeta Atmosferico con Franjas Diagonales -->
+  <g id="planet_diagonal_bands" transform="translate(340, 240)">
+    <defs>
+    <clipPath id="banded-planet-clip">
+      <circle cx="70" cy="70" r="48" />
+    </clipPath>
+  </defs>
+  <!-- Sphere Border -->
+  <circle cx="70" cy="70" r="48" fill="none" stroke="currentColor" stroke-width="2.5" />
+  <!-- Atmospheric Diagonal Parallel Bands -->
+  <g clip-path="url(#banded-planet-clip)" fill="currentColor">
+    <polygon points="10,40 130,-80 145,-65 25,55" />
+    <polygon points="15,75 140,-50 155,-35 30,90" />
+    <polygon points="25,108 145,-12 165,8 45,128" />
+    <polygon points="50,140 160,30 175,45 65,155" />
+    <!-- Fine Secondary Stripes -->
+    <line x1="20" y1="62" x2="140" y2="-58" stroke="currentColor" stroke-width="2" />
+    <line x1="36" y1="98" x2="156" y2="-22" stroke="currentColor" stroke-width="2" />
+  </g>
+  </g>
+
+  <!-- Galaxia Espiral Cosmica con Brazos Logaritmicos -->
+  <g id="spiral_galaxy_vortex" transform="translate(660, 240)">
+    <!-- Core Singularity -->
+  <circle cx="80" cy="70" r="10" />
+  <!-- Spiral Arm 1 -->
+  <path d="M 80 60 C 95 60 106 68 110 80 C 114 96 98 112 78 114 C 52 116 30 94 32 68 C 34 38 64 22 96 24 C 122 26 142 42 144 56 C 144 60 138 60 136 56 C 132 44 116 32 94 30 C 68 28 42 42 40 68 C 38 90 56 108 78 106 C 94 104 106 90 102 78 C 98 70 90 66 80 66 Z" />
+  <!-- Spiral Arm 2 (Inverted) -->
+  <path d="M 80 80 C 65 80 54 72 50 60 C 46 44 62 28 82 26 C 108 24 130 46 128 72 C 126 102 96 118 64 116 C 38 114 18 98 16 84 C 16 80 22 80 24 84 C 28 96 44 108 66 110 C 92 112 118 98 120 72 C 122 50 104 32 82 34 C 66 36 54 50 58 62 C 62 70 70 74 80 74 Z" />
+  <!-- Satellite Cluster Star Pips -->
+  <circle cx="148" cy="72" r="3.2" />
+  <circle cx="140" cy="88" r="2.5" />
+  <circle cx="12"  cy="68" r="3" />
+  <circle cx="20"  cy="52" r="2.2" />
+  </g>
+
+  <!-- Constelacion Osa Mayor (Star Chart) -->
+  <g id="ursa_major_constellation" transform="translate(980, 240)">
+    <!-- Constellation Connecting Vectors -->
+  <polyline points="22,32 44,40 68,64 84,94 138,104 126,128 88,118 84,94" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- 7 Star Node Orbs -->
+  <circle cx="22"  cy="32"  r="5" fill="currentColor" stroke="none" />
+  <circle cx="44"  cy="40"  r="4.5" fill="currentColor" stroke="none" />
+  <circle cx="68"  cy="64"  r="4.5" fill="currentColor" stroke="none" />
+  <circle cx="84"  cy="94"  r="5.5" fill="currentColor" stroke="none" />
+  <circle cx="138" cy="104" r="5" fill="currentColor" stroke="none" />
+  <circle cx="126" cy="128" r="4.8" fill="currentColor" stroke="none" />
+  <circle cx="88"  cy="118" r="5.2" fill="currentColor" stroke="none" />
+  </g>
+
+  <!-- Sol Radiante con Corona de Llamaradas Solares -->
+  <g id="sun_radiant_corona" transform="translate(20, 460)">
+    <!-- Sun Photosphere Core Ring -->
+  <circle cx="70" cy="70" r="32" fill="none" stroke="currentColor" stroke-width="5" />
+  <circle cx="70" cy="70" r="22" fill="none" stroke="currentColor" stroke-width="2" opacity="0.6" />
+  <!-- Jagged Solar Plasma Flares (24 rays) -->
+  <line x1="106.0" y1="70.0" x2="122.0" y2="70.0" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="104.8" y1="79.3" x2="112.5" y2="81.4" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="101.2" y1="88.0" x2="115.0" y2="96.0" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="95.5" y1="95.5" x2="101.1" y2="101.1" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="88.0" y1="101.2" x2="96.0" y2="115.0" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="79.3" y1="104.8" x2="81.4" y2="112.5" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="70.0" y1="106.0" x2="70.0" y2="122.0" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="60.7" y1="104.8" x2="58.6" y2="112.5" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="52.0" y1="101.2" x2="44.0" y2="115.0" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="44.5" y1="95.5" x2="38.9" y2="101.1" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="38.8" y1="88.0" x2="25.0" y2="96.0" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="35.2" y1="79.3" x2="27.5" y2="81.4" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="34.0" y1="70.0" x2="18.0" y2="70.0" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="35.2" y1="60.7" x2="27.5" y2="58.6" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="38.8" y1="52.0" x2="25.0" y2="44.0" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="44.5" y1="44.5" x2="38.9" y2="38.9" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="52.0" y1="38.8" x2="44.0" y2="25.0" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="60.7" y1="35.2" x2="58.6" y2="27.5" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="70.0" y1="34.0" x2="70.0" y2="18.0" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="79.3" y1="35.2" x2="81.4" y2="27.5" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="88.0" y1="38.8" x2="96.0" y2="25.0" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="95.5" y1="44.5" x2="101.1" y2="38.9" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="101.2" y1="52.0" x2="115.0" y2="44.0" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="104.8" y1="60.7" x2="112.5" y2="58.6" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <!-- Telescopio Refractor Astronomico en Tripode -->
+  <g id="optical_observatory_telescope" transform="translate(340, 460)">
+    <!-- Telescope Optical Tube (Tilted 35 deg) -->
+  <g transform="rotate(-35 80 70)">
+    <!-- Main Barrel Tube -->
+    <path d="M 28 60 L 132 60 L 132 80 L 28 80 Z" fill="none" stroke="currentColor" stroke-width="3" />
+    <rect x="22" y="56" width="10" height="28" rx="2" />
+    <rect x="128" y="58" width="8" height="24" rx="2" />
+    <!-- Finder Scope on top -->
+    <rect x="52" y="44" width="46" height="8" rx="2" />
+    <line x1="60" y1="52" x2="60" y2="60" stroke="currentColor" stroke-width="2.5" />
+    <line x1="88" y1="52" x2="88" y2="60" stroke="currentColor" stroke-width="2.5" />
+    <!-- Eyepiece Diagonal -->
+    <rect x="122" y="80" width="8" height="14" rx="1" />
+    <circle cx="126" cy="98" r="4" />
+  </g>
+  <!-- Mount Pivot Hub -->
+  <circle cx="80" cy="74" r="8" fill="#070913" stroke="currentColor" stroke-width="3" />
+  <circle cx="80" cy="74" r="3" />
+  <!-- Counterweight Shaft -->
+  <line x1="80" y1="74" x2="60" y2="100" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+  <rect x="52" y="94" width="12" height="10" rx="2" />
+  <!-- Tripod Head & Legs -->
+  <polygon points="74,82 86,82 83,96 77,96" />
+  <line x1="80" y1="96" x2="80" y2="152" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="78" y1="96" x2="36" y2="152" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="82" y1="96" x2="124" y2="152" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="56" y1="126" x2="104" y2="126" stroke="currentColor" stroke-width="2" />
+  </g>
+
+  <!-- Fases Lunares Geometricas con Anillo Orbital (Serie 2) -->
+  <g id="celestial_crescent_phases_ring" transform="translate(660, 460)">
+    <!-- Minimalist DailyMinimal Style: Central Compass Line -->
+  <line x1="80" y1="10" x2="80" y2="150" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+  <!-- Primary Orbit Circle -->
+  <circle cx="80" cy="80" r="56" fill="none" stroke="currentColor" stroke-width="1.8" />
+  <!-- Secondary Inner Dashed Guide -->
+  <circle cx="80" cy="80" r="42" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.6" />
+  <!-- Central Sun / Star Point -->
+  <circle cx="80" cy="80" r="7" fill="none" stroke="currentColor" stroke-width="2.5" />
+  <circle cx="80" cy="80" r="2.5" />
+  <!-- Top Moon (Full) -->
+  <circle cx="80" cy="24" r="8" fill="#fff" stroke="currentColor" stroke-width="2" />
+  <!-- Bottom Moon (New Moon Outline) -->
+  <circle cx="80" cy="136" r="8" fill="none" stroke="currentColor" stroke-width="2" />
+  <!-- Right Moon (First Quarter / Waxing Crescent) -->
+  <g transform="translate(136, 80)">
+    <circle cx="0" cy="0" r="8" fill="none" stroke="currentColor" stroke-width="2" />
+    <path d="M 0 -8 A 8 8 0 0 1 0 8 Z" fill="currentColor" />
+  </g>
+  <!-- Left Moon (Third Quarter / Waning) -->
+  <g transform="translate(24, 80)">
+    <circle cx="0" cy="0" r="8" fill="none" stroke="currentColor" stroke-width="2" />
+    <path d="M 0 -8 A 8 8 0 0 0 0 8 Z" fill="currentColor" />
+  </g>
+  </g>
+
+  <!-- Carguero Corelliano (Millennium Cruiser) -->
+  <g id="millennium_cruiser" transform="translate(980, 460)">
+    <!-- Main Saucer Hull -->
+  <circle cx="70" cy="88" r="44" />
+  <!-- Forward Cargo Mandibles -->
+  <path d="M 44 56 L 44 18 L 58 18 L 58 48" />
+  <path d="M 96 56 L 96 18 L 82 18 L 82 48" />
+  <line x1="58" y1="36" x2="82" y2="36" stroke-dasharray="3 3" />
+  <!-- Right Offset Cockpit Tube -->
+  <path d="M 112 74 L 132 60 L 132 46 L 122 46 L 108 62" />
+  <circle cx="127" cy="53" r="3.5" fill="currentColor" stroke="none" />
+  <!-- Core Quad Laser Turret Ring -->
+  <circle cx="70" cy="88" r="14" stroke-width="2" />
+  <line x1="70" y1="74" x2="70" y2="102" />
+  <line x1="56" y1="88" x2="84" y2="88" />
+  <!-- Rear Sublight Engine Vents -->
+  <path d="M 40 124 C 50 134 90 134 100 124" stroke-width="3.5" />
+  </g>
+
+  <!-- Interceptor Espacial Tri-Ala (TIE Dagger) -->
+  <g id="tie_interceptor" transform="translate(20, 680)">
+    <!-- Central Command Pod -->
+  <circle cx="70" cy="80" r="14" fill="#070913" stroke="currentColor" stroke-width="3" />
+  <circle cx="70" cy="80" r="6" fill="currentColor" />
+  <!-- Forward Needle Prow -->
+  <polygon points="70,18 73,64 67,64" />
+  <!-- Left Dagger Wing -->
+  <polygon points="26,24 48,66 48,110 32,136 28,132 40,105 40,70" />
+  <!-- Right Dagger Wing (Mirrored) -->
+  <polygon points="114,24 92,66 92,110 108,136 112,132 100,105 100,70" />
+  <!-- Wing Pylon Struts -->
+  <line x1="48" y1="80" x2="92" y2="80" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+  </g>
+
+  <!-- Caza Delta Furtivo Vanguard -->
+  <g id="delta_dart_interceptor" transform="translate(340, 680)">
+    <!-- Needle Cockpit & Fuselage -->
+  <polygon points="70,16 75,80 70,136 65,80" />
+  <!-- Swept Delta Wings -->
+  <polygon points="70,36 124,124 108,128 70,96 32,128 16,124" />
+  <!-- Twin Stabilizer Vanes -->
+  <polygon points="86,96 102,138 94,140 82,106" />
+  <polygon points="54,96 38,138 46,140 58,106" />
+  <!-- Thruster Nozzles -->
+  <rect x="66" y="136" width="8" height="8" rx="2" />
+  </g>
+
+  <!-- Cohete Espacial en Ascenso con Fuego de Empuje -->
+  <g id="rocket_launch_solid" transform="translate(660, 680)">
+    <!-- Aerodynamic Nose Cone & Body -->
+  <path d="M 60 12 C 64 24 74 48 74 88 L 46 88 C 46 48 56 24 60 12 Z" />
+  <!-- Porthole Window -->
+  <circle cx="60" cy="52" r="7" fill="#070913" stroke="currentColor" stroke-width="2.5" />
+  <!-- Left Swept Fin -->
+  <polygon points="46,68 24,106 36,112 46,92" />
+  <!-- Right Swept Fin -->
+  <polygon points="74,68 96,106 84,112 74,92" />
+  <!-- Engine Exhaust Flames -->
+  <polygon points="52,94 60,138 68,94" />
+  <polygon points="44,94 48,124 52,94" opacity="0.7" />
+  <polygon points="68,94 72,124 76,94" opacity="0.7" />
+  </g>
+
+  <!-- Sonda Orbital con Paneles Solares Desplegados -->
+  <g id="deep_space_probe_satellite" transform="translate(980, 680)">
+    <!-- Central Core Bus -->
+  <rect x="74" y="48" width="32" height="44" rx="4" fill="currentColor" fill-opacity="0.2" />
+  <circle cx="90" cy="70" r="6" fill="currentColor" stroke="none" />
+  <!-- Top Dish / Sensor -->
+  <path d="M 78 40 C 78 30 102 30 102 40" stroke-width="3" />
+  <line x1="90" y1="40" x2="90" y2="48" stroke-width="3" />
+  <circle cx="90" cy="24" r="3" fill="currentColor" stroke="none" />
+  <line x1="90" y1="24" x2="90" y2="34" />
+  <!-- Left Solar Panel Grid Array -->
+  <g transform="translate(10, 52)">
+    <rect x="0" y="0" width="54" height="36" rx="2" stroke-width="2.5" />
+    <line x1="18" y1="0" x2="18" y2="36" />
+    <line x1="36" y1="0" x2="36" y2="36" />
+    <line x1="0" y1="18" x2="54" y2="18" />
+    <line x1="54" y1="18" x2="64" y2="18" stroke-width="3" />
+  </g>
+  <!-- Right Solar Panel Grid Array -->
+  <g transform="translate(116, 52)">
+    <rect x="0" y="0" width="54" height="36" rx="2" stroke-width="2.5" />
+    <line x1="18" y1="0" x2="18" y2="36" />
+    <line x1="36" y1="0" x2="36" y2="36" />
+    <line x1="0" y1="18" x2="54" y2="18" />
+    <line x1="-10" y1="18" x2="0" y2="18" stroke-width="3" />
+  </g>
+  </g>
+
+  <!-- Antena Parabolica de Espacio Profundo -->
+  <g id="deep_space_radar_dish" transform="translate(20, 900)">
+    <!-- Pedestal Mount -->
+  <path d="M 50 120 C 50 110 58 102 70 102 C 82 102 90 110 90 120 Z" />
+  <rect x="42" y="120" width="56" height="8" rx="2" />
+  <circle cx="70" cy="98" r="7" />
+  <!-- Parabolic Dish Angled 38 deg -->
+  <g transform="rotate(-38 70 70)">
+    <path d="M 30 70 C 30 42 70 42 70 42 C 70 42 110 42 110 70 C 95 62 75 60 70 60 C 65 60 45 62 30 70 Z" />
+    <line x1="70" y1="60" x2="70" y2="34" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+    <circle cx="70" cy="32" r="5" />
+  </g>
+  </g>
+
+  <!-- Casco de Astronauta con Visor Curvo y Antena -->
+  <g id="astronaut_helmet_visor" transform="translate(340, 900)">
+    <!-- Outer Helmet Dome -->
+  <path d="M 40 128 C 24 116 20 86 24 60 C 30 28 54 16 80 16 C 106 16 130 28 136 60 C 140 86 136 116 120 128" stroke-width="3" />
+  <!-- Helmet Collar Base Rim -->
+  <rect x="36" y="128" width="88" height="12" rx="4" fill="currentColor" fill-opacity="0.15" stroke-width="2.5" />
+  <line x1="48" y1="134" x2="112" y2="134" stroke-width="1.8" />
+  <!-- Visor Bubble Window (Smooth Curved Béziers) -->
+  <path d="M 42 66 C 42 46 58 40 80 40 C 102 40 118 46 118 66 C 118 94 104 108 80 108 C 56 108 42 94 42 66 Z" fill="currentColor" fill-opacity="0.25" stroke-width="3" />
+  <!-- Visor Reflection Flare (Crescent Glare) -->
+  <path d="M 54 54 C 64 48 80 48 94 52 C 90 56 78 56 64 62 C 58 64 54 60 54 54 Z" fill="currentColor" stroke="none" />
+  <!-- Comms Audio Antenna Earpiece (Right) -->
+  <rect x="134" y="68" width="8" height="24" rx="2" fill="currentColor" stroke="none" />
+  <line x1="138" y1="68" x2="148" y2="34" stroke-width="2.5" />
+  <circle cx="148" cy="34" r="3" fill="currentColor" stroke="none" />
+  <!-- Oxygen Vent Port Details (Left) -->
+  <circle cx="34" cy="88" r="4" fill="currentColor" stroke="none" />
+  <line x1="28" y1="88" x2="34" y2="88" stroke-width="2" />
+  </g>
+
+  <!-- Contenedor Tactico "DANGER" con Branquias de Riesgo -->
+  <g id="hud_callout_danger" transform="translate(660, 900)">
+    <!-- Main Chamfered Body -->
+  <polygon points="12,48 48,12 232,12 248,28 248,168 28,168 12,152" stroke-width="2.5" />
+  <!-- Inner Framing Inset -->
+  <polygon points="20,52 50,22 228,22 240,34 240,160 32,160 20,148" stroke-width="1" opacity="0.6" stroke-dasharray="4 2" />
+  <!-- Header Alert Badge Area -->
+  <polygon points="48,16 230,16 238,24 238,48 20,48 48,16" fill="currentColor" fill-opacity="0.15" stroke="none" />
+  <!-- Warning Triangle Symbol -->
+  <polygon points="214,24 226,44 202,44" fill="currentColor" stroke="none" />
+  <line x1="214" y1="30" x2="214" y2="38" stroke="#000" stroke-width="2" stroke-linecap="round" />
+  <circle cx="214" cy="41" r="1.2" fill="#000" stroke="none" />
+  <!-- Right Hazard Gills -->
+  <g fill="currentColor" stroke="none">
+    <polygon points="254,42 264,42 264,52 254,62" />
+    <polygon points="254,68 264,68 264,78 254,88" />
+    <polygon points="254,94 264,94 264,104 254,114" />
+    <polygon points="254,120 264,120 264,130 254,140" />
+    <polygon points="254,146 264,146 264,156 254,166" />
+  </g>
+  </g>
+
+  <!-- Callout con Puntero Radar "DATA SCAN" -->
+  <g id="hud_callout_target_scan" transform="translate(980, 900)">
+    <!-- Target Reticle (Left Anchor) -->
+  <circle cx="48" cy="120" r="16" stroke-width="2" />
+  <circle cx="48" cy="120" r="8" stroke-width="1.5" />
+  <circle cx="48" cy="120" r="3" fill="currentColor" stroke="none" />
+  <line x1="48" y1="96" x2="48" y2="102" stroke-width="2" />
+  <line x1="48" y1="138" x2="48" y2="144" stroke-width="2" />
+  <line x1="24" y1="120" x2="30" y2="120" stroke-width="2" />
+  <line x1="66" y1="120" x2="72" y2="120" stroke-width="2" />
+  <!-- Diagonal Leader Line to Container -->
+  <polyline points="64,120 102,120 134,160 134,24 308,24 308,180 134,180" stroke-width="2" stroke-linecap="round" />
+  <!-- Header Bar -->
+  <rect x="134" y="24" width="174" height="28" fill="currentColor" fill-opacity="0.15" stroke="none" />
+  <!-- Hazard Diagonal Hatch -->
+  <g stroke="currentColor" stroke-width="2">
+    <line x1="144" y1="46" x2="152" y2="30" />
+    <line x1="154" y1="46" x2="162" y2="30" />
+    <line x1="164" y1="46" x2="172" y2="30" />
+    <line x1="174" y1="46" x2="182" y2="30" />
+  </g>
+  </g>
+
+  <!-- Marco Biselado con Marcador Diamante "68%" -->
+  <g id="hud_callout_telemetry_68" transform="translate(20, 1120)">
+    <!-- Diamond Target Anchor (Left) -->
+  <polygon points="36,90 48,78 60,90 48,102" stroke-width="2" fill="currentColor" fill-opacity="0.15" />
+  <rect x="44" y="86" width="8" height="8" fill="currentColor" stroke="none" />
+  <!-- Connecting Pointer Line -->
+  <line x1="60" y1="90" x2="124" y2="90" stroke-width="2" />
+  <!-- Main Dual Chamfered Box -->
+  <polygon points="152,48 184,16 324,16 324,148 136,148 136,64" stroke-width="2.5" />
+  <polygon points="158,52 186,22 318,22 318,142 142,142 142,68" stroke-width="1" stroke-dasharray="6 3" />
+  <!-- Hazard Bar Accent -->
+  <g stroke="currentColor" stroke-width="2.5">
+    <line x1="150" y1="78" x2="160" y2="68" />
+    <line x1="160" y1="78" x2="170" y2="68" />
+    <line x1="170" y1="78" x2="180" y2="68" />
+    <line x1="180" y1="78" x2="190" y2="68" />
+    <line x1="190" y1="78" x2="200" y2="68" />
+  </g>
+  </g>
+
+  <!-- Tarjeta Holografica con Pestana Superior y Cortes 45° -->
+  <g id="hud_card_cyber_cut" transform="translate(340, 1120)">
+    <!-- Outer Cyber Border -->
+  <polygon points="20,40 100,40 110,24 240,24 250,40 340,40 340,192 316,216 44,216 20,192" stroke-width="2.5" />
+  <!-- Corner Accent Grips -->
+  <polygon points="20,40 28,40 28,68 20,76" fill="currentColor" stroke="none" />
+  <polygon points="340,40 332,40 332,68 340,76" fill="currentColor" stroke="none" />
+  <polyline points="20,172 20,192 44,216 70,216" stroke-width="4" stroke-linecap="round" />
+  <polyline points="340,172 340,192 316,216 290,216" stroke-width="4" stroke-linecap="round" />
+  <!-- Top Tab Inset -->
+  <polygon points="112,28 238,28 246,38 104,38" fill="currentColor" fill-opacity="0.2" stroke="none" />
+  </g>
+
+  <!-- Panel Tactico Octogonal Simetrico con Pestanas -->
+  <g id="hud_card_octagon_panel" transform="translate(660, 1120)">
+    <!-- Octagonal Frame (All 4 corners 45 deg) -->
+  <polygon points="56,20 264,20 300,56 300,144 264,180 56,180 20,144 20,56" stroke-width="2.5" />
+  <!-- Inner Optical Inset -->
+  <polygon points="62,28 258,28 292,62 292,138 258,172 62,172 28,138 28,62" stroke-width="1" stroke-dasharray="5 3" opacity="0.6" />
+  <!-- Top & Bottom Latch Grips -->
+  <rect x="130" y="14" width="60" height="6" fill="currentColor" stroke="none" rx="2" />
+  <rect x="130" y="180" width="60" height="6" fill="currentColor" stroke="none" rx="2" />
+  </g>
+
+  <!-- Esfera Wireframe 3D en Radar Tactico HUD -->
+  <g id="hud_radar_wireframe_globe" transform="translate(980, 1120)">
+    <!-- Outer Compass Ring -->
+  <circle cx="80" cy="80" r="70" stroke-width="2.5" />
+  <circle cx="80" cy="80" r="74" stroke-width="1" stroke-dasharray="4 4" />
+  <!-- Cardinal Caliper Ticks -->
+  <polygon points="80,4 76,14 84,14" fill="currentColor" stroke="none" />
+  <polygon points="80,156 76,146 84,146" fill="currentColor" stroke="none" />
+  <polygon points="4,80 14,76 14,84" fill="currentColor" stroke="none" />
+  <polygon points="156,80 146,76 146,84" fill="currentColor" stroke="none" />
+  <!-- Wireframe Sphere Inner Core -->
+  <circle cx="80" cy="80" r="54" stroke-width="2" />
+  <!-- Longitude Lines -->
+  <ellipse cx="80" cy="80" rx="36" ry="54" stroke-width="1.4" />
+  <ellipse cx="80" cy="80" rx="18" ry="54" stroke-width="1.4" />
+  <line x1="80" y1="26" x2="80" y2="134" stroke-width="1.4" />
+  <!-- Latitude Equator & Parallels -->
+  <ellipse cx="80" cy="80" rx="54" ry="18" stroke-width="1.6" />
+  <ellipse cx="80" cy="56" rx="48" ry="12" stroke-width="1" stroke-dasharray="3 2" />
+  <ellipse cx="80" cy="104" rx="48" ry="12" stroke-width="1" stroke-dasharray="3 2" />
+  </g>
+
+  <!-- Barra de Progreso Tactica con Dial Circular "50% LOADING" -->
+  <g id="hud_gauge_circular_loading" transform="translate(20, 1340)">
+    <!-- Circular Dial (Left) -->
+  <circle cx="60" cy="60" r="46" stroke-width="2" />
+  <circle cx="60" cy="60" r="52" stroke-width="1" stroke-dasharray="4 3" />
+  <!-- 50% Circular Progress Arc (Half circle filled) -->
+  <path d="M 60 18 A 42 42 0 0 1 60 102" stroke-width="6" stroke-linecap="round" />
+  <circle cx="60" cy="60" r="32" fill="currentColor" fill-opacity="0.1" stroke-width="1.5" />
+  <!-- Center Core Pip -->
+  <circle cx="60" cy="60" r="3" fill="currentColor" stroke="none" />
+  <!-- Horizontal Loading Container (Right) -->
+  <polygon points="106,38 316,38 330,52 330,82 316,96 106,96" stroke-width="2.5" />
+  <!-- Inner Segmented Progress Bars (50% filled) -->
+  <g fill="currentColor" stroke="none">
+    <rect x="116" y="46" width="16" height="42" rx="2" />
+    <rect x="138" y="46" width="16" height="42" rx="2" />
+    <rect x="160" y="46" width="16" height="42" rx="2" />
+    <rect x="182" y="46" width="16" height="42" rx="2" />
+    <rect x="204" y="46" width="16" height="42" rx="2" />
+    <!-- Empty remaining slots -->
+    <rect x="226" y="46" width="16" height="42" rx="2" fill-opacity="0.15" />
+    <rect x="248" y="46" width="16" height="42" rx="2" fill-opacity="0.15" />
+    <rect x="270" y="46" width="16" height="42" rx="2" fill-opacity="0.15" />
+    <rect x="292" y="46" width="16" height="42" rx="2" fill-opacity="0.15" />
+  </g>
+  </g>
+
+  <!-- Grafico de Area Curva Spline con Matriz de Puntos -->
+  <g id="hud_graph_data_spline" transform="translate(340, 1340)">
+    <!-- Container Box with Cut Corner -->
+  <polygon points="20,20 220,20 220,144 196,168 20,168" stroke-width="2.5" />
+  <!-- Dot Matrix Grid (6x7 dots) -->
+  <g fill="currentColor" stroke="none" opacity="0.3">
+    <circle cx="45" cy="40" r="1.5" /><circle cx="70" cy="40" r="1.5" /><circle cx="95" cy="40" r="1.5" /><circle cx="120" cy="40" r="1.5" /><circle cx="145" cy="40" r="1.5" /><circle cx="170" cy="40" r="1.5" /><circle cx="195" cy="40" r="1.5" /><circle cx="45" cy="60" r="1.5" /><circle cx="70" cy="60" r="1.5" /><circle cx="95" cy="60" r="1.5" /><circle cx="120" cy="60" r="1.5" /><circle cx="145" cy="60" r="1.5" /><circle cx="170" cy="60" r="1.5" /><circle cx="195" cy="60" r="1.5" /><circle cx="45" cy="80" r="1.5" /><circle cx="70" cy="80" r="1.5" /><circle cx="95" cy="80" r="1.5" /><circle cx="120" cy="80" r="1.5" /><circle cx="145" cy="80" r="1.5" /><circle cx="170" cy="80" r="1.5" /><circle cx="195" cy="80" r="1.5" /><circle cx="45" cy="100" r="1.5" /><circle cx="70" cy="100" r="1.5" /><circle cx="95" cy="100" r="1.5" /><circle cx="120" cy="100" r="1.5" /><circle cx="145" cy="100" r="1.5" /><circle cx="170" cy="100" r="1.5" /><circle cx="195" cy="100" r="1.5" /><circle cx="45" cy="120" r="1.5" /><circle cx="70" cy="120" r="1.5" /><circle cx="95" cy="120" r="1.5" /><circle cx="120" cy="120" r="1.5" /><circle cx="145" cy="120" r="1.5" /><circle cx="170" cy="120" r="1.5" /><circle cx="195" cy="120" r="1.5" /><circle cx="45" cy="140" r="1.5" /><circle cx="70" cy="140" r="1.5" /><circle cx="95" cy="140" r="1.5" /><circle cx="120" cy="140" r="1.5" /><circle cx="145" cy="140" r="1.5" /><circle cx="170" cy="140" r="1.5" /><circle cx="195" cy="140" r="1.5" />
+  </g>
+  <!-- Area Curve Spline (Filled Area) -->
+  <path d="M 28 156 L 28 130 C 44 115 54 80 72 84 C 90 88 98 126 116 112 C 136 96 142 36 166 42 C 188 48 198 120 212 128 L 212 156 Z" fill="currentColor" fill-opacity="0.18" stroke="none" />
+  <!-- Top Spline Line -->
+  <path d="M 28 130 C 44 115 54 80 72 84 C 90 88 98 126 116 112 C 136 96 142 36 166 42 C 188 48 198 120 212 128" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <!-- Insignia de Alerta con Signo de Exclamacion y Franjas 45° -->
+  <g id="hud_alert_hazard_badge" transform="translate(660, 1340)">
+    <!-- Left Hazard Wings -->
+  <g fill="currentColor" stroke="none">
+    <polygon points="14,88 32,46 44,46 26,88" />
+    <polygon points="34,88 52,46 64,46 46,88" />
+    <polygon points="54,88 72,46 84,46 66,88" />
+    <polygon points="74,88 92,46 104,46 86,88" />
+  </g>
+  <!-- Right Hazard Wings -->
+  <g fill="currentColor" stroke="none">
+    <polygon points="176,88 194,46 206,46 188,88" />
+    <polygon points="196,88 214,46 226,46 208,88" />
+    <polygon points="216,88 234,46 246,46 228,88" />
+    <polygon points="236,88 254,46 266,46 248,88" />
+  </g>
+  <!-- Central Hex Warning Base -->
+  <polygon points="112,46 168,46 182,72 168,98 112,98 98,72" fill="#070913" stroke="currentColor" stroke-width="3" />
+  <!-- Exclamation Mark -->
+  <line x1="140" y1="56" x2="140" y2="76" stroke="currentColor" stroke-width="5" stroke-linecap="round" />
+  <circle cx="140" cy="88" r="3.5" fill="currentColor" stroke="none" />
+  </g>
+
+  <!-- Malla Radar Polar con Coordenadas Circulares y Radios -->
+  <g id="hud_polar_radar_grid" transform="translate(980, 1340)">
+    <!-- Outer Box Frame -->
+  <rect x="8" y="8" width="144" height="144" stroke-width="2.5" />
+  <!-- Concentric Range Rings (from bottom-left origin) -->
+  <path d="M 8 152 A 136 136 0 0 1 144 16" stroke-width="2" />
+  <path d="M 8 152 A 100 100 0 0 1 108 52" stroke-width="1.5" />
+  <path d="M 8 152 A 64 64 0 0 1 72 88" stroke-width="1.5" />
+  <path d="M 8 152 A 28 28 0 0 1 36 124" stroke-width="1.5" />
+  <!-- Radiating Angle Rays from Corner (0, 15, 30, 45, 60, 75, 90 deg) -->
+  <line x1="8" y1="152" x2="152" y2="152" />
+  <line x1="8" y1="152" x2="144" y2="116" stroke-dasharray="3 3" />
+  <line x1="8" y1="152" x2="126" y2="82" />
+  <line x1="8" y1="152" x2="104" y2="56" />
+  <line x1="8" y1="152" x2="72" y2="28" />
+  <line x1="8" y1="152" x2="8" y2="8" />
+  <!-- Blip Targets -->
+  <circle cx="88" cy="74" r="3.5" fill="currentColor" stroke="none" />
+  <circle cx="48" cy="112" r="2.8" fill="currentColor" stroke="none" />
+  </g>
+
+  <!-- Ecualizador de Ondas de Frecuencia de Audio Táctico -->
+  <g id="hud_waveform_audio_frequency" transform="translate(20, 1560)">
+    <!-- Container Border with Slanted Corner -->
+  <polygon points="12,16 308,16 308,104 288,124 12,124" stroke-width="2.5" />
+  <line x1="12" y1="124" x2="308" y2="124" stroke-width="1.5" stroke-dasharray="4 2" />
+  <!-- Grid Ticks dB Labels -->
+  <line x1="12" y1="40" x2="20" y2="40" stroke-width="2" />
+  <line x1="12" y1="70" x2="20" y2="70" stroke-width="2" />
+  <line x1="12" y1="100" x2="20" y2="100" stroke-width="2" />
+  <!-- Frequency Equalizer Columns (15 Columns) -->
+  <g fill="currentColor" stroke="none">
+    <rect x="32" y="83" width="10" height="35" rx="1.5" />
+      <rect x="32" y="77" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="50" y="66" width="10" height="52" rx="1.5" />
+      <rect x="50" y="60" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="68" y="90" width="10" height="28" rx="1.5" />
+      <rect x="68" y="84" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="86" y="54" width="10" height="64" rx="1.5" />
+      <rect x="86" y="48" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="104" y="36" width="10" height="82" rx="1.5" />
+      <rect x="104" y="30" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="122" y="73" width="10" height="45" rx="1.5" />
+      <rect x="122" y="67" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="140" y="22" width="10" height="96" rx="1.5" />
+      <rect x="140" y="16" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="158" y="43" width="10" height="75" rx="1.5" />
+      <rect x="158" y="37" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="176" y="60" width="10" height="58" rx="1.5" />
+      <rect x="176" y="54" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="194" y="30" width="10" height="88" rx="1.5" />
+      <rect x="194" y="24" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="212" y="48" width="10" height="70" rx="1.5" />
+      <rect x="212" y="42" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="230" y="70" width="10" height="48" rx="1.5" />
+      <rect x="230" y="64" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="248" y="56" width="10" height="62" rx="1.5" />
+      <rect x="248" y="50" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="266" y="84" width="10" height="34" rx="1.5" />
+      <rect x="266" y="78" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="284" y="98" width="10" height="20" rx="1.5" />
+      <rect x="284" y="92" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+  </g>
+  </g>
+
+  <!-- Reticula de Rastreo y Bloqueo de Blanco con Calibradores -->
+  <g id="hud_crosshair_lock_reticle" transform="translate(340, 1560)">
+    <!-- Outer Caliper Corner Brackets -->
+  <path d="M 32 46 L 32 32 L 46 32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 128 46 L 128 32 L 114 32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 32 114 L 32 128 L 46 128" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 128 114 L 128 128 L 114 128" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Concentric Reticle Rings -->
+  <circle cx="80" cy="80" r="54" stroke-width="1.5" stroke-dasharray="8 6" />
+  <circle cx="80" cy="80" r="38" stroke-width="2" />
+  <circle cx="80" cy="80" r="16" stroke-width="1.8" />
+  <!-- Target Crosshair Lines with Center Gap -->
+  <line x1="80" y1="12" x2="80" y2="28" stroke-width="2.5" />
+  <line x1="80" y1="132" x2="80" y2="148" stroke-width="2.5" />
+  <line x1="12" y1="80" x2="28" y2="80" stroke-width="2.5" />
+  <line x1="132" y1="80" x2="148" y2="80" stroke-width="2.5" />
+  <!-- Inner Cross Pointer -->
+  <line x1="80" y1="72" x2="80" y2="88" stroke-width="1.5" />
+  <line x1="72" y1="80" x2="88" y2="80" stroke-width="1.5" />
+  <circle cx="80" cy="80" r="3" fill="currentColor" stroke="none" />
+  </g>
+</svg>

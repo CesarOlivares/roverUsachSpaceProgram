@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" fill="none" stroke="currentColor">
+  <!-- Target Reticle (Left Anchor) -->
+  <circle cx="48" cy="120" r="16" stroke-width="2" />
+  <circle cx="48" cy="120" r="8" stroke-width="1.5" />
+  <circle cx="48" cy="120" r="3" fill="currentColor" stroke="none" />
+  <line x1="48" y1="96" x2="48" y2="102" stroke-width="2" />
+  <line x1="48" y1="138" x2="48" y2="144" stroke-width="2" />
+  <line x1="24" y1="120" x2="30" y2="120" stroke-width="2" />
+  <line x1="66" y1="120" x2="72" y2="120" stroke-width="2" />
+  <!-- Diagonal Leader Line to Container -->
+  <polyline points="64,120 102,120 134,160 134,24 308,24 308,180 134,180" stroke-width="2" stroke-linecap="round" />
+  <!-- Header Bar -->
+  <rect x="134" y="24" width="174" height="28" fill="currentColor" fill-opacity="0.15" stroke="none" />
+  <!-- Hazard Diagonal Hatch -->
+  <g stroke="currentColor" stroke-width="2">
+    <line x1="144" y1="46" x2="152" y2="30" />
+    <line x1="154" y1="46" x2="162" y2="30" />
+    <line x1="164" y1="46" x2="172" y2="30" />
+    <line x1="174" y1="46" x2="182" y2="30" />
+  </g>
+</svg>

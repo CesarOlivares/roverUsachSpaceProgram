@@ -17,6 +17,9 @@ class OperationView extends Emitter {
         this.chipWasd = Dom.byId('hud-wasd');
         this.chipGamepad = Dom.byId('hud-gamepad');
         this.armBtn = Dom.byId('btn-arm-toggle');
+        this.armLabel = this.armBtn?.querySelector('.btn-label');
+        this.armState = Dom.byId('arm-state');
+        this.armStateText = Dom.byId('arm-state-text');
 
         this.armBtn?.addEventListener('click', () => this.emit('toggle-arm'));
         Dom.byId('btn-preflight')?.addEventListener('click', () => this.emit('preflight'));
@@ -50,9 +53,15 @@ class OperationView extends Emitter {
         const armedOrArming = m.armed || Boolean(m.armPending?.target);
 
         if (this.armBtn) {
-            this.armBtn.textContent = armedOrArming ? '🛡️ DESARMAR ROVER' : '🛡️ ARMAR ROVER';
+            Dom.setText(this.armLabel, armedOrArming ? 'DESARMAR ROVER' : 'ARMAR ROVER');
             this.armBtn.classList.toggle('armed', armedOrArming);
         }
+
+        // Indicador grande del armado: lo primero que mira el operario.
+        const state = m.armPending?.target ? 'arming' : (m.armed ? 'armed' : 'disarmed');
+        if (this.armState) this.armState.dataset.state = state;
+        Dom.setText(this.armStateText,
+                    { arming: 'ARMANDO…', armed: 'ARMADO', disarmed: 'DESARMADO' }[state]);
 
         // En observacion se bloquea todo lo que actua. La parada de emergencia
         // no: cualquiera puede detener el rover, tenga el mando o no.

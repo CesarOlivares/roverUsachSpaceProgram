@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" fill="none" stroke="currentColor">
+  <!-- Octagonal Frame (All 4 corners 45 deg) -->
+  <polygon points="56,20 264,20 300,56 300,144 264,180 56,180 20,144 20,56" stroke-width="2.5" />
+  <!-- Inner Optical Inset -->
+  <polygon points="62,28 258,28 292,62 292,138 258,172 62,172 28,138 28,62" stroke-width="1" stroke-dasharray="5 3" opacity="0.6" />
+  <!-- Top & Bottom Latch Grips -->
+  <rect x="130" y="14" width="60" height="6" fill="currentColor" stroke="none" rx="2" />
+  <rect x="130" y="180" width="60" height="6" fill="currentColor" stroke="none" rx="2" />
+</svg>

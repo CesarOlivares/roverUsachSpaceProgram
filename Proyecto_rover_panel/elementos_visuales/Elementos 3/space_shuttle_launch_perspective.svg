@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 120" fill="none" stroke="currentColor">
+  <!-- Horizontal Hypervelocity Plasma Trail Beam -->
+  <polygon points="12,78 200,68 200,74 12,84" fill="currentColor" fill-opacity="0.25" stroke="none" />
+  <line x1="12" y1="81" x2="204" y2="71" stroke-width="2.5" stroke-linecap="round" />
+  <line x1="28" y1="86" x2="180" y2="76" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.6" />
+  <!-- 3D Perspective Shuttle Profile (Flying Right) -->
+  <g transform="translate(196, 44) rotate(-5)">
+    <!-- Main Fuselage & Delta Wing -->
+    <polygon points="68,26 12,18 2,24 16,30 64,32" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" />
+    <!-- Wing Top Chine -->
+    <polygon points="24,24 4,38 12,40 32,28" fill="currentColor" stroke="currentColor" stroke-width="1.5" />
+    <!-- Vertical Tail Fin -->
+    <polygon points="14,18 2,6 8,6 20,18" fill="currentColor" stroke="currentColor" stroke-width="1.5" />
+    <!-- Cockpit Visor -->
+    <polygon points="56,24 64,26 56,27" fill="#070914" stroke="currentColor" stroke-width="1.2" />
+    <!-- Engine Thrust Flare -->
+    <polygon points="2,22 -12,23 2,26" fill="currentColor" stroke="none" />
+  </g>
+</svg>

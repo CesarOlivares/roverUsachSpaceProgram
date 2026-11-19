@@ -18,8 +18,16 @@ constexpr size_t   kMaxLineLen = 256;
 constexpr uint32_t kRoverLostMs   = 500;
 // Cada cuanto informa la base de su propio estado al panel.
 constexpr uint32_t kStatusPeriodMs = 500;
-// Ventana para la calidad del enlace: ultimos N envios.
+// Ventana para la calidad del enlace y los reintentos: ultimos N envios.
 constexpr int      kLqWindow = 20;
+
+// Con el rover perdido, cada este tiempo la base reconfigura su nRF24 (un
+// bajon de tension puede dejarlo con la configuracion de fabrica). Mismo
+// ritmo que los intentos del rover y del panel.
+constexpr uint32_t kRetryWindowMs = 1000;
+// Solo se reintenta si el panel esta mandando ordenes: sin trafico no hay
+// forma de saber si el rover contesta.
+constexpr uint32_t kPanelActiveMs = 300;
 
 }  // namespace cfg
 

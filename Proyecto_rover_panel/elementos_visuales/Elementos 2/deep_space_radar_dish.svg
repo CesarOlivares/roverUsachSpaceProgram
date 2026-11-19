@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" fill="currentColor">
+  <!-- Pedestal Mount -->
+  <path d="M 50 120 C 50 110 58 102 70 102 C 82 102 90 110 90 120 Z" />
+  <rect x="42" y="120" width="56" height="8" rx="2" />
+  <circle cx="70" cy="98" r="7" />
+  <!-- Parabolic Dish Angled 38 deg -->
+  <g transform="rotate(-38 70 70)">
+    <path d="M 30 70 C 30 42 70 42 70 42 C 70 42 110 42 110 70 C 95 62 75 60 70 60 C 65 60 45 62 30 70 Z" />
+    <line x1="70" y1="60" x2="70" y2="34" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+    <circle cx="70" cy="32" r="5" />
+  </g>
+</svg>

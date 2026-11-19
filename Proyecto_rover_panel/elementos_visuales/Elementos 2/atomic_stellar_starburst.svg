@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 140" fill="none" stroke="currentColor">
+  <!-- Core Point -->
+  <circle cx="120" cy="70" r="3" fill="currentColor" stroke="none" />
+  <!-- 4 Overlapping Elliptical Orbits (0, 45, 90, 135 deg) -->
+  <ellipse cx="120" cy="70" rx="46" ry="14" stroke-width="1.8" />
+  <ellipse cx="120" cy="70" rx="46" ry="14" stroke-width="1.8" transform="rotate(45 120 70)" />
+  <ellipse cx="120" cy="70" rx="46" ry="14" stroke-width="1.8" transform="rotate(90 120 70)" />
+  <ellipse cx="120" cy="70" rx="46" ry="14" stroke-width="1.8" transform="rotate(135 120 70)" />
+  <!-- Cardinal Spire Needles -->
+  <line x1="120" y1="8" x2="120" y2="132" stroke-width="2" stroke-linecap="round" />
+  <line x1="58" y1="70" x2="182" y2="70" stroke-width="2" stroke-linecap="round" />
+  <!-- Flanking 4-Point Diamonds -->
+  <path d="M 36 54 Q 36.96 68.72 48 70 Q 36.96 71.28 36 86 Q 35.04 71.28 24 70 Q 35.04 68.72 36 54 Z" fill="currentColor" stroke="none" />
+  <path d="M 204 54 Q 204.96 68.72 216 70 Q 204.96 71.28 204 86 Q 203.04 71.28 192 70 Q 203.04 68.72 204 54 Z" fill="currentColor" stroke="none" />
+  <path d="M 120 6 Q 120.4 13.36 125 14 Q 120.4 14.64 120 22 Q 119.6 14.64 115 14 Q 119.6 13.36 120 6 Z" fill="currentColor" stroke="none" />
+  <path d="M 120 118 Q 120.4 125.36 125 126 Q 120.4 126.64 120 134 Q 119.6 126.64 115 126 Q 119.6 125.36 120 118 Z" fill="currentColor" stroke="none" />
+</svg>

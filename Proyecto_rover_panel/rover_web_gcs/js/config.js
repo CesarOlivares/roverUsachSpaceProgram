@@ -33,6 +33,27 @@ const CONFIG = {
     STEER_CENTER: 90,           // misma geometria que el firmware (RoverConfig.h)
     STEER_THROW: 45,
     BASE_STATUS_STALE_MS: 1500, // la base informa cada 500 ms; sin noticias, no hay base
+
+    // Reconexion: los mismos tiempos que el firmware (RoverConfig.h). A los
+    // FAILSAFE_MS sin telemetria el rover ya corto la traccion; se dan
+    // RETRY_COUNT intentos de RETRY_WINDOW_MS y, si no vuelve, se desconecta.
+    FAILSAFE_MS: 400,
+    RETRY_COUNT: 3,
+    RETRY_WINDOW_MS: 1000,
+
+    // Analisis de senal: una muestra cada SAMPLE_MS, se guardan HISTORY_S segundos.
+    SAMPLE_MS: 500,
+    HISTORY_S: 120,
+
+    // Gesto de "asentir" con el servo 5 (canal 4): adelante y atras alrededor del
+    // centro. Si el servo cabecea al reves, pon AMPLITUDE en negativo.
+    NOD: {
+        CHANNEL: 4,
+        CENTER: 90,
+        AMPLITUDE: 25,          // grados a cada lado del centro
+        CYCLES: 2,              // veces que va adelante y atras
+        STEP_MS: 350,           // pausa entre posiciones: da tiempo al servo a llegar
+    },
 };
 
 /*

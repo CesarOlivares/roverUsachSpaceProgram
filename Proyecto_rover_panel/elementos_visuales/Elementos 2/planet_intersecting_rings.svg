@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 140" fill="none" stroke="currentColor" stroke-width="2.2">
+  <!-- Central Sphere -->
+  <circle cx="80" cy="70" r="38" />
+  <!-- Ring 1 (Tilted 30 deg) -->
+  <ellipse cx="80" cy="70" rx="58" ry="18" transform="rotate(-32 80 70)" />
+  <circle cx="128" cy="38" r="3.5" fill="currentColor" stroke="none" />
+  <!-- Ring 2 (Tilted -25 deg) -->
+  <ellipse cx="80" cy="70" rx="56" ry="16" transform="rotate(28 80 70)" />
+  <circle cx="118" cy="94" r="4.5" fill="#fff" stroke="currentColor" stroke-width="2" />
+</svg>

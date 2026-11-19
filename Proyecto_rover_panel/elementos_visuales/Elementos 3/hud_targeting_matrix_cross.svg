@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="currentColor">
+  <!-- Diagonal X Full-Span Crossing Vectors -->
+  <line x1="16" y1="16" x2="184" y2="184" stroke-width="1.5" />
+  <line x1="184" y1="16" x2="16" y2="184" stroke-width="1.5" />
+  <!-- Cardinal Crosshair Arms with Precision Gap -->
+  <line x1="100" y1="12" x2="100" y2="70" stroke-width="2.5" />
+  <line x1="100" y1="130" x2="100" y2="188" stroke-width="2.5" />
+  <line x1="12" y1="100" x2="70" y2="100" stroke-width="2.5" />
+  <line x1="130" y1="100" x2="188" y2="100" stroke-width="2.5" />
+  <!-- Central Target Diamond Lock Bracket -->
+  <polygon points="100,74 126,100 100,126 74,100" stroke-width="2" fill="currentColor" fill-opacity="0.15" />
+  <circle cx="100" cy="100" r="14" stroke-width="1.5" stroke-dasharray="3 3" />
+  <circle cx="100" cy="100" r="3" fill="currentColor" stroke="none" />
+  <!-- Corner Range Caliper Ticks -->
+  <polyline points="44,28 28,28 28,44" stroke-width="2" />
+  <polyline points="156,28 172,28 172,44" stroke-width="2" />
+  <polyline points="44,172 28,172 28,156" stroke-width="2" />
+  <polyline points="156,172 172,172 172,156" stroke-width="2" />
+</svg>

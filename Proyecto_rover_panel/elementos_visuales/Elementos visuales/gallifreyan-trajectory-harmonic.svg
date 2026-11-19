@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none" stroke="currentColor" stroke-width="1.2">
+  <circle cx="120" cy="120" r="106" stroke-width="2" />
+  <!-- Harmonic concentric resonance rings -->
+  <circle cx="120" cy="120" r="95" stroke-width="0.7" opacity="0.8" />
+  <circle cx="120" cy="120" r="88" stroke-width="0.7" opacity="0.8" />
+  <circle cx="120" cy="120" r="81" stroke-width="0.7" opacity="0.8" />
+  <circle cx="120" cy="120" r="74" stroke-width="0.7" opacity="0.8" />
+  <circle cx="120" cy="120" r="67" stroke-width="0.7" opacity="0.8" />
+  <circle cx="120" cy="120" r="60" stroke-width="0.7" opacity="0.8" />
+  <circle cx="120" cy="120" r="53" stroke-width="0.7" opacity="0.8" />
+  <circle cx="120" cy="120" r="46" stroke-width="0.7" opacity="0.8" />
+  <circle cx="120" cy="120" r="39" stroke-width="0.7" opacity="0.8" />
+  <circle cx="120" cy="120" r="32" stroke-width="0.7" opacity="0.8" />
+  <!-- Central core -->
+  <circle cx="120" cy="120" r="16" fill="currentColor" />
+  <circle cx="120" cy="120" r="8" fill="#fff" stroke="none" />
+  <circle cx="120" cy="120" r="4" fill="currentColor" stroke="none" />
+  <!-- Planetary nodes -->
+  <circle cx="50" cy="120" r="10" fill="currentColor" />
+  <line x1="50" y1="120" x2="120" y2="120" stroke-width="1.5" />
+  <circle cx="185" cy="120" r="14" fill="#fff" stroke="currentColor" stroke-width="2" />
+  <circle cx="110" cy="55" r="7" fill="currentColor" />
+  <circle cx="140" cy="175" r="9" fill="#fff" stroke="currentColor" stroke-width="2" />
+  <line x1="120" y1="120" x2="140" y2="175" stroke-width="1.2" />
+</svg>

@@ -38,9 +38,9 @@ const Format = {
 
     steer(angle) {
         const a = Math.round(angle);
-        if (a < 80) return `⬅️ IZQ (${a}°)`;
-        if (a > 100) return `➡️ DER (${a}°)`;
-        return `⏺️ CENTRO (${a}°)`;
+        if (a < 80) return `◀ IZQ ${a}°`;
+        if (a > 100) return `DER ${a}° ▶`;
+        return `● CENTRO ${a}°`;
     },
 
     /**
@@ -52,14 +52,21 @@ const Format = {
         const { mode, stale } = model.link;
         const radio = model.radio;
 
-        if (mode === 'none') return { text: '● DESCONECTADO', cls: 'badge-danger', state: 'off' };
+        if (mode === 'none') return { text: 'DESCONECTADO', cls: 'badge-danger', state: 'off' };
 
-        let label = mode === 'demo' ? '🧪 SIMULACION' : '🔌 CABLE DIRECTO';
+        const rc = model.reconnect;
+        if (rc) {
+            const what = rc.cause === 'usb' ? 'USB' : 'ROVER';
+            return { text: `RECONECTANDO ${what} · ${rc.attempt}/${CONFIG.RETRY_COUNT}`, cls: 'badge-warning', state: 'warn' };
+        }
+
+        let label = mode === 'demo' ? 'SIMULACIÓN' : 'CABLE DIRECTO';
         if (radio) {
-            if (!radio.rover) {
-                return { text: '📻 BASE OK · SIN SEÑAL DEL ROVER', cls: 'badge-warning', state: 'warn' };
+            // Con telemetria fresca, un "rover: false" de la base es un estado viejo.
+            if (!radio.rover && stale) {
+                return { text: 'BASE OK · SIN SEÑAL DEL ROVER', cls: 'badge-warning', state: 'warn' };
             }
-            label = `📻 RADIO nRF24 · ${radio.lq}%`;
+            label = `RADIO nRF24 · ${radio.lq}%`;
         }
 
         if (stale) return { text: `${label} · SIN DATOS`, cls: 'badge-warning', state: 'warn' };

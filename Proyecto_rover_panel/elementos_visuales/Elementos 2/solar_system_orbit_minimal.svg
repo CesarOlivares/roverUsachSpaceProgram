@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" fill="none" stroke="currentColor">
+  <!-- Sun Core -->
+  <circle cx="70" cy="70" r="7" stroke-width="2.5" />
+  <!-- Orbit 1 -->
+  <circle cx="70" cy="70" r="18" stroke-width="1.5" />
+  <circle cx="70" cy="52" r="3" fill="currentColor" stroke="none" />
+  <!-- Orbit 2 -->
+  <circle cx="70" cy="70" r="32" stroke-width="1.5" />
+  <circle cx="98" cy="84" r="3.5" fill="currentColor" stroke="none" />
+  <!-- Orbit 3 -->
+  <circle cx="70" cy="70" r="48" stroke-width="1.5" />
+  <circle cx="28" cy="70" r="4" fill="currentColor" stroke="none" />
+  <circle cx="118" cy="70" r="2.5" fill="#fff" stroke="currentColor" stroke-width="1.5" />
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" fill="none" stroke="currentColor" stroke-linejoin="round">
+  <!-- Outer Delta Perimeter -->
+  <polygon points="70,14 126,112 14,112" stroke-width="2.5" />
+  <!-- Inner Apex Converging Ridges -->
+  <line x1="70" y1="14" x2="70" y2="78" stroke-width="2.2" />
+  <line x1="14" y1="112" x2="70" y2="78" stroke-width="2.2" />
+  <line x1="126" y1="112" x2="70" y2="78" stroke-width="2.2" />
+  <!-- Facet Fill Shades -->
+  <polygon points="70,14 70,78 14,112" fill="currentColor" fill-opacity="0.25" stroke="none" />
+  <polygon points="70,78 126,112 14,112" fill="currentColor" fill-opacity="0.1" stroke="none" />
+  <circle cx="70" cy="78" r="3.5" fill="currentColor" stroke="none" />
+</svg>

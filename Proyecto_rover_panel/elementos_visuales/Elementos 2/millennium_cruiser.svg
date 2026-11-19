@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round">
+  <!-- Main Saucer Hull -->
+  <circle cx="70" cy="88" r="44" />
+  <!-- Forward Cargo Mandibles -->
+  <path d="M 44 56 L 44 18 L 58 18 L 58 48" />
+  <path d="M 96 56 L 96 18 L 82 18 L 82 48" />
+  <line x1="58" y1="36" x2="82" y2="36" stroke-dasharray="3 3" />
+  <!-- Right Offset Cockpit Tube -->
+  <path d="M 112 74 L 132 60 L 132 46 L 122 46 L 108 62" />
+  <circle cx="127" cy="53" r="3.5" fill="currentColor" stroke="none" />
+  <!-- Core Quad Laser Turret Ring -->
+  <circle cx="70" cy="88" r="14" stroke-width="2" />
+  <line x1="70" y1="74" x2="70" y2="102" />
+  <line x1="56" y1="88" x2="84" y2="88" />
+  <!-- Rear Sublight Engine Vents -->
+  <path d="M 40 124 C 50 134 90 134 100 124" stroke-width="3.5" />
+</svg>

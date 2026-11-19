@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <!-- Left Fuselage -->
+  <polygon points="46,12 46,75 32,90 22,80 34,68 34,34" />
+  <!-- Right Fuselage -->
+  <polygon points="54,12 54,75 68,90 78,80 66,68 66,34" />
+</svg>

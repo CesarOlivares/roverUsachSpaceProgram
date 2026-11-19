@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rover 6x6 · Estación de Control</title>
+    <!-- Tipografía de spaceprogram.cl: Horizon (títulos) y Now (texto), si están en
+         fonts/ o instaladas en el PC. Si no, Audiowide y Space Grotesk de Google Fonts;
+         sin Internet, la fuente del sistema. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,20 +18,21 @@
 
 <!-- ===================== PANTALLA DE CONEXIÓN ===================== -->
 <div id="login-screen">
-    <div class="login-card">
-        <div class="logo-icon">🛰️</div>
-        <h2>Rover 6×6</h2>
-        <p>Estación de control · ESP32-S3 N16R8</p>
+    <div class="login-card hud-frame">
+        <i class="icon login-logo" data-icon="sun"></i>
+        <span class="brand-kicker">USACH SPACE PROGRAM · ROBÓTICA</span>
+        <h2 class="display">ROVER 6×6</h2>
+        <p class="login-sub">Estación de control</p>
 
         <div class="conn-options">
             <button id="btn-connect-serial" class="btn btn-primary">
-                📻 Conectar estación base (USB)
+                <i class="icon" data-icon="satellite"></i><span>Conectar estación base (USB)</span>
             </button>
             <p class="hint">Elige el puerto de la ESP32 de la estación base. Para pruebas en banco
                 puedes elegir el USB del propio rover: funciona igual, sin radio.</p>
 
             <button id="btn-connect-demo" class="btn btn-ghost">
-                🧪 Simulación (sin hardware)
+                <i class="icon" data-icon="globe"></i><span>Simulación (sin hardware)</span>
             </button>
         </div>
 
@@ -36,21 +43,25 @@
 <!-- ===================== CABECERA ===================== -->
 <header class="app-header">
     <div class="header-brand">
-        <span class="brand-title">ROVER 6×6</span>
-        <span class="brand-subtitle">Estación de control</span>
+        <i class="icon brand-logo" data-icon="sun"></i>
+        <div>
+            <span class="brand-kicker">USACH SPACE PROGRAM</span>
+            <span class="brand-title display">ROVER 6×6</span>
+        </div>
     </div>
 
     <nav class="mode-tabs">
-        <button class="tab-btn active" id="tab-general">🎮 Operación</button>
-        <button class="tab-btn" id="tab-diagnostics">⚙️ Diagnóstico</button>
+        <button class="tab-btn active" id="tab-general"><i class="icon" data-icon="chevrons"></i>Operación</button>
+        <button class="tab-btn" id="tab-signal"><i class="icon" data-icon="radar"></i>Señal</button>
+        <button class="tab-btn" id="tab-diagnostics"><i class="icon" data-icon="gear"></i>Diagnóstico</button>
     </nav>
 
     <div class="header-badges">
         <span id="latency-badge" class="badge badge-gray">Latencia: --</span>
         <span id="control-badge" class="badge badge-warning" hidden>OBSERVADOR</span>
         <span id="arm-badge" class="badge badge-danger">DESARMADO</span>
-        <span id="status-badge" class="badge badge-danger">● DESCONECTADO</span>
-        <button id="btn-disconnect" class="btn-icon" title="Desconectar" hidden>⏏</button>
+        <span id="status-badge" class="badge badge-danger">DESCONECTADO</span>
+        <button id="btn-disconnect" class="btn-icon" title="Desconectar" hidden><i class="icon" data-icon="eject"></i></button>
     </div>
 </header>
 
@@ -61,19 +72,35 @@
     <!-- ===================== VISTA: OPERACIÓN ===================== -->
     <div id="view-general" class="dashboard-grid">
 
-        <!-- Columna izquierda -->
-        <div class="card">
-            <div class="header-title"><span>Estado y seguridad</span><span class="card-icon">⚡</span></div>
-            <hr class="divider">
+        <!-- Columna izquierda: seguridad -->
+        <section class="card">
+            <h3 class="card-title"><i class="icon" data-icon="target"></i>Seguridad</h3>
+
+            <div id="arm-state" class="arm-state" data-state="disarmed">
+                <i class="icon arm-state-icon" data-icon="target"></i>
+                <div>
+                    <span class="metric-label">Estado del rover</span>
+                    <strong id="arm-state-text" class="arm-state-text display">DESARMADO</strong>
+                </div>
+            </div>
+
+            <div class="action-stack">
+                <button id="btn-arm-toggle" class="btn btn-arm" data-needs-control disabled>
+                    <i class="icon" data-icon="target"></i><span class="btn-label">ARMAR ROVER</span>
+                </button>
+                <button id="btn-preflight" class="btn btn-wizard" data-needs-control disabled>
+                    <i class="icon" data-icon="rocket"></i><span>Calibración pre-vuelo</span>
+                </button>
+                <button id="btn-estop" class="btn btn-danger btn-estop">
+                    <i class="icon" data-icon="hazard"></i><span>PARADA DE EMERGENCIA</span>
+                </button>
+                <p class="hint center">Esc o barra espaciadora = parada de emergencia</p>
+            </div>
 
             <div class="sys-stats">
                 <div class="metric-box">
                     <span class="metric-label">Tiempo activo</span>
                     <strong id="uptime-val" class="metric-big">--</strong>
-                </div>
-                <div class="metric-box">
-                    <span class="metric-label">Memoria libre</span>
-                    <strong id="heap-val" class="metric-big">--</strong>
                 </div>
                 <div class="metric-box">
                     <span class="metric-label">Enlace radio</span>
@@ -82,120 +109,189 @@
             </div>
 
             <div class="input-hud-card">
-                <span class="hud-title">Entradas de conducción</span>
+                <span class="metric-label">Entradas de conducción</span>
                 <div class="hud-indicators">
                     <div id="hud-wasd" class="hud-chip">Teclado WASD</div>
                     <div id="hud-gamepad" class="hud-chip">Mando</div>
                 </div>
-                <p class="hint">Esc o barra espaciadora = parada de emergencia</p>
             </div>
+        </section>
 
-            <div class="action-stack">
-                <button id="btn-preflight" class="btn btn-wizard" data-needs-control disabled>
-                    ⚙️ Calibración pre-vuelo
-                </button>
-                <button id="btn-arm-toggle" class="btn btn-arm" data-needs-control disabled>
-                    🛡️ ARMAR ROVER
-                </button>
-                <button id="btn-estop" class="btn btn-danger">
-                    ⛔ PARADA DE EMERGENCIA
-                </button>
-            </div>
-        </div>
-
-        <!-- Columna central -->
-        <div class="card card-center">
-            <div class="header-title">
-                <span>Esquema superior 6×6</span>
+        <!-- Columna central: vehículo -->
+        <section class="card card-center">
+            <h3 class="card-title">
+                <i class="icon" data-icon="reticle"></i>Vehículo · vista superior
                 <span class="legend-text">
-                    <span class="dot dot-active"></span> Activo
-                    <span class="dot dot-idle"></span> Reposo
+                    <span class="dot dot-active"></span>Avance
+                    <span class="dot dot-reverse"></span>Retroceso
+                    <span class="dot dot-idle"></span>Reposo
                 </span>
-            </div>
+            </h3>
 
-            <div class="rover-view">
-                <div class="rover-chassis">
-                    <div class="chassis-header">FRENTE</div>
+            <div class="vehicle-layout">
+                <div class="rover-view">
+                    <div class="rover-chassis">
+                        <div class="chassis-header">FRENTE</div>
 
-                    <div class="wheel w-front-left" id="m1">
-                        <span class="wheel-label">M1</span><span class="wheel-val wheel-val-left">0%</span>
+                        <div class="wheel w-front-left" id="m1">
+                            <span class="wheel-label">M1</span><span class="wheel-val wheel-val-left">0°</span>
+                        </div>
+                        <div class="wheel w-front-right" id="m2">
+                            <span class="wheel-label">M2</span><span class="wheel-val wheel-val-right">0°</span>
+                        </div>
+                        <div class="wheel w-mid-left" id="m3">
+                            <span class="wheel-label">M3</span><span class="wheel-val wheel-val-left">FIJA</span>
+                        </div>
+                        <div class="wheel w-mid-right" id="m4">
+                            <span class="wheel-label">M4</span><span class="wheel-val wheel-val-right">FIJA</span>
+                        </div>
+                        <div class="wheel w-rear-left" id="m5">
+                            <span class="wheel-label">M5</span><span class="wheel-val wheel-val-left">0°</span>
+                        </div>
+                        <div class="wheel w-rear-right" id="m6">
+                            <span class="wheel-label">M6</span><span class="wheel-val wheel-val-right">0°</span>
+                        </div>
                     </div>
-                    <div class="wheel w-front-right" id="m2">
-                        <span class="wheel-label">M2</span><span class="wheel-val wheel-val-right">0%</span>
-                    </div>
-                    <div class="wheel w-mid-left" id="m3">
-                        <span class="wheel-label">M3</span><span class="wheel-val wheel-val-left">0%</span>
-                    </div>
-                    <div class="wheel w-mid-right" id="m4">
-                        <span class="wheel-label">M4</span><span class="wheel-val wheel-val-right">0%</span>
-                    </div>
-                    <div class="wheel w-rear-left" id="m5">
-                        <span class="wheel-label">M5</span><span class="wheel-val wheel-val-left">0%</span>
-                    </div>
-                    <div class="wheel w-rear-right" id="m6">
-                        <span class="wheel-label">M6</span><span class="wheel-val wheel-val-right">0%</span>
+
+                    <div id="motor-test-popover" class="motor-popover hidden">
+                        <div class="popover-header">
+                            <span id="popover-title">Motor</span>
+                            <button id="btn-popover-close" class="popover-close">×</button>
+                        </div>
+                        <div class="popover-buttons">
+                            <button class="btn btn-popover btn-yes" data-needs-control id="btn-popover-forward">Adelante</button>
+                            <button class="btn btn-popover btn-no" data-needs-control id="btn-popover-backward">Atrás</button>
+                        </div>
+                        <p class="hint">Mantén pulsado: se mueven las 6 ruedas</p>
                     </div>
                 </div>
 
-                <div id="motor-test-popover" class="motor-popover hidden">
-                    <div class="popover-header">
-                        <span id="popover-title">Motor</span>
-                        <button id="btn-popover-close" class="popover-close">×</button>
-                    </div>
-                    <div class="popover-buttons">
-                        <button class="btn btn-popover btn-yes" data-needs-control id="btn-popover-forward">Adelante</button>
-                        <button class="btn btn-popover btn-no" data-needs-control id="btn-popover-backward">Atrás</button>
-                    </div>
-                    <p class="hint">Mantén pulsado: se mueven las 6 ruedas</p>
+                <!-- Medidor de tracción (BTS7960) -->
+                <div id="traction-gauge" class="traction-gauge" data-dir="idle">
+                    <span class="metric-label">Tracción · BTS7960</span>
+                    <svg viewBox="0 0 220 140" class="gauge-svg" aria-hidden="true">
+                        <path d="M 28 120 A 82 82 0 0 1 192 120" class="gauge-track" />
+                        <path d="M 40 120 A 70 70 0 0 1 180 120" class="gauge-inner" />
+                        <g class="gauge-ticks">
+                            <line x1="28" y1="120" x2="14" y2="120" /><line x1="52" y1="62" x2="42.1" y2="52.1" />
+                            <line x1="110" y1="38" x2="110" y2="24" /><line x1="168" y1="62" x2="177.9" y2="52.1" />
+                            <line x1="192" y1="120" x2="206" y2="120" />
+                        </g>
+                        <path id="gauge-arc-fwd" d="M 110 38 A 82 82 0 0 1 192 120" pathLength="100"
+                              class="gauge-arc gauge-arc-fwd" stroke-dasharray="100" stroke-dashoffset="100" />
+                        <path id="gauge-arc-rev" d="M 110 38 A 82 82 0 0 0 28 120" pathLength="100"
+                              class="gauge-arc gauge-arc-rev" stroke-dasharray="100" stroke-dashoffset="100" />
+                        <polygon id="gauge-needle" points="107,120 110,50 113,120" class="gauge-needle" />
+                        <circle cx="110" cy="120" r="10" class="gauge-hub" />
+                        <circle cx="110" cy="120" r="4" class="gauge-pin" />
+                        <text x="18" y="136" class="gauge-scale">−100</text>
+                        <text x="202" y="136" class="gauge-scale" text-anchor="end">+100</text>
+                    </svg>
+                    <strong id="traction-val" class="gauge-value display">0%</strong>
+                    <span id="traction-dir" class="gauge-dir">DETENIDO</span>
                 </div>
             </div>
+        </section>
 
-            <!-- Monitor de enlace -->
-            <div class="link-monitor">
-                <div class="header-title"><span>📶 Monitor de enlace</span></div>
+        <!-- Columna derecha: servo 5 y enlace -->
+        <div class="side-stack">
+            <section class="card">
+                <h3 class="card-title"><i class="icon" data-icon="helmet"></i>Servo 5 · cabeceo</h3>
+                <div class="mast-row">
+                    <div id="mast-tilt" class="mast-tilt" aria-hidden="true">
+                        <span class="mast-arm"></span><span class="mast-pivot"></span>
+                    </div>
+                    <div>
+                        <span class="metric-label">Ángulo · canal 4</span>
+                        <strong id="mast-angle-val" class="metric-big display">90°</strong>
+                    </div>
+                </div>
+                <button class="btn btn-nod" data-nod data-needs-control disabled>
+                    <i class="icon" data-icon="helmet"></i><span class="btn-label">ASENTIR</span>
+                </button>
+                <p class="hint">Mueve el servo 5 adelante y atrás y lo deja en el centro. No hace falta armar.</p>
+            </section>
+
+            <section class="card">
+                <h3 class="card-title"><i class="icon" data-icon="radar"></i>Enlace</h3>
                 <div class="link-stats">
-                    <div><span class="metric-label">Estado</span><strong id="debug-link-status" data-state="off">Desconectado</strong></div>
+                    <div class="link-status-row">
+                        <span class="metric-label">Estado</span>
+                        <strong id="debug-link-status" data-state="off">Desconectado</strong>
+                    </div>
                     <div><span class="metric-label">Tramas OK</span><strong id="debug-rx-ok" data-state="ok">0</strong></div>
-                    <div><span class="metric-label">Tramas con error</span><strong id="debug-rx-err" data-state="ok">0</strong></div>
+                    <div><span class="metric-label">Con error</span><strong id="debug-rx-err" data-state="ok">0</strong></div>
                 </div>
-                <span class="metric-label">Último envío (TX)</span>
-                <pre id="debug-tx-data" class="wire-log wire-tx">—</pre>
-                <span class="metric-label">Última telemetría (RX)</span>
-                <pre id="debug-rx-data" class="wire-log wire-rx">—</pre>
-            </div>
+            </section>
         </div>
+    </div>
 
-        <!-- Columna derecha -->
-        <div class="card">
-            <div class="header-title"><span>📍 Mapa de pines</span><span class="card-icon">🔌</span></div>
-            <hr class="divider">
+    <!-- ===================== VISTA: SEÑAL ===================== -->
+    <div id="view-signal" class="signal-layout hidden">
 
-            <div class="gpio-table-container">
-                <table class="gpio-table">
-                    <thead>
-                        <tr><th>GPIO</th><th>Función</th><th>Estado</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><strong>5 / 4</strong></td><td>Tracción 6 ruedas · BTS7960 (RPWM / LPWM)</td><td><span id="pin-traction-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
-                        <tr><td><strong>8 / 9</strong></td><td>Bus I2C · PCA9685 (SDA / SCL)</td><td><span id="pin-i2c-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
-                        <tr><td><strong>10–14</strong></td><td>Radio nRF24L01 · SPI</td><td><span id="pin-nrf-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
-                        <tr><td colspan="3" class="table-section">Servos de dirección · PCA9685</td></tr>
-                        <tr><td><strong>Canal 0</strong></td><td>Del. izq (FL)</td><td><span id="servo-dir-0-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
-                        <tr><td><strong>Canal 1</strong></td><td>Del. der (FR)</td><td><span id="servo-dir-1-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
-                        <tr><td><strong>Canal 2</strong></td><td>Tras. izq (RL)</td><td><span id="servo-dir-2-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
-                        <tr><td><strong>Canal 3</strong></td><td>Tras. der (RR)</td><td><span id="servo-dir-3-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
-                        <tr><td><strong>Canal 4</strong></td><td>Servo 5 · en suspensión</td><td><span id="servo-dir-4-badge" class="pin-badge pin-i2c">⏺️ CENTRO (90°)</span></td></tr>
-                    </tbody>
-                </table>
+        <section class="card">
+            <h3 class="card-title"><i class="icon" data-icon="radar"></i>Estado de la antena
+                <span id="signal-demo-tools" class="signal-tools" hidden>
+                    <button class="btn btn-secondary btn-small" data-simulate="2000">Simular corte de 2 s</button>
+                    <button class="btn btn-secondary btn-small" data-simulate="5000">Simular corte de 5 s</button>
+                </span>
+            </h3>
+            <div class="kpi-grid">
+                <div class="kpi kpi-wide"><span class="metric-label">Estado del enlace</span><strong data-kpi="status">--</strong></div>
+                <div class="kpi"><span class="metric-label">Calidad (últimos 20 envíos)</span><strong data-kpi="lq">--</strong></div>
+                <div class="kpi"><span class="metric-label">Latencia ida y vuelta</span><strong data-kpi="latency">--</strong></div>
+                <div class="kpi"><span class="metric-label">Retransmisiones por paquete</span><strong data-kpi="arc">--</strong></div>
+                <div class="kpi"><span class="metric-label">Telemetría recibida</span><strong data-kpi="rate">--</strong></div>
+                <div class="kpi"><span class="metric-label">Paquetes perdidos</span><strong data-kpi="loss">--</strong></div>
+                <div class="kpi"><span class="metric-label">Cortes en la sesión</span><strong data-kpi="drops">0</strong></div>
+                <div class="kpi"><span class="metric-label">Corte más largo</span><strong data-kpi="longest">—</strong></div>
+                <div class="kpi"><span class="metric-label">Reinicios rover / base</span><strong data-kpi="resets">0 / 0</strong></div>
+                <div class="kpi"><span class="metric-label">nRF24 de la base</span><strong data-kpi="chip">--</strong></div>
+                <div class="kpi"><span class="metric-label">Reconfiguraciones de radio</span><strong data-kpi="reinit">--</strong></div>
+                <div class="kpi"><span class="metric-label">Base encendida hace</span><strong data-kpi="uptime">--</strong></div>
             </div>
+        </section>
+
+        <section class="card">
+            <h3 class="card-title"><i class="icon" data-icon="wave"></i>Últimos 2 minutos
+                <span class="legend-text"><span class="legend-lost"></span>Sin enlace <span class="legend-th"></span>Límite</span>
+            </h3>
+            <div class="chart-grid">
+                <figure class="chart"><figcaption>Calidad<span class="chart-current">--</span></figcaption>
+                    <svg id="chart-lq" viewBox="0 0 600 120" preserveAspectRatio="none"></svg></figure>
+                <figure class="chart"><figcaption>Latencia<span class="chart-current">--</span></figcaption>
+                    <svg id="chart-latency" viewBox="0 0 600 120" preserveAspectRatio="none"></svg></figure>
+                <figure class="chart"><figcaption>Retransmisiones por paquete<span class="chart-current">--</span></figcaption>
+                    <svg id="chart-arc" viewBox="0 0 600 120" preserveAspectRatio="none"></svg></figure>
+                <figure class="chart"><figcaption>Telemetría por segundo<span class="chart-current">--</span></figcaption>
+                    <svg id="chart-rate" viewBox="0 0 600 120" preserveAspectRatio="none"></svg></figure>
+            </div>
+        </section>
+
+        <div class="signal-bottom">
+            <section class="card">
+                <h3 class="card-title"><i class="icon" data-icon="target"></i>Diagnóstico</h3>
+                <ul id="signal-diagnosis" class="findings"></ul>
+                <p class="hint">Si se pierde el enlace, el rover corta la tracción a los 0,4 s pero sigue armado:
+                    se hacen 3 intentos de reconexión de 1 s y, si no vuelve, se desarma y el panel se desconecta.</p>
+            </section>
+
+            <section class="card">
+                <h3 class="card-title"><i class="icon" data-icon="chevrons"></i>Registro de eventos
+                    <button id="btn-signal-export" class="btn btn-secondary btn-small push-right">Exportar CSV</button>
+                </h3>
+                <div class="log-container">
+                    <table class="log-table"><tbody id="signal-log"></tbody></table>
+                </div>
+            </section>
         </div>
     </div>
 
     <!-- ===================== VISTA: DIAGNÓSTICO ===================== -->
     <div id="view-diagnostics" class="dashboard-grid grid-two hidden">
 
-        <div class="card">
-            <div class="header-title"><span>Tracción · BTS7960</span></div>
+        <section class="card">
+            <h3 class="card-title"><i class="icon" data-icon="chevrons"></i>Tracción · BTS7960</h3>
             <p class="section-desc">Un único puente H mueve las 6 ruedas a la vez: velocidad y sentido de toda la tracción.</p>
 
             <div class="motor-grid">
@@ -207,51 +303,83 @@
             </div>
 
             <button id="btn-stop-all-motors" class="btn btn-secondary" data-needs-control>Detener la tracción</button>
-        </div>
+        </section>
 
-        <div class="card">
-            <div class="header-title"><span>Servos de dirección</span></div>
+        <section class="card">
+            <h3 class="card-title"><i class="icon" data-icon="compass"></i>Servos · PCA9685</h3>
 
-            <div class="sub-section">
-                <h4>Servos de dirección · PCA9685</h4>
-                <div class="servo-row">
-                    <label>FL · del. izq · canal 0</label>
-                    <input type="range" min="0" max="180" value="90" data-needs-control data-servo="0">
-                    <span id="servo-0-val">⏺️ CENTRO (90°)</span>
-                </div>
-                <div class="servo-row">
-                    <label>FR · del. der · canal 1</label>
-                    <input type="range" min="0" max="180" value="90" data-needs-control data-servo="1">
-                    <span id="servo-1-val">⏺️ CENTRO (90°)</span>
-                </div>
-                <div class="servo-row">
-                    <label>RL · tras. izq · canal 2</label>
-                    <input type="range" min="0" max="180" value="90" data-needs-control data-servo="2">
-                    <span id="servo-2-val">⏺️ CENTRO (90°)</span>
-                </div>
-                <div class="servo-row">
-                    <label>RR · tras. der · canal 3</label>
-                    <input type="range" min="0" max="180" value="90" data-needs-control data-servo="3">
-                    <span id="servo-3-val">⏺️ CENTRO (90°)</span>
-                </div>
-                <div class="servo-row">
-                    <label>Servo 5 · canal 4 (en suspensión)</label>
-                    <input type="range" min="0" max="180" value="90" data-needs-control data-servo="4">
-                    <span id="servo-4-val">⏺️ CENTRO (90°)</span>
-                </div>
+            <div class="servo-row">
+                <label>FL · del. izq · canal 0</label>
+                <input type="range" min="0" max="180" value="90" data-needs-control data-servo="0">
+                <span id="servo-0-val">● CENTRO 90°</span>
             </div>
+            <div class="servo-row">
+                <label>FR · del. der · canal 1</label>
+                <input type="range" min="0" max="180" value="90" data-needs-control data-servo="1">
+                <span id="servo-1-val">● CENTRO 90°</span>
+            </div>
+            <div class="servo-row">
+                <label>RL · tras. izq · canal 2</label>
+                <input type="range" min="0" max="180" value="90" data-needs-control data-servo="2">
+                <span id="servo-2-val">● CENTRO 90°</span>
+            </div>
+            <div class="servo-row">
+                <label>RR · tras. der · canal 3</label>
+                <input type="range" min="0" max="180" value="90" data-needs-control data-servo="3">
+                <span id="servo-3-val">● CENTRO 90°</span>
+            </div>
+            <div class="servo-row">
+                <label>Servo 5 · cabeceo · canal 4</label>
+                <input type="range" min="0" max="180" value="90" data-needs-control data-servo="4">
+                <span id="servo-4-val">● CENTRO 90°</span>
+            </div>
+            <button class="btn btn-nod" data-nod data-needs-control disabled>
+                <i class="icon" data-icon="helmet"></i><span class="btn-label">ASENTIR</span>
+            </button>
+        </section>
 
-        </div>
+        <section class="card">
+            <h3 class="card-title"><i class="icon" data-icon="gear"></i>Mapa de pines</h3>
+            <div class="gpio-table-container">
+                <table class="gpio-table">
+                    <thead>
+                        <tr><th>GPIO</th><th>Función</th><th>Estado</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>5 / 4</strong></td><td>Tracción 6 ruedas · BTS7960 (RPWM / LPWM)</td><td><span id="pin-traction-badge" class="pin-badge pin-idle">INACTIVO</span></td></tr>
+                        <tr><td><strong>8 / 9</strong></td><td>Bus I2C · PCA9685 (SDA / SCL)</td><td><span id="pin-i2c-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
+                        <tr><td><strong>10–14</strong></td><td>Radio nRF24L01 · SPI</td><td><span id="pin-nrf-badge" class="pin-badge pin-idle">SIN ENLACE</span></td></tr>
+                        <tr><td colspan="3" class="table-section">Servos · PCA9685</td></tr>
+                        <tr><td><strong>Canal 0</strong></td><td>Del. izq (FL)</td><td><span id="servo-dir-0-badge" class="pin-badge pin-i2c">● CENTRO 90°</span></td></tr>
+                        <tr><td><strong>Canal 1</strong></td><td>Del. der (FR)</td><td><span id="servo-dir-1-badge" class="pin-badge pin-i2c">● CENTRO 90°</span></td></tr>
+                        <tr><td><strong>Canal 2</strong></td><td>Tras. izq (RL)</td><td><span id="servo-dir-2-badge" class="pin-badge pin-i2c">● CENTRO 90°</span></td></tr>
+                        <tr><td><strong>Canal 3</strong></td><td>Tras. der (RR)</td><td><span id="servo-dir-3-badge" class="pin-badge pin-i2c">● CENTRO 90°</span></td></tr>
+                        <tr><td><strong>Canal 4</strong></td><td>Servo 5 · cabeceo</td><td><span id="servo-dir-4-badge" class="pin-badge pin-i2c">● CENTRO 90°</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
+        <section class="card">
+            <h3 class="card-title"><i class="icon" data-icon="wave"></i>Tramas y sistema</h3>
+            <div class="metric-box inline-metric">
+                <span class="metric-label">Memoria libre del rover</span>
+                <strong id="heap-val" class="metric-big">--</strong>
+            </div>
+            <span class="metric-label">Último envío (TX)</span>
+            <pre id="debug-tx-data" class="wire-log wire-tx">—</pre>
+            <span class="metric-label">Última telemetría (RX)</span>
+            <pre id="debug-rx-data" class="wire-log wire-rx">—</pre>
+        </section>
     </div>
 </main>
 
 <!-- ===================== MODAL PRE-VUELO ===================== -->
 <div id="calibration-modal" class="modal-backdrop">
-    <div class="modal-content">
+    <div class="modal-content hud-frame">
         <div class="wizard-header">
             <span class="wizard-step-badge" id="modal-step-badge">PASO 1</span>
-            <h3 id="modal-step-title">Comprobación del enlace</h3>
+            <h3 id="modal-step-title" class="display">Comprobación del enlace</h3>
         </div>
         <div class="wizard-body">
             <p id="modal-step-desc">Verificando enlace...</p>
@@ -269,10 +397,12 @@
 <script src="js/model/protocol.js"></script>
 <script src="js/model/kinematics.js"></script>
 <script src="js/model/RoverModel.js"></script>
+<script src="js/model/LinkStats.js"></script>
 <script src="js/transport/SerialTransport.js"></script>
 <script src="js/transport/DemoTransport.js"></script>
 <script src="js/transport/Link.js"></script>
 <script src="js/view/dom.js"></script>
+<script src="js/view/icons.js"></script>
 <script src="js/view/LoginView.js"></script>
 <script src="js/view/HeaderView.js"></script>
 <script src="js/view/OperationView.js"></script>
@@ -281,11 +411,15 @@
 <script src="js/view/LinkMonitorView.js"></script>
 <script src="js/view/DiagnosticsView.js"></script>
 <script src="js/view/PreflightView.js"></script>
+<script src="js/view/MastView.js"></script>
+<script src="js/view/SignalView.js"></script>
 <script src="js/controller/DriveController.js"></script>
 <script src="js/controller/SafetyController.js"></script>
 <script src="js/controller/DiagnosticsController.js"></script>
+<script src="js/controller/MastController.js"></script>
 <script src="js/controller/PreflightController.js"></script>
 <script src="js/controller/ConnectionController.js"></script>
+<script src="js/controller/LinkWatchController.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

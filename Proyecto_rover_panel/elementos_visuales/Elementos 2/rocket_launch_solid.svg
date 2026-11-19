@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 160" fill="currentColor">
+  <!-- Aerodynamic Nose Cone & Body -->
+  <path d="M 60 12 C 64 24 74 48 74 88 L 46 88 C 46 48 56 24 60 12 Z" />
+  <!-- Porthole Window -->
+  <circle cx="60" cy="52" r="7" fill="#070913" stroke="currentColor" stroke-width="2.5" />
+  <!-- Left Swept Fin -->
+  <polygon points="46,68 24,106 36,112 46,92" />
+  <!-- Right Swept Fin -->
+  <polygon points="74,68 96,106 84,112 74,92" />
+  <!-- Engine Exhaust Flames -->
+  <polygon points="52,94 60,138 68,94" />
+  <polygon points="44,94 48,124 52,94" opacity="0.7" />
+  <polygon points="68,94 72,124 76,94" opacity="0.7" />
+</svg>

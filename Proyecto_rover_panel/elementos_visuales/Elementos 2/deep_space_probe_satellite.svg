@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 140" fill="none" stroke="currentColor" stroke-width="2">
+  <!-- Central Core Bus -->
+  <rect x="74" y="48" width="32" height="44" rx="4" fill="currentColor" fill-opacity="0.2" />
+  <circle cx="90" cy="70" r="6" fill="currentColor" stroke="none" />
+  <!-- Top Dish / Sensor -->
+  <path d="M 78 40 C 78 30 102 30 102 40" stroke-width="3" />
+  <line x1="90" y1="40" x2="90" y2="48" stroke-width="3" />
+  <circle cx="90" cy="24" r="3" fill="currentColor" stroke="none" />
+  <line x1="90" y1="24" x2="90" y2="34" />
+  <!-- Left Solar Panel Grid Array -->
+  <g transform="translate(10, 52)">
+    <rect x="0" y="0" width="54" height="36" rx="2" stroke-width="2.5" />
+    <line x1="18" y1="0" x2="18" y2="36" />
+    <line x1="36" y1="0" x2="36" y2="36" />
+    <line x1="0" y1="18" x2="54" y2="18" />
+    <line x1="54" y1="18" x2="64" y2="18" stroke-width="3" />
+  </g>
+  <!-- Right Solar Panel Grid Array -->
+  <g transform="translate(116, 52)">
+    <rect x="0" y="0" width="54" height="36" rx="2" stroke-width="2.5" />
+    <line x1="18" y1="0" x2="18" y2="36" />
+    <line x1="36" y1="0" x2="36" y2="36" />
+    <line x1="0" y1="18" x2="54" y2="18" />
+    <line x1="-10" y1="18" x2="0" y2="18" stroke-width="3" />
+  </g>
+</svg>

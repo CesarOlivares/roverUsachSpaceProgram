@@ -20,11 +20,19 @@ public:
     void        notePanelError() { pcErrors_++; }
 
     /* --- Radio --- */
-    void recordSend(bool delivered, uint32_t nowMs);
+    void recordSend(bool delivered, uint8_t retries, uint32_t nowMs);
     bool roverReachable(uint32_t nowMs) const;
     int  linkQuality() const;                 // % de envios con ACK en la ventana
+    int  avgRetriesX10() const;               // retransmisiones medias por envio x10
     uint32_t sentOk() const   { return sentOk_; }
     uint32_t sentFail() const { return sentFail_; }
+
+    /* --- Reconexion --- */
+    /** true si toca un nuevo intento: rover perdido y el panel sigue mandando. */
+    bool     reconnectDue(uint32_t nowMs) const;
+    void     noteReconnect(uint32_t nowMs) { retry_++; reinits_++; lastRetryMs_ = nowMs; }
+    uint32_t retry() const   { return retry_; }      // intento de la caida actual (0 = sano)
+    uint32_t reinits() const { return reinits_; }    // reconfiguraciones desde el arranque
 
     /** Vuelca un paquete de telemetria del rover. false si no es valido. */
     bool applyTelemetry(const uint8_t *buf, uint8_t len);
@@ -48,6 +56,12 @@ private:
     uint32_t lastAckMs_;
     bool     everAcked_;
     bool     window_[cfg::kLqWindow];
+    uint8_t  arcWindow_[cfg::kLqWindow];
     int      windowPos_;
     int      windowFill_;
+
+    uint32_t lastSendMs_;
+    uint32_t lastRetryMs_;
+    uint32_t retry_;
+    uint32_t reinits_;
 };

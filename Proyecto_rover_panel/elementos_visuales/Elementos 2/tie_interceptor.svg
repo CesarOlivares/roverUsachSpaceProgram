@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160" fill="currentColor">
+  <!-- Central Command Pod -->
+  <circle cx="70" cy="80" r="14" fill="#070913" stroke="currentColor" stroke-width="3" />
+  <circle cx="70" cy="80" r="6" fill="currentColor" />
+  <!-- Forward Needle Prow -->
+  <polygon points="70,18 73,64 67,64" />
+  <!-- Left Dagger Wing -->
+  <polygon points="26,24 48,66 48,110 32,136 28,132 40,105 40,70" />
+  <!-- Right Dagger Wing (Mirrored) -->
+  <polygon points="114,24 92,66 92,110 108,136 112,132 100,105 100,70" />
+  <!-- Wing Pylon Struts -->
+  <line x1="48" y1="80" x2="92" y2="80" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+</svg>

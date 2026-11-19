@@ -15,6 +15,12 @@ public:
     /** false si el modulo no responde por SPI. */
     bool begin();
 
+    /** Vuelve a configurar el modulo (intento de reconexion). false si no responde. */
+    bool reinit();
+
+    /** true si el modulo responde por SPI ahora mismo. */
+    bool chipConnected() { return radio_.isChipConnected(); }
+
     /**
      * Envia un paquete y espera el ACK (con reintentos por hardware).
      * @param ack    buffer de al menos 32 bytes para la telemetria de vuelta
@@ -23,6 +29,15 @@ public:
      */
     bool send(const uint8_t *buf, uint8_t len, uint8_t *ack, uint8_t &ackLen);
 
+    /**
+     * Retransmisiones que necesito el ultimo envio (0..15). Es el mejor aviso
+     * temprano de un enlace que se degrada: sube antes de que se pierdan paquetes.
+     */
+    uint8_t lastRetries() const { return lastArc_; }
+
 private:
-    RF24 radio_;
+    bool configure();
+
+    RF24    radio_;
+    uint8_t lastArc_ = 0;
 };

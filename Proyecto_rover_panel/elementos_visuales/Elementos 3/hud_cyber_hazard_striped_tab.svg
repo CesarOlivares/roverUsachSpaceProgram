@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 90" fill="none" stroke="currentColor">
+  <!-- Outer Heavy Chamfered Hull -->
+  <polygon points="12,24 24,12 256,12 268,24 268,66 256,78 24,78 12,66" stroke-width="2.5" />
+  <!-- Left Callout Box "100" -->
+  <rect x="22" y="22" width="60" height="46" rx="2" stroke-width="1.8" fill="currentColor" fill-opacity="0.1" />
+  <line x1="32" y1="36" x2="72" y2="36" stroke-width="2" />
+  <line x1="32" y1="45" x2="72" y2="45" stroke-width="1.5" stroke-dasharray="3 2" />
+  <line x1="32" y1="54" x2="72" y2="54" stroke-width="2" />
+  <!-- Center Diagonal Hazard Stripes Area -->
+  <g fill="currentColor" stroke="none">
+    <polygon points="96,66 108,24 118,24 106,66" />
+    <polygon points="116,66 128,24 138,24 126,66" />
+    <polygon points="136,66 148,24 158,24 146,66" />
+    <polygon points="156,66 168,24 178,24 166,66" />
+    <polygon points="176,66 188,24 198,24 186,66" />
+  </g>
+  <!-- Right Callout Box "000" -->
+  <rect x="206" y="22" width="52" height="46" rx="2" stroke-width="1.8" fill="currentColor" fill-opacity="0.1" />
+  <circle cx="220" cy="45" r="4.5" stroke-width="2" />
+  <circle cx="232" cy="45" r="4.5" stroke-width="2" />
+  <circle cx="244" cy="45" r="4.5" stroke-width="2" />
+</svg>

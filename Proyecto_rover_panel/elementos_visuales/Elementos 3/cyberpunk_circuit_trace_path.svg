@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none" stroke="currentColor">
+  <!-- Primary Bus Trace Line -->
+  <polyline points="16,28 88,28 124,64 186,64 212,90 212,142" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Parallel Secondary Trace -->
+  <polyline points="28,40 84,40 118,74 178,74 200,96 200,142" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.7" />
+  <!-- Trace Via Pads & Solder Terminals -->
+  <circle cx="16" cy="28" r="5" fill="currentColor" stroke="none" />
+  <circle cx="16" cy="28" r="8" stroke-width="1.5" />
+  <circle cx="28" cy="40" r="3.5" fill="currentColor" stroke="none" />
+  <!-- Junction Test Point Nodes -->
+  <rect x="120" y="60" width="8" height="8" rx="2" fill="currentColor" stroke="none" />
+  <rect x="182" y="60" width="8" height="8" rx="2" fill="currentColor" stroke="none" />
+  <!-- Terminal Chevron Cross -->
+  <circle cx="212" cy="142" r="5" fill="#070914" stroke="currentColor" stroke-width="2" />
+  <line x1="208" y1="138" x2="216" y2="146" stroke-width="2" />
+  <line x1="216" y1="138" x2="208" y2="146" stroke-width="2" />
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 110" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Outer U-Turn Trail Envelope -->
+  <path d="M 170 18 L 48 18 C 24 18 10 32 10 55 C 10 78 24 92 48 92 L 180 92" stroke-width="2.5" />
+  <path d="M 195 24 L 56 24 C 36 24 20 36 20 55 C 20 74 36 86 56 86 L 190 86" stroke-width="1.8" />
+  <!-- Meteor Rock Head -->
+  <polygon points="34,42 56,32 78,44 82,72 58,84 36,70" fill="currentColor" fill-opacity="0.15" stroke-width="2.2" />
+  <!-- Crater Indentations inside Rock -->
+  <ellipse cx="48" cy="46" rx="4" ry="3" fill="currentColor" stroke="none" />
+  <ellipse cx="64" cy="54" rx="5" ry="4" fill="currentColor" stroke="none" />
+  <ellipse cx="46" cy="68" rx="3" ry="2.5" fill="currentColor" stroke="none" />
+  <ellipse cx="70" cy="72" rx="3.5" ry="3" fill="currentColor" stroke="none" />
+  <!-- Trailing Horizontal Speedlines -->
+  <line x1="88" y1="36" x2="220" y2="36" stroke-width="2.2" />
+  <line x1="94" y1="44" x2="250" y2="44" stroke-width="1.8" />
+  <line x1="88" y1="52" x2="270" y2="52" stroke-width="2.5" />
+  <line x1="92" y1="60" x2="235" y2="60" stroke-width="1.6" stroke-dasharray="8 6" />
+  <line x1="88" y1="68" x2="255" y2="68" stroke-width="2.2" />
+  <line x1="94" y1="76" x2="210" y2="76" stroke-width="1.8" />
+</svg>

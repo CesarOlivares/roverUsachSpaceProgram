@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <!-- Blade 1 (Top) -->
+  <path d="M 50 8 L 53 40 Q 50 42 47 40 Z" />
+  <!-- Blade 2 (Bottom Right) -->
+  <path d="M 88 78 L 59 48 Q 57 51 55 49 Z" />
+  <!-- Blade 3 (Bottom Left) -->
+  <path d="M 12 78 L 41 48 Q 43 51 45 49 Z" />
+  <!-- Curved central ring sectors -->
+  <path d="M 50 36 A 14 14 0 0 1 62 43" fill="none" stroke="currentColor" stroke-width="2.5" />
+  <path d="M 60 55 A 14 14 0 0 1 40 55" fill="none" stroke="currentColor" stroke-width="2.5" />
+  <path d="M 38 43 A 14 14 0 0 1 50 36" fill="none" stroke="currentColor" stroke-width="2.5" />
+</svg>

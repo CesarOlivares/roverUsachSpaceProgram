@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" stroke="currentColor">
+  <!-- Outer Caliper Corner Brackets -->
+  <path d="M 32 46 L 32 32 L 46 32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 128 46 L 128 32 L 114 32" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 32 114 L 32 128 L 46 128" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M 128 114 L 128 128 L 114 128" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Concentric Reticle Rings -->
+  <circle cx="80" cy="80" r="54" stroke-width="1.5" stroke-dasharray="8 6" />
+  <circle cx="80" cy="80" r="38" stroke-width="2" />
+  <circle cx="80" cy="80" r="16" stroke-width="1.8" />
+  <!-- Target Crosshair Lines with Center Gap -->
+  <line x1="80" y1="12" x2="80" y2="28" stroke-width="2.5" />
+  <line x1="80" y1="132" x2="80" y2="148" stroke-width="2.5" />
+  <line x1="12" y1="80" x2="28" y2="80" stroke-width="2.5" />
+  <line x1="132" y1="80" x2="148" y2="80" stroke-width="2.5" />
+  <!-- Inner Cross Pointer -->
+  <line x1="80" y1="72" x2="80" y2="88" stroke-width="1.5" />
+  <line x1="72" y1="80" x2="88" y2="80" stroke-width="1.5" />
+  <circle cx="80" cy="80" r="3" fill="currentColor" stroke="none" />
+</svg>

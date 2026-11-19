@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" stroke="currentColor">
+  <!-- Outer Compass Ring -->
+  <circle cx="80" cy="80" r="70" stroke-width="2.5" />
+  <circle cx="80" cy="80" r="74" stroke-width="1" stroke-dasharray="4 4" />
+  <!-- Cardinal Caliper Ticks -->
+  <polygon points="80,4 76,14 84,14" fill="currentColor" stroke="none" />
+  <polygon points="80,156 76,146 84,146" fill="currentColor" stroke="none" />
+  <polygon points="4,80 14,76 14,84" fill="currentColor" stroke="none" />
+  <polygon points="156,80 146,76 146,84" fill="currentColor" stroke="none" />
+  <!-- Wireframe Sphere Inner Core -->
+  <circle cx="80" cy="80" r="54" stroke-width="2" />
+  <!-- Longitude Lines -->
+  <ellipse cx="80" cy="80" rx="36" ry="54" stroke-width="1.4" />
+  <ellipse cx="80" cy="80" rx="18" ry="54" stroke-width="1.4" />
+  <line x1="80" y1="26" x2="80" y2="134" stroke-width="1.4" />
+  <!-- Latitude Equator & Parallels -->
+  <ellipse cx="80" cy="80" rx="54" ry="18" stroke-width="1.6" />
+  <ellipse cx="80" cy="56" rx="48" ry="12" stroke-width="1" stroke-dasharray="3 2" />
+  <ellipse cx="80" cy="104" rx="48" ry="12" stroke-width="1" stroke-dasharray="3 2" />
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 180" fill="none" stroke="currentColor">
+  <!-- Diamond Target Anchor (Left) -->
+  <polygon points="36,90 48,78 60,90 48,102" stroke-width="2" fill="currentColor" fill-opacity="0.15" />
+  <rect x="44" y="86" width="8" height="8" fill="currentColor" stroke="none" />
+  <!-- Connecting Pointer Line -->
+  <line x1="60" y1="90" x2="124" y2="90" stroke-width="2" />
+  <!-- Main Dual Chamfered Box -->
+  <polygon points="152,48 184,16 324,16 324,148 136,148 136,64" stroke-width="2.5" />
+  <polygon points="158,52 186,22 318,22 318,142 142,142 142,68" stroke-width="1" stroke-dasharray="6 3" />
+  <!-- Hazard Bar Accent -->
+  <g stroke="currentColor" stroke-width="2.5">
+    <line x1="150" y1="78" x2="160" y2="68" />
+    <line x1="160" y1="78" x2="170" y2="68" />
+    <line x1="170" y1="78" x2="180" y2="68" />
+    <line x1="180" y1="78" x2="190" y2="68" />
+    <line x1="190" y1="78" x2="200" y2="68" />
+  </g>
+</svg>

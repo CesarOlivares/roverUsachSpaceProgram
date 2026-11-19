@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none" stroke="currentColor">
+  <!-- Outer Deformed Kidney/Toroidal Boundary -->
+  <path d="M 120 28 C 174 24 220 54 212 94 C 204 134 164 138 120 132 C 76 126 28 136 28 94 C 28 52 66 32 120 28 Z" stroke-width="2.5" />
+  <!-- Central Vortex Negative Hole -->
+  <ellipse cx="120" cy="80" rx="24" ry="12" stroke-width="2.2" fill="currentColor" fill-opacity="0.15" />
+  <!-- Radiating Poloidal Cross-Section Loops (8 Loops) -->
+  <ellipse cx="64" cy="80" rx="14" ry="26" stroke-width="1.2" transform="rotate(-15 64 80)" />
+  <ellipse cx="176" cy="80" rx="14" ry="26" stroke-width="1.2" transform="rotate(15 176 80)" />
+  <ellipse cx="120" cy="46" rx="26" ry="10" stroke-width="1.2" />
+  <ellipse cx="120" cy="114" rx="26" ry="10" stroke-width="1.2" />
+  <!-- Diagonal Ribs -->
+  <path d="M 52 46 C 78 58 100 70 120 80 C 140 90 162 102 188 114" stroke-width="1.2" stroke-dasharray="3 2" />
+  <path d="M 52 114 C 78 102 100 90 120 80 C 140 70 162 58 188 46" stroke-width="1.2" stroke-dasharray="3 2" />
+  <!-- Concentric Latitude Ribs -->
+  <path d="M 38 78 C 68 56 172 56 202 78" stroke-width="1.5" />
+  <path d="M 38 82 C 68 104 172 104 202 82" stroke-width="1.5" />
+</svg>

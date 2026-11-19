@@ -18,7 +18,16 @@ RadioTx::RadioTx() : radio_(radio::kSpiHz) {}
 bool RadioTx::begin()
 {
     SPI.begin(pins::kNrfSck, pins::kNrfMiso, pins::kNrfMosi, pins::kNrfCsn);
+    return configure();
+}
 
+bool RadioTx::reinit()
+{
+    return configure();
+}
+
+bool RadioTx::configure()
+{
     if (!radio_.begin(&SPI, pins::kNrfCe, pins::kNrfCsn) || !radio_.isChipConnected()) {
         return false;
     }
@@ -43,7 +52,9 @@ bool RadioTx::send(const uint8_t *buf, uint8_t len, uint8_t *ack, uint8_t &ackLe
     // write() bloquea hasta el ACK o hasta agotar los reintentos (~10 ms como
     // mucho); si falla, el propio RF24 vacia la FIFO: nada se queda pendiente
     // para salir mas tarde con una orden ya caducada.
-    if (!radio_.write(buf, len)) return false;
+    bool ok = radio_.write(buf, len);
+    lastArc_ = radio_.getARC();
+    if (!ok) return false;
 
     if (radio_.available()) {
         uint8_t n = radio_.getDynamicPayloadSize();

@@ -14,6 +14,8 @@
  *   telemetry  llego telemetria nueva
  *   wire       { dir: 'tx'|'rx', text } ultima trama en cada sentido
  *   notice     mensaje para el operador
+ *   base       llego un estado de la estacion base
+ *   reconnect  cambia el intento de reconexion ({ prev, state })
  */
 class RoverModel extends Emitter {
     constructor() {
@@ -60,6 +62,18 @@ class RoverModel extends Emitter {
         this.seq = 0;
         this.pendingPings = new Map();   // seq -> instante de envio, para medir el RTT real
         this.lastRxAt = 0;
+
+        // Reconexion en curso: { attempt: 1..RETRY_COUNT, cause: 'radio'|'usb', since } o null.
+        this.reconnect = null;
+    }
+
+    /** Estado de la reconexion; null cuando el enlace esta sano. */
+    setReconnect(state) {
+        const prev = this.reconnect;
+        if (prev === state || (prev && state && prev.attempt === state.attempt && prev.cause === state.cause)) return;
+        this.reconnect = state;
+        this.emit('reconnect', { prev, state });
+        this.emit('link');
     }
 
     /* --- Consultas --- */
@@ -74,6 +88,7 @@ class RoverModel extends Emitter {
     beginSession(mode) {
         this.link = { mode, stale: true, latency: null };
         this.radio = null;
+        this.reconnect = null;
         this.armed = false;
         this.armPending = null;
         this.manual = null;
@@ -86,10 +101,13 @@ class RoverModel extends Emitter {
     endSession() {
         this.link = { mode: 'none', stale: true, latency: null };
         this.radio = null;
+        this.reconnect = null;
         this.armed = false;
         this.armPending = null;
         this.manual = null;
         this.pendingPings.clear();
+        // La ultima telemetria ya no describe nada: que no quede una rueda "girando".
+        this.telemetry.motors = new Array(CONFIG.MOTOR_COUNT).fill(0);
         this.emit('link');
         this.emit('arm');
         this.emit('manual');
@@ -159,7 +177,8 @@ class RoverModel extends Emitter {
     /** Estado periodico de la estacion base. */
     applyBaseStatus(s, now) {
         const prev = this.radio;
-        this.radio = { rover: s.rover, lq: s.lq, at: now };
+        this.radio = { ...s, at: now };
+        this.emit('base');
         if (!prev || prev.rover !== s.rover || prev.lq !== s.lq) this.emit('link');
         if (prev && prev.rover && !s.rover) {
             this.emit('notice', 'La estación base perdió la señal del rover.');

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 160" fill="none" stroke="currentColor">
+  <!-- Base Chamfered Framing Tray -->
+  <polygon points="12,142 64,24 248,24 196,142" stroke-width="1" stroke-dasharray="4 3" opacity="0.4" />
+  <!-- Longitudinal Spline Ridges (Front to Back) -->
+  <path d="M 16 138 C 50 134 90 100 130 114 C 170 128 200 92 234 104" stroke-width="2.5" stroke-linecap="round" />
+  <path d="M 28 116 C 60 112 100 82 138 94 C 176 106 206 72 238 84" stroke-width="2" stroke-linecap="round" />
+  <path d="M 40 94 C 70 90 110 64 146 74 C 182 84 212 52 242 64" stroke-width="1.6" stroke-linecap="round" />
+  <path d="M 52 72 C 80 68 120 46 154 54 C 188 62 218 34 246 44" stroke-width="1.3" stroke-linecap="round" />
+  <path d="M 64 50 C 90 46 130 28 162 34 C 194 40 224 18 250 26" stroke-width="1" stroke-linecap="round" opacity="0.6" />
+  <!-- Transverse Cross-Mesh Grid Lines Connecting Peaks -->
+  <line x1="20" y1="134" x2="68" y2="38" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.6" />
+  <line x1="48" y1="134" x2="92" y2="38" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.6" />
+  <line x1="76" y1="134" x2="116" y2="38" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.6" />
+  <line x1="104" y1="134" x2="140" y2="38" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.6" />
+  <line x1="132" y1="134" x2="164" y2="38" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.6" />
+  <line x1="160" y1="134" x2="188" y2="38" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.6" />
+  <line x1="188" y1="134" x2="212" y2="38" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.6" />
+  <line x1="216" y1="134" x2="236" y2="38" stroke-width="1.2" stroke-dasharray="2 3" opacity="0.6" />
+  <!-- Highlight Peak Node Markers -->
+  <circle cx="130" cy="114" r="3" fill="currentColor" stroke="none" />
+  <circle cx="138" cy="94" r="3" fill="currentColor" stroke="none" />
+  <circle cx="200" cy="92" r="3" fill="currentColor" stroke="none" />
+</svg>

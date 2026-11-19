@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 220" fill="none" stroke="currentColor">
+  <!-- Outer Cyber Border -->
+  <polygon points="20,40 100,40 110,24 240,24 250,40 340,40 340,192 316,216 44,216 20,192" stroke-width="2.5" />
+  <!-- Corner Accent Grips -->
+  <polygon points="20,40 28,40 28,68 20,76" fill="currentColor" stroke="none" />
+  <polygon points="340,40 332,40 332,68 340,76" fill="currentColor" stroke="none" />
+  <polyline points="20,172 20,192 44,216 70,216" stroke-width="4" stroke-linecap="round" />
+  <polyline points="340,172 340,192 316,216 290,216" stroke-width="4" stroke-linecap="round" />
+  <!-- Top Tab Inset -->
+  <polygon points="112,28 238,28 246,38 104,38" fill="currentColor" fill-opacity="0.2" stroke="none" />
+</svg>

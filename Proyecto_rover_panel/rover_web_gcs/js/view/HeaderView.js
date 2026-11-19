@@ -19,6 +19,7 @@ class HeaderView extends Emitter {
 
         this.tabs = {
             general: { tab: Dom.byId('tab-general'), view: Dom.byId('view-general') },
+            signal: { tab: Dom.byId('tab-signal'), view: Dom.byId('view-signal') },
             diagnostics: { tab: Dom.byId('tab-diagnostics'), view: Dom.byId('view-diagnostics') },
         };
         for (const [mode, { tab }] of Object.entries(this.tabs)) {
@@ -72,7 +73,7 @@ class HeaderView extends Emitter {
 
         if (this.control) {
             this.control.hidden = m.hasControl();
-            this.control.textContent = '👀 OBSERVADOR';
+            this.control.textContent = 'OBSERVADOR';
             this.control.className = 'badge badge-warning';
         }
     }

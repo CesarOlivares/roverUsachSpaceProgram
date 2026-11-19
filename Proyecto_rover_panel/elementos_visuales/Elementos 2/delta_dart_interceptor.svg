@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160" fill="currentColor">
+  <!-- Needle Cockpit & Fuselage -->
+  <polygon points="70,16 75,80 70,136 65,80" />
+  <!-- Swept Delta Wings -->
+  <polygon points="70,36 124,124 108,128 70,96 32,128 16,124" />
+  <!-- Twin Stabilizer Vanes -->
+  <polygon points="86,96 102,138 94,140 82,106" />
+  <polygon points="54,96 38,138 46,140 58,106" />
+  <!-- Thruster Nozzles -->
+  <rect x="66" y="136" width="8" height="8" rx="2" />
+</svg>

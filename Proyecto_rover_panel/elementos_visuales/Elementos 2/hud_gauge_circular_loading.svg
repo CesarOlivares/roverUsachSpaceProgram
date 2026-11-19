@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 120" fill="none" stroke="currentColor">
+  <!-- Circular Dial (Left) -->
+  <circle cx="60" cy="60" r="46" stroke-width="2" />
+  <circle cx="60" cy="60" r="52" stroke-width="1" stroke-dasharray="4 3" />
+  <!-- 50% Circular Progress Arc (Half circle filled) -->
+  <path d="M 60 18 A 42 42 0 0 1 60 102" stroke-width="6" stroke-linecap="round" />
+  <circle cx="60" cy="60" r="32" fill="currentColor" fill-opacity="0.1" stroke-width="1.5" />
+  <!-- Center Core Pip -->
+  <circle cx="60" cy="60" r="3" fill="currentColor" stroke="none" />
+  <!-- Horizontal Loading Container (Right) -->
+  <polygon points="106,38 316,38 330,52 330,82 316,96 106,96" stroke-width="2.5" />
+  <!-- Inner Segmented Progress Bars (50% filled) -->
+  <g fill="currentColor" stroke="none">
+    <rect x="116" y="46" width="16" height="42" rx="2" />
+    <rect x="138" y="46" width="16" height="42" rx="2" />
+    <rect x="160" y="46" width="16" height="42" rx="2" />
+    <rect x="182" y="46" width="16" height="42" rx="2" />
+    <rect x="204" y="46" width="16" height="42" rx="2" />
+    <!-- Empty remaining slots -->
+    <rect x="226" y="46" width="16" height="42" rx="2" fill-opacity="0.15" />
+    <rect x="248" y="46" width="16" height="42" rx="2" fill-opacity="0.15" />
+    <rect x="270" y="46" width="16" height="42" rx="2" fill-opacity="0.15" />
+    <rect x="292" y="46" width="16" height="42" rx="2" fill-opacity="0.15" />
+  </g>
+</svg>

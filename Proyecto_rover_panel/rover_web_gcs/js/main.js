@@ -2,7 +2,10 @@
 
 /* Cableado: crea el modelo, las vistas y los controladores y une intenciones con acciones. */
 document.addEventListener('DOMContentLoaded', () => {
+    Icons.mount();
+
     const model = new RoverModel();
+    const stats = new LinkStats(model);
     const link = new Link();
 
     // Vistas
@@ -12,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const schematic = new SchematicView(model);
     const diagView = new DiagnosticsView(model);
     const preflightView = new PreflightView();
+    const mastView = new MastView(model);
+    const signalView = new SignalView(model, stats);
     new PinTableView(model);
     new LinkMonitorView(model);
 
@@ -19,17 +24,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const drive = new DriveController(model, link);
     const safety = new SafetyController(model, link);
     const diagnostics = new DiagnosticsController(model, link, drive);
+    const mast = new MastController(model, diagnostics);
     const preflight = new PreflightController(model, link, preflightView, drive, diagnostics, safety);
     const connection = new ConnectionController(model, link, login, { drive, preflight, safety });
+    const linkWatch = new LinkWatchController(model, link, connection);
 
     drive.bindInputs();
     safety.bindInputs();
+    linkWatch.start();
 
     // Intenciones -> controladores
     login.on('serial', () => connection.connectSerial());
     login.on('demo', () => connection.connectDemo());
 
-    header.on('disconnect', () => connection.disconnect());
+    header.on('disconnect', () => connection.disconnect('Panel desconectado.'));
 
     operation.on('toggle-arm', () => drive.toggleArm());
     operation.on('preflight', () => preflight.start());
@@ -45,4 +53,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     diagView.on('servo', ({ channel, angle }) => diagnostics.setServo(channel, angle));
     diagView.on('jog', ({ steps }) => diagnostics.jogStepper(steps));
+
+    mastView.on('nod', () => mast.nod());
+
+    // Señal: exportar el registro y, en simulacion, provocar cortes de prueba.
+    signalView.on('export', () => {
+        const blob = new Blob([stats.toCsv()], { type: 'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `enlace_rover_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    });
+    signalView.on('simulate', ({ ms }) => {
+        if (link.transport instanceof DemoTransport) link.transport.simulateDrop(ms);
+    });
 });

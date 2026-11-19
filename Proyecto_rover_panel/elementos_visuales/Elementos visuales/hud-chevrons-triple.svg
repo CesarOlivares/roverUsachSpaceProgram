@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 80" fill="currentColor">
+  <!-- Chevron 1 -->
+  <polygon points="12,10 32,40 12,70 24,70 44,40 24,10" />
+  <!-- Chevron 2 -->
+  <polygon points="36,10 56,40 36,70 48,70 68,40 48,10" />
+  <!-- Chevron 3 -->
+  <polygon points="60,10 80,40 60,70 72,70 92,40 72,10" />
+</svg>

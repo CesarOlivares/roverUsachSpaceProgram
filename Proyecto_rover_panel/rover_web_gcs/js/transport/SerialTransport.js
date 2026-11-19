@@ -17,9 +17,31 @@ class SerialTransport {
         if (!SerialTransport.available) {
             throw new Error('Este navegador no soporta Web Serial. Usa Chrome o Edge.');
         }
-        this.port = await navigator.serial.requestPort();
-        await this.port.open({ baudRate: CONFIG.BAUD_RATE });
-        this.writer = this.port.writable.getWriter();
+        await this._start(await navigator.serial.requestPort());
+    }
+
+    /**
+     * Reabre el mismo dispositivo sin pedir permiso otra vez: tras desenchufar
+     * y volver a enchufar, el navegador lo devuelve en getPorts() (con otro
+     * objeto) y se reconoce por su fabricante y producto USB.
+     */
+    static async reopen(info, onLine, onClose) {
+        const ports = await navigator.serial.getPorts();
+        const port = ports.find((p) => {
+            const i = p.getInfo();
+            return i.usbVendorId === info.usbVendorId && i.usbProductId === info.usbProductId;
+        });
+        if (!port) throw new Error('La estación base no está enchufada.');
+        const t = new SerialTransport(onLine, onClose);
+        await t._start(port);
+        return t;
+    }
+
+    async _start(port) {
+        this.port = port;
+        this.info = port.getInfo();
+        await port.open({ baudRate: CONFIG.BAUD_RATE });
+        this.writer = port.writable.getWriter();
         this._readLoop();
     }
 

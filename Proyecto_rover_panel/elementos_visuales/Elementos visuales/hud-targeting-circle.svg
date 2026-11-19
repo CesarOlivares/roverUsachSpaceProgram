@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.2">
+  <!-- Segment 1: Top -->
+  <path d="M 32 20 A 36 36 0 0 1 68 20" />
+  <!-- Segment 2: Right -->
+  <path d="M 80 32 A 36 36 0 0 1 80 68" />
+  <!-- Segment 3: Bottom -->
+  <path d="M 68 80 A 36 36 0 0 1 32 80" />
+  <!-- Segment 4: Left -->
+  <path d="M 20 68 A 36 36 0 0 1 20 32" />
+  <!-- Outer Caliper Spikes -->
+  <line x1="50" y1="6" x2="50" y2="16" stroke-width="2.5" />
+  <line x1="50" y1="84" x2="50" y2="94" stroke-width="2.5" />
+  <line x1="6" y1="50" x2="16" y2="50" stroke-width="2.5" />
+  <line x1="84" y1="50" x2="94" y2="50" stroke-width="2.5" />
+  <!-- Center Target Core -->
+  <circle cx="50" cy="50" r="6" stroke-width="2" />
+  <circle cx="50" cy="50" r="2" fill="currentColor" stroke="none" />
+</svg>

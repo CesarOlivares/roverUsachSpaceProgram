@@ -200,6 +200,14 @@ bool CommandController::controlLinkLost(int64_t timeoutUs)
     return guarded && model_.controlSilenceUs(esp_timer_get_time()) > timeoutUs;
 }
 
+void CommandController::linkLostHold()
+{
+    Lock lock(mtx_);
+    traction_.stopNow();
+    model_.setTraction(0.0f);
+    stepper_.stop();
+}
+
 void CommandController::failsafeStop()
 {
     Lock lock(mtx_);

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 140" fill="none" stroke="currentColor">
+  <!-- Container Border with Slanted Corner -->
+  <polygon points="12,16 308,16 308,104 288,124 12,124" stroke-width="2.5" />
+  <line x1="12" y1="124" x2="308" y2="124" stroke-width="1.5" stroke-dasharray="4 2" />
+  <!-- Grid Ticks dB Labels -->
+  <line x1="12" y1="40" x2="20" y2="40" stroke-width="2" />
+  <line x1="12" y1="70" x2="20" y2="70" stroke-width="2" />
+  <line x1="12" y1="100" x2="20" y2="100" stroke-width="2" />
+  <!-- Frequency Equalizer Columns (15 Columns) -->
+  <g fill="currentColor" stroke="none">
+    <rect x="32" y="83" width="10" height="35" rx="1.5" />
+      <rect x="32" y="77" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="50" y="66" width="10" height="52" rx="1.5" />
+      <rect x="50" y="60" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="68" y="90" width="10" height="28" rx="1.5" />
+      <rect x="68" y="84" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="86" y="54" width="10" height="64" rx="1.5" />
+      <rect x="86" y="48" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="104" y="36" width="10" height="82" rx="1.5" />
+      <rect x="104" y="30" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="122" y="73" width="10" height="45" rx="1.5" />
+      <rect x="122" y="67" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="140" y="22" width="10" height="96" rx="1.5" />
+      <rect x="140" y="16" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="158" y="43" width="10" height="75" rx="1.5" />
+      <rect x="158" y="37" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="176" y="60" width="10" height="58" rx="1.5" />
+      <rect x="176" y="54" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="194" y="30" width="10" height="88" rx="1.5" />
+      <rect x="194" y="24" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="212" y="48" width="10" height="70" rx="1.5" />
+      <rect x="212" y="42" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="230" y="70" width="10" height="48" rx="1.5" />
+      <rect x="230" y="64" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="248" y="56" width="10" height="62" rx="1.5" />
+      <rect x="248" y="50" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="266" y="84" width="10" height="34" rx="1.5" />
+      <rect x="266" y="78" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+    <rect x="284" y="98" width="10" height="20" rx="1.5" />
+      <rect x="284" y="92" width="10" height="2.5" rx="1" fill-opacity="0.8" />
+  </g>
+</svg>

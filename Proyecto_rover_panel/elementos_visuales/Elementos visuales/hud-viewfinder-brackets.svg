@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+  <!-- Top Left -->
+  <polyline points="10,32 10,10 32,10" />
+  <!-- Top Right -->
+  <polyline points="88,10 110,10 110,32" />
+  <!-- Bottom Left -->
+  <polyline points="10,88 10,110 32,110" />
+  <!-- Bottom Right -->
+  <polyline points="88,110 110,110 110,88" />
+  <!-- Center Aiming pip -->
+  <circle cx="60" cy="60" r="3" fill="currentColor" stroke="none" />
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140">
+  <defs>
+    <clipPath id="delta-hatch-clip">
+      <polygon points="70,22 120,108 20,108" />
+    </clipPath>
+  </defs>
+  <!-- Outer Triangle Frame -->
+  <polygon points="70,14 128,114 12,114" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" />
+  <!-- 45-degree Dense Hatching clipped inside -->
+  <g clip-path="url(#delta-hatch-clip)" stroke="currentColor" stroke-width="2.5">
+    <line x1="-20" y1="130" x2="60" y2="10" />
+    <line x1="-10" y1="130" x2="70" y2="10" />
+    <line x1="0" y1="130" x2="80" y2="10" />
+    <line x1="10" y1="130" x2="90" y2="10" />
+    <line x1="20" y1="130" x2="100" y2="10" />
+    <line x1="30" y1="130" x2="110" y2="10" />
+    <line x1="40" y1="130" x2="120" y2="10" />
+    <line x1="50" y1="130" x2="130" y2="10" />
+    <line x1="60" y1="130" x2="140" y2="10" />
+    <line x1="70" y1="130" x2="150" y2="10" />
+    <line x1="80" y1="130" x2="160" y2="10" />
+    <line x1="90" y1="130" x2="170" y2="10" />
+    <line x1="100" y1="130" x2="180" y2="10" />
+    <line x1="110" y1="130" x2="190" y2="10" />
+    <line x1="120" y1="130" x2="200" y2="10" />
+    <line x1="130" y1="130" x2="210" y2="10" />
+    <line x1="140" y1="130" x2="220" y2="10" />
+    <line x1="150" y1="130" x2="230" y2="10" />
+  </g>
+</svg>

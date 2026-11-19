@@ -72,7 +72,9 @@ void setup()
         Log::warn("ROVER", "La radio no arranco. El enlace por cable sigue operativo.");
     }
 
-    // Un unico failsafe para todos los enlaces.
+    // Un unico failsafe para todos los enlaces. Cada intento de reconexion
+    // reconfigura el nRF24 (si la radio no arranco, no hay nada que reiniciar).
+    if (cfg::kLinkRadio) safety.setReconnectHook([] { radioLink.requestReinit(); });
     if (!safety.begin()) haltOnError("el failsafe");
 
     Log::info("ROVER", "Subsistemas en linea.");

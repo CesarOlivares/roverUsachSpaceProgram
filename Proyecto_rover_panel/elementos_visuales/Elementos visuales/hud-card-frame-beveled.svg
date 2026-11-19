@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" fill="none" stroke="currentColor">
+  <!-- Outer beveled border -->
+  <polygon points="24,10 376,10 390,24 390,216 376,230 24,230 10,216 10,24" stroke-width="2" />
+  <!-- Corner Tech Accent Brackets -->
+  <polyline points="10,40 10,24 24,10 40,10" stroke-width="3.5" />
+  <polyline points="360,10 376,10 390,24 390,40" stroke-width="3.5" />
+  <polyline points="390,200 390,216 376,230 360,230" stroke-width="3.5" />
+  <polyline points="40,230 24,230 10,216 10,200" stroke-width="3.5" />
+  <!-- Top tech notch -->
+  <polygon points="160,10 170,18 230,18 240,10" fill="currentColor" opacity="0.4" />
+  <!-- Side data grip notches -->
+  <line x1="394" y1="100" x2="394" y2="140" stroke-width="3" stroke-linecap="round" />
+  <line x1="6" y1="100" x2="6" y2="140" stroke-width="3" stroke-linecap="round" />
+  <!-- Subtly shaded header bar inside -->
+  <polygon points="24,18 376,18 382,24 382,42 18,42 18,24" fill="currentColor" fill-opacity="0.08" stroke="none" />
+</svg>

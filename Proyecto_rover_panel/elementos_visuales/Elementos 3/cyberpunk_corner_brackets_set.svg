@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" stroke="currentColor">
+  <!-- Top-Left Bracket -->
+  <path d="M 18 42 L 18 18 L 42 18" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="26" cy="26" r="2" fill="currentColor" stroke="none" />
+  <!-- Top-Right Bracket -->
+  <path d="M 118 18 L 142 18 L 142 42" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="134" cy="26" r="2" fill="currentColor" stroke="none" />
+  <!-- Bottom-Left Bracket -->
+  <path d="M 18 118 L 18 142 L 42 142" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="26" cy="134" r="2" fill="currentColor" stroke="none" />
+  <!-- Bottom-Right Bracket -->
+  <path d="M 142 118 L 142 142 L 118 142" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="134" cy="134" r="2" fill="currentColor" stroke="none" />
+  <!-- Center Precision Crosshairs -->
+  <line x1="80" y1="62" x2="80" y2="72" stroke-width="2" />
+  <line x1="80" y1="88" x2="80" y2="98" stroke-width="2" />
+  <line x1="62" y1="80" x2="72" y2="80" stroke-width="2" />
+  <line x1="88" y1="80" x2="98" y2="80" stroke-width="2" />
+  <circle cx="80" cy="80" r="3" fill="currentColor" stroke="none" />
+</svg>

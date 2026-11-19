@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none" stroke="currentColor">
+  <!-- 7 Horizontal Resonance Rings Behind/Around Planet -->
+  <g stroke-linecap="round">
+    <ellipse cx="120" cy="80" rx="104" ry="34" stroke-width="2" />
+    <ellipse cx="120" cy="80" rx="94" ry="30" stroke-width="1.2" stroke-dasharray="4 3" />
+    <ellipse cx="120" cy="80" rx="84" ry="26" stroke-width="1.6" />
+    <ellipse cx="120" cy="80" rx="74" ry="22" stroke-width="1" />
+    <ellipse cx="120" cy="80" rx="64" ry="18" stroke-width="1.4" />
+    <ellipse cx="120" cy="80" rx="54" ry="14" stroke-width="1" stroke-dasharray="2 2" />
+    <ellipse cx="120" cy="80" rx="44" ry="10" stroke-width="1.2" />
+  </g>
+  <!-- Central Sphere Body -->
+  <circle cx="120" cy="80" r="34" fill="#070914" stroke="currentColor" stroke-width="2.5" />
+  <!-- Shaded Hemisphere -->
+  <path d="M 120 46 A 34 34 0 0 1 120 114 A 18 34 0 0 0 120 46 Z" fill="currentColor" fill-opacity="0.25" stroke="none" />
+  <!-- Surface Craters -->
+  <circle cx="114" cy="72" r="3" fill="currentColor" stroke="none" />
+  <circle cx="128" cy="84" r="4" fill="currentColor" stroke="none" />
+  <circle cx="118" cy="94" r="2.5" fill="currentColor" stroke="none" />
+  <circle cx="132" cy="68" r="2" fill="currentColor" stroke="none" />
+  <!-- Orbiting Node Pip -->
+  <circle cx="28" cy="74" r="3.5" fill="currentColor" stroke="none" />
+</svg>

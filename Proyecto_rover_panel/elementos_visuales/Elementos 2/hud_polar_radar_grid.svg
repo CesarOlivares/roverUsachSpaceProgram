@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" stroke="currentColor" stroke-width="1.8">
+  <!-- Outer Box Frame -->
+  <rect x="8" y="8" width="144" height="144" stroke-width="2.5" />
+  <!-- Concentric Range Rings (from bottom-left origin) -->
+  <path d="M 8 152 A 136 136 0 0 1 144 16" stroke-width="2" />
+  <path d="M 8 152 A 100 100 0 0 1 108 52" stroke-width="1.5" />
+  <path d="M 8 152 A 64 64 0 0 1 72 88" stroke-width="1.5" />
+  <path d="M 8 152 A 28 28 0 0 1 36 124" stroke-width="1.5" />
+  <!-- Radiating Angle Rays from Corner (0, 15, 30, 45, 60, 75, 90 deg) -->
+  <line x1="8" y1="152" x2="152" y2="152" />
+  <line x1="8" y1="152" x2="144" y2="116" stroke-dasharray="3 3" />
+  <line x1="8" y1="152" x2="126" y2="82" />
+  <line x1="8" y1="152" x2="104" y2="56" />
+  <line x1="8" y1="152" x2="72" y2="28" />
+  <line x1="8" y1="152" x2="8" y2="8" />
+  <!-- Blip Targets -->
+  <circle cx="88" cy="74" r="3.5" fill="currentColor" stroke="none" />
+  <circle cx="48" cy="112" r="2.8" fill="currentColor" stroke="none" />
+</svg>

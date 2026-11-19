@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 180" fill="none" stroke="currentColor">
+  <!-- Top Throat Mouth Ellipse -->
+  <ellipse cx="80" cy="30" rx="54" ry="16" stroke-width="2.5" />
+  <ellipse cx="80" cy="30" rx="38" ry="10" stroke-width="1.2" stroke-dasharray="3 2" />
+  <!-- Bottom Throat Exit Ellipse -->
+  <ellipse cx="80" cy="150" rx="54" ry="16" stroke-width="2.5" />
+  <ellipse cx="80" cy="150" rx="38" ry="10" stroke-width="1.2" stroke-dasharray="3 2" />
+  <!-- Narrow Central Waist Rim -->
+  <ellipse cx="80" cy="90" rx="28" ry="8" stroke-width="2.2" fill="currentColor" fill-opacity="0.1" />
+  <!-- Hyperbolic Side Flanks -->
+  <path d="M 26 30 C 52 64 52 116 26 150" stroke-width="2.2" />
+  <path d="M 134 30 C 108 64 108 116 134 150" stroke-width="2.2" />
+  <!-- Internal Straight Line Ruled Surface Generators (Diagonal Struts) -->
+  <line x1="134.0" y1="30.0" x2="41.8" y2="161.3" stroke-width="1" stroke-dasharray="4 2" opacity="0.6" />
+  <line x1="126.8" y1="38.0" x2="27.8" y2="154.1" stroke-width="1" stroke-dasharray="4 2" opacity="0.6" />
+  <line x1="107.0" y1="43.9" x2="27.8" y2="145.9" stroke-width="1" stroke-dasharray="4 2" opacity="0.6" />
+  <line x1="80.0" y1="46.0" x2="41.8" y2="138.7" stroke-width="1" stroke-dasharray="4 2" opacity="0.6" />
+  <line x1="53.0" y1="43.9" x2="66.0" y2="134.5" stroke-width="1" stroke-dasharray="4 2" opacity="0.6" />
+  <line x1="33.2" y1="38.0" x2="94.0" y2="134.5" stroke-width="1" stroke-dasharray="4 2" opacity="0.6" />
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="currentColor">
+  <!-- Telescope Optical Tube (Tilted 35 deg) -->
+  <g transform="rotate(-35 80 70)">
+    <!-- Main Barrel Tube -->
+    <path d="M 28 60 L 132 60 L 132 80 L 28 80 Z" fill="none" stroke="currentColor" stroke-width="3" />
+    <rect x="22" y="56" width="10" height="28" rx="2" />
+    <rect x="128" y="58" width="8" height="24" rx="2" />
+    <!-- Finder Scope on top -->
+    <rect x="52" y="44" width="46" height="8" rx="2" />
+    <line x1="60" y1="52" x2="60" y2="60" stroke="currentColor" stroke-width="2.5" />
+    <line x1="88" y1="52" x2="88" y2="60" stroke="currentColor" stroke-width="2.5" />
+    <!-- Eyepiece Diagonal -->
+    <rect x="122" y="80" width="8" height="14" rx="1" />
+    <circle cx="126" cy="98" r="4" />
+  </g>
+  <!-- Mount Pivot Hub -->
+  <circle cx="80" cy="74" r="8" fill="#070913" stroke="currentColor" stroke-width="3" />
+  <circle cx="80" cy="74" r="3" />
+  <!-- Counterweight Shaft -->
+  <line x1="80" y1="74" x2="60" y2="100" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+  <rect x="52" y="94" width="12" height="10" rx="2" />
+  <!-- Tripod Head & Legs -->
+  <polygon points="74,82 86,82 83,96 77,96" />
+  <line x1="80" y1="96" x2="80" y2="152" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="78" y1="96" x2="36" y2="152" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="82" y1="96" x2="124" y2="152" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+  <line x1="56" y1="126" x2="104" y2="126" stroke="currentColor" stroke-width="2" />
+</svg>

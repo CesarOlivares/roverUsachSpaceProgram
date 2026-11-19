@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <SPI.h>
 #include <RF24.h>
 #include "../controller/CommandController.h"
@@ -23,13 +24,21 @@ public:
     /** false si el modulo no responde por SPI (el rover sigue por cable). */
     bool begin();
 
+    /**
+     * Pide reconfigurar el nRF24 (intento de reconexion del failsafe). Se puede
+     * llamar desde cualquier tarea: lo ejecuta la tarea de la radio.
+     */
+    void requestReinit();
+
 private:
     static void task(void *arg);
     void        loop();
+    bool        configure();
     void        loadAckPayload();
 
     CommandController &ctrl_;
     SPIClass           spi_;
     RF24               radio_;
     bool               nextIsMotion_ = true;
+    std::atomic<bool>  reinitRequested_{false};
 };

@@ -128,7 +128,12 @@ estacion_base/src/
 ## Seguridad del enlace
 
 - **La base nunca repite ni encola órdenes.** Solo reenvía lo que llega del panel, en el momento en que llega. Si una orden no llega al rover tras los reintentos del hardware, se descarta: no sale más tarde.
-- **Failsafe:** si el panel se cierra, se desenchufa la base o se pierde la radio, deja de llegar tráfico. Pasados 400 ms, el rover se desarma, para y libera el mando.
+- **Failsafe con reconexión:** si el panel se cierra, se desenchufa la base o se pierde la radio, deja de llegar tráfico.
+  - A los **400 ms** el rover corta la tracción en seco, pero sigue armado y conserva el mando.
+  - Hace **3 intentos de reconexión de 1 s**: en cada uno reconfigura su nRF24, por si un bajón de tensión lo dejó con la configuración de fábrica. La base hace lo mismo con el suyo, y el panel muestra `RECONECTANDO ROVER · n/3` (o `USB` si lo que se cortó es el cable, y entonces reabre el puerto).
+  - Si el enlace vuelve, se sigue conduciendo sin rearmar.
+  - Si no vuelve en ~3,4 s, el rover se desarma y libera el mando, y el panel se desconecta.
+  - Los tiempos están en `RoverConfig.h` (`kLinkRetryCount`, `kLinkRetryWindowMs`) y en `js/config.js` (`RETRY_COUNT`, `RETRY_WINDOW_MS`); tienen que coincidir.
 - **Indicadores del panel:**
   - `BASE OK · SIN SEÑAL DEL ROVER`: la base funciona pero no recibe ACK del rover.
   - `SIN DATOS`: no llega telemetría.
@@ -150,6 +155,10 @@ Cada orden es una línea: `{"action":"…","client":"…","seq":N, …}`.
 
 **Desde la estación base el panel recibe:**
 - **La telemetría de siempre**, más el campo `radio_lq`.
-- **Cada 500 ms, un estado de la base:** `{"type":"base","rover":true,"lq":95,"tx_ok":N,"tx_fail":N}`.
+- **Cada 500 ms, un estado de la base:** `{"type":"base","rover":true,"lq":95,"tx_ok":N,"tx_fail":N,"arc":3,"retry":0,"reinit":0,"chip":true,"up":120}`.
+  - `arc`: retransmisiones medias por paquete ×10, en los últimos 20 envíos. Sube antes de que se pierdan paquetes.
+  - `retry`: intento de reconexión en curso (0 = enlace sano). `reinit`: veces que la base reconfiguró su radio.
+  - `chip`: el nRF24 de la base responde por SPI. `up`: segundos desde que arrancó la base; si baja, la base se reinició.
+  - El panel usa estos datos en la pestaña **Señal**: gráficas de los últimos 2 minutos, registro de cortes (exportable a CSV) y un diagnóstico de la causa.
 
 **Servo 5 (canal 4):** está en suspensión. `DRIVE` mueve solo los canales 0..3. Para reactivarlo, cambia `kSteeringServosInDrive` en `rover_6x6/src/config/RoverConfig.h` y `STEERING_SERVOS` en `js/config.js`.

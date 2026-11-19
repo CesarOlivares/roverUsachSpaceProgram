@@ -18,8 +18,29 @@ bool RadioLink::begin()
 {
     spi_.begin(pins::kNrfSck, pins::kNrfMiso, pins::kNrfMosi, pins::kNrfCsn);
 
-    if (!radio_.begin(&spi_, pins::kNrfCe, pins::kNrfCsn) || !radio_.isChipConnected()) {
+    if (!configure()) {
         Log::warn("RADIO", "El nRF24L01 no responde por SPI. Revisa cableado y 3,3 V. Solo queda el cable.");
+        return false;
+    }
+
+    if (xTaskCreatePinnedToCore(task, "link_radio", 4096, this, 6, nullptr, 0) != pdPASS) {
+        return false;
+    }
+
+    Log::info("RADIO", "nRF24L01 escuchando en el canal %u (%u kbps).",
+              (unsigned)radio::kChannel, (unsigned)radio::kDataRateKbps);
+    return true;
+}
+
+/*
+ * Configuracion completa del modulo. Se usa al arrancar y en cada intento de
+ * reconexion: un bajon de tension (motores arrancando) puede resetear el
+ * nRF24 a sus valores de fabrica, con otro canal y otra direccion, y entonces
+ * no vuelve a oir a la base aunque la senal sea perfecta.
+ */
+bool RadioLink::configure()
+{
+    if (!radio_.begin(&spi_, pins::kNrfCe, pins::kNrfCsn) || !radio_.isChipConnected()) {
         return false;
     }
 
@@ -35,14 +56,12 @@ bool RadioLink::begin()
 
     // La primera orden ya se lleva telemetria de vuelta.
     loadAckPayload();
-
-    if (xTaskCreatePinnedToCore(task, "link_radio", 4096, this, 6, nullptr, 0) != pdPASS) {
-        return false;
-    }
-
-    Log::info("RADIO", "nRF24L01 escuchando en el canal %u (%u kbps).",
-              (unsigned)radio::kChannel, (unsigned)radio::kDataRateKbps);
     return true;
+}
+
+void RadioLink::requestReinit()
+{
+    reinitRequested_.store(true);
 }
 
 void RadioLink::task(void *arg) { static_cast<RadioLink *>(arg)->loop(); }
@@ -52,6 +71,16 @@ void RadioLink::loop()
     uint8_t buf[radio::kPayloadMax];
 
     while (true) {
+        // El reinicio lo pide el failsafe desde otra tarea, pero el SPI solo lo
+        // toca esta: asi nunca hay dos accesos al modulo a la vez.
+        if (reinitRequested_.exchange(false)) {
+            if (configure()) {
+                Log::info("RADIO", "nRF24L01 reconfigurado.");
+            } else {
+                Log::warn("RADIO", "El nRF24L01 no responde por SPI al reconfigurarlo.");
+            }
+        }
+
         uint8_t pipe;
         if (!radio_.available(&pipe)) {
             // 1 ms de sondeo: la FIFO RX del nRF24 guarda 3 paquetes y la base

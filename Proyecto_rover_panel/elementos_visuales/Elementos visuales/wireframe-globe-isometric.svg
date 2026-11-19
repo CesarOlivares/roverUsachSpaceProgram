@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="1.8">
+  <!-- Outer boundary sphere -->
+  <circle cx="60" cy="60" r="50" stroke-width="2.2" />
+  <!-- Longitude Ellipses -->
+  <ellipse cx="60" cy="60" rx="34" ry="50" />
+  <ellipse cx="60" cy="60" rx="17" ry="50" />
+  <line x1="60" y1="10" x2="60" y2="110" />
+  <!-- Latitude Ellipses / Parallels -->
+  <ellipse cx="60" cy="60" rx="50" ry="16" />
+  <ellipse cx="60" cy="38" rx="46" ry="12" stroke-dasharray="3 2" />
+  <ellipse cx="60" cy="82" rx="46" ry="12" stroke-dasharray="3 2" />
+</svg>

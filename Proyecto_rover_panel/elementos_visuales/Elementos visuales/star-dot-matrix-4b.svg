@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <!-- Core Star -->
+  <path d="M 50 36 Q 50 50 64 50 Q 50 50 50 64 Q 50 50 36 50 Q 50 50 50 36 Z" />
+  <!-- Cardinal dots -->
+  <circle cx="50" cy="24" r="2.2" />
+  <circle cx="50" cy="14" r="1.6" />
+  <circle cx="50" cy="76" r="2.2" />
+  <circle cx="50" cy="86" r="1.6" />
+  <circle cx="24" cy="50" r="2.2" />
+  <circle cx="14" cy="50" r="1.6" />
+  <circle cx="76" cy="50" r="2.2" />
+  <circle cx="86" cy="50" r="1.6" />
+  <!-- Diagonal dots -->
+  <circle cx="34" cy="34" r="2.2" />
+  <circle cx="22" cy="22" r="1.5" />
+  <circle cx="66" cy="34" r="2.2" />
+  <circle cx="78" cy="22" r="1.5" />
+  <circle cx="34" cy="66" r="2.2" />
+  <circle cx="22" cy="78" r="1.5" />
+  <circle cx="66" cy="66" r="2.2" />
+  <circle cx="78" cy="78" r="1.5" />
+</svg>

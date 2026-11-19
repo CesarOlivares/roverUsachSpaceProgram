@@ -37,6 +37,18 @@ constexpr size_t kTelemetryBufLen = 384;
 constexpr uint32_t kFailsafeTimeoutMs = 400;
 constexpr uint32_t kFailsafePollMs    = 25;
 
+/*
+ * Reconexion antes de desarmar. A los kFailsafeTimeoutMs de silencio la
+ * traccion se corta SIEMPRE en seco; lo que se conserva es el armado y el
+ * mando, para que un corte breve no obligue a volver a armar. Se hacen
+ * kLinkRetryCount intentos (cada uno reinicia el nRF24, por si un bajon de
+ * tension lo dejo desconfigurado) separados por kLinkRetryWindowMs. Si el
+ * operador no vuelve, se desarma y se libera el mando como antes.
+ * Total hasta desarmar: 400 ms + 3 x 1000 ms = 3,4 s (las ruedas, paradas desde 0,4 s).
+ */
+constexpr uint32_t kLinkRetryCount    = 3;
+constexpr uint32_t kLinkRetryWindowMs = 1000;
+
 constexpr size_t kOwnerIdLen = proto::kClientIdLen;
 
 /* --- Actuadores --------------------------------------------------------- */

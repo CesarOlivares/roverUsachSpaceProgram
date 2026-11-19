@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" fill="none" stroke="currentColor">
+  <!-- Outer Front Aperture Frame -->
+  <rect x="16" y="16" width="148" height="148" stroke-width="2.5" />
+  <!-- Depth Stage 1 -->
+  <rect x="36" y="36" width="108" height="108" stroke-width="1.8" />
+  <!-- Depth Stage 2 -->
+  <rect x="54" y="54" width="72" height="72" stroke-width="1.5" />
+  <!-- Depth Stage 3 -->
+  <rect x="70" y="70" width="40" height="40" stroke-width="1.2" />
+  <!-- Vanishing Point Back Wall -->
+  <rect x="82" y="82" width="16" height="16" stroke-width="1" fill="currentColor" fill-opacity="0.2" />
+  <!-- Corner Perspective Receding Rays -->
+  <line x1="16" y1="16" x2="82" y2="82" stroke-width="1.8" />
+  <line x1="164" y1="16" x2="98" y2="82" stroke-width="1.8" />
+  <line x1="16" y1="164" x2="82" y2="98" stroke-width="1.8" />
+  <line x1="164" y1="164" x2="98" y2="98" stroke-width="1.8" />
+  <!-- Wall Subdivision Perspective Grid Lines -->
+  <!-- Top Wall Lines -->
+  <line x1="56" y1="16" x2="86" y2="82" stroke-width="1" stroke-dasharray="3 2" />
+  <line x1="124" y1="16" x2="94" y2="82" stroke-width="1" stroke-dasharray="3 2" />
+  <!-- Bottom Wall Lines -->
+  <line x1="56" y1="164" x2="86" y2="98" stroke-width="1" stroke-dasharray="3 2" />
+  <line x1="124" y1="164" x2="94" y2="98" stroke-width="1" stroke-dasharray="3 2" />
+  <!-- Left Wall Lines -->
+  <line x1="16" y1="56" x2="82" y2="86" stroke-width="1" stroke-dasharray="3 2" />
+  <line x1="16" y1="124" x2="82" y2="94" stroke-width="1" stroke-dasharray="3 2" />
+  <!-- Right Wall Lines -->
+  <line x1="164" y1="56" x2="98" y2="86" stroke-width="1" stroke-dasharray="3 2" />
+  <line x1="164" y1="124" x2="98" y2="94" stroke-width="1" stroke-dasharray="3 2" />
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" fill="none" stroke="currentColor">
+  <!-- Container Box with Cut Corner -->
+  <polygon points="20,20 220,20 220,144 196,168 20,168" stroke-width="2.5" />
+  <!-- Dot Matrix Grid (6x7 dots) -->
+  <g fill="currentColor" stroke="none" opacity="0.3">
+    <circle cx="45" cy="40" r="1.5" /><circle cx="70" cy="40" r="1.5" /><circle cx="95" cy="40" r="1.5" /><circle cx="120" cy="40" r="1.5" /><circle cx="145" cy="40" r="1.5" /><circle cx="170" cy="40" r="1.5" /><circle cx="195" cy="40" r="1.5" /><circle cx="45" cy="60" r="1.5" /><circle cx="70" cy="60" r="1.5" /><circle cx="95" cy="60" r="1.5" /><circle cx="120" cy="60" r="1.5" /><circle cx="145" cy="60" r="1.5" /><circle cx="170" cy="60" r="1.5" /><circle cx="195" cy="60" r="1.5" /><circle cx="45" cy="80" r="1.5" /><circle cx="70" cy="80" r="1.5" /><circle cx="95" cy="80" r="1.5" /><circle cx="120" cy="80" r="1.5" /><circle cx="145" cy="80" r="1.5" /><circle cx="170" cy="80" r="1.5" /><circle cx="195" cy="80" r="1.5" /><circle cx="45" cy="100" r="1.5" /><circle cx="70" cy="100" r="1.5" /><circle cx="95" cy="100" r="1.5" /><circle cx="120" cy="100" r="1.5" /><circle cx="145" cy="100" r="1.5" /><circle cx="170" cy="100" r="1.5" /><circle cx="195" cy="100" r="1.5" /><circle cx="45" cy="120" r="1.5" /><circle cx="70" cy="120" r="1.5" /><circle cx="95" cy="120" r="1.5" /><circle cx="120" cy="120" r="1.5" /><circle cx="145" cy="120" r="1.5" /><circle cx="170" cy="120" r="1.5" /><circle cx="195" cy="120" r="1.5" /><circle cx="45" cy="140" r="1.5" /><circle cx="70" cy="140" r="1.5" /><circle cx="95" cy="140" r="1.5" /><circle cx="120" cy="140" r="1.5" /><circle cx="145" cy="140" r="1.5" /><circle cx="170" cy="140" r="1.5" /><circle cx="195" cy="140" r="1.5" />
+  </g>
+  <!-- Area Curve Spline (Filled Area) -->
+  <path d="M 28 156 L 28 130 C 44 115 54 80 72 84 C 90 88 98 126 116 112 C 136 96 142 36 166 42 C 188 48 198 120 212 128 L 212 156 Z" fill="currentColor" fill-opacity="0.18" stroke="none" />
+  <!-- Top Spline Line -->
+  <path d="M 28 130 C 44 115 54 80 72 84 C 90 88 98 126 116 112 C 136 96 142 36 166 42 C 188 48 198 120 212 128" stroke-width="3" stroke-linecap="round" />
+</svg>

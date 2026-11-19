@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" stroke="currentColor">
+  <!-- Outer Elliptical Orbit Guide -->
+  <ellipse cx="80" cy="80" rx="72" ry="24" stroke-width="1.2" stroke-dasharray="3 3" transform="rotate(-15 80 80)" opacity="0.6" />
+  <circle cx="146" cy="62" r="3" fill="currentColor" stroke="none" />
+  <!-- Concentric Fine Line Moiré Rings (12 rings) -->
+  <circle cx="80" cy="80" r="8.0" stroke-width="1.5" />
+  <circle cx="80" cy="80" r="12.2" stroke-width="0.9" />
+  <circle cx="80" cy="80" r="16.4" stroke-width="1.5" />
+  <circle cx="80" cy="80" r="20.6" stroke-width="0.9" />
+  <circle cx="80" cy="80" r="24.8" stroke-width="1.5" />
+  <circle cx="80" cy="80" r="29.0" stroke-width="0.9" />
+  <circle cx="80" cy="80" r="33.2" stroke-width="1.5" />
+  <circle cx="80" cy="80" r="37.4" stroke-width="0.9" />
+  <circle cx="80" cy="80" r="41.6" stroke-width="1.5" />
+  <circle cx="80" cy="80" r="45.8" stroke-width="0.9" />
+  <circle cx="80" cy="80" r="50.0" stroke-width="1.5" />
+  <circle cx="80" cy="80" r="54.2" stroke-width="0.9" />
+  <!-- Eclipse Shadow Arc Masking Core -->
+  <path d="M 80 28 A 52 52 0 0 1 118 116 A 52 52 0 0 0 80 28 Z" fill="currentColor" fill-opacity="0.18" stroke="none" />
+  <!-- Central Singularity Core Pip -->
+  <circle cx="80" cy="80" r="3" fill="currentColor" stroke="none" />
+</svg>

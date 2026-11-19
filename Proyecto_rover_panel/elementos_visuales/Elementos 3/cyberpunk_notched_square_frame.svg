@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" fill="none" stroke="currentColor">
+  <!-- 4 Symmetrical Segmented Edges with Center Notches -->
+  <!-- Top Bar -->
+  <polyline points="20,32 20,20 54,20 58,28 82,28 86,20 120,20 120,32" stroke-width="2.5" stroke-linejoin="round" />
+  <!-- Bottom Bar -->
+  <polyline points="20,108 20,120 54,120 58,112 82,112 86,120 120,120 120,108" stroke-width="2.5" stroke-linejoin="round" />
+  <!-- Left Bar -->
+  <line x1="20" y1="44" x2="20" y2="96" stroke-width="2.5" />
+  <!-- Right Bar -->
+  <line x1="120" y1="44" x2="120" y2="96" stroke-width="2.5" />
+  <!-- Internal Target Ring -->
+  <circle cx="70" cy="70" r="26" stroke-width="1.8" stroke-dasharray="6 3" />
+  <circle cx="70" cy="70" r="8" fill="currentColor" fill-opacity="0.2" stroke-width="1.5" />
+  <circle cx="70" cy="70" r="2.5" fill="currentColor" stroke="none" />
+</svg>

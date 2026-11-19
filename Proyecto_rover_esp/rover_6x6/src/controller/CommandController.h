@@ -44,6 +44,12 @@ public:
      */
     bool controlLinkLost(int64_t timeoutUs);
 
+    /**
+     * Primer paso al perder el enlace: corta la traccion en seco y para el paso
+     * a paso, pero conserva armado, mando y servos mientras se reintenta.
+     */
+    void linkLostHold();
+
     /** Desarma, para todo, libera el mando y reinicia el temporizador del enlace. */
     void failsafeStop();
 
