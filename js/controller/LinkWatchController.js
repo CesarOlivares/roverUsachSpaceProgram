@@ -37,7 +37,8 @@ class LinkWatchController {
         const m = this.model;
         // Sin transporte (USB caido) la reconexion la lleva ConnectionController.
         if (!m.connected || !this.link.connected) return;
-        if (m.reconnect?.cause === 'usb') return;
+        // La caida del USB o del WebSocket la reintenta ConnectionController.
+        if (m.reconnect && m.reconnect.cause !== 'radio') return;
         // Hasta que llega la primera telemetria no hay enlace que perder.
         if (m.lastRxAt === 0) return;
 

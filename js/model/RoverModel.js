@@ -63,8 +63,38 @@ class RoverModel extends Emitter {
         this.pendingPings = new Map();   // seq -> instante de envio, para medir el RTT real
         this.lastRxAt = 0;
 
-        // Reconexion en curso: { attempt: 1..RETRY_COUNT, cause: 'radio'|'usb', since } o null.
+        // Reconexion en curso: { attempt: 1..RETRY_COUNT, cause: 'radio'|'usb'|'wifi', since } o null.
         this.reconnect = null;
+
+        // Wi-Fi del rover: ultimo estado ({ ..., at }) y ultima busqueda de redes.
+        // Solo llegan con el panel en cable directo o por Wi-Fi.
+        this.wifi = null;
+        this.wifiScan = null;
+        this.wifiHost = null;            // host del rover si la sesion es por Wi-Fi
+    }
+
+    /* --- Wi-Fi del rover --- */
+
+    applyWifiStatus(status, now) {
+        const prevSeq = this.wifi?.msgSeq;
+        this.wifi = { ...status, at: now };
+        this.emit('wifi');
+        if (prevSeq !== undefined && status.msgSeq !== prevSeq && status.msg) {
+            this.emit('notice', `Wi-Fi: ${status.msg}`);
+        }
+    }
+
+    applyWifiScan(nets) {
+        this.wifiScan = nets;
+        this.emit('wifi');
+    }
+
+    /** Descarta el estado del Wi-Fi si el rover dejo de informar. */
+    refreshWifi(now) {
+        if (this.wifi && now - this.wifi.at > CONFIG.WIFI_STATUS_STALE_MS) {
+            this.wifi = null;
+            this.emit('wifi');
+        }
     }
 
     /** Estado de la reconexion; null cuando el enlace esta sano. */
@@ -85,9 +115,13 @@ class RoverModel extends Emitter {
 
     /* --- Enlace --- */
 
-    beginSession(mode) {
+    beginSession(mode, host = null) {
         this.link = { mode, stale: true, latency: null };
         this.radio = null;
+        this.wifi = null;
+        this.wifiScan = null;
+        this.wifiHost = mode === 'wifi' ? host : null;
+        this.emit('wifi');
         this.reconnect = null;
         this.armed = false;
         this.armPending = null;
@@ -101,6 +135,10 @@ class RoverModel extends Emitter {
     endSession() {
         this.link = { mode: 'none', stale: true, latency: null };
         this.radio = null;
+        this.wifi = null;
+        this.wifiScan = null;
+        this.wifiHost = null;
+        this.emit('wifi');
         this.reconnect = null;
         this.armed = false;
         this.armPending = null;
@@ -115,6 +153,7 @@ class RoverModel extends Emitter {
 
     /** Recalcula si el enlace esta caido: sin telemetria reciente no se pinta latencia vieja. */
     refreshStale(now) {
+        this.refreshWifi(now);
         if (this.radio && now - this.radio.at > CONFIG.BASE_STATUS_STALE_MS) {
             this.radio = null;                  // la base dejo de informar
             this.emit('link');

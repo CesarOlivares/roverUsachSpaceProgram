@@ -23,6 +23,8 @@ class ConnectionController {
             model.applyTelemetry(data, performance.now());
         });
         link.on('base', (status) => model.applyBaseStatus(status, performance.now()));
+        link.on('wifi', (status) => model.applyWifiStatus(status, performance.now()));
+        link.on('wifi_scan', (nets) => model.applyWifiScan(nets));
         link.on('tx', (payload) => model.noteWire('tx', payload));
         link.on('failed', () => this._onTransportClosed(this.link.transport));
     }
@@ -37,6 +39,37 @@ class ConnectionController {
             await this._onConnected(transport, 'serial');
         } catch (err) {
             this.login.setStatus(err.message || 'No se pudo abrir el puerto serie.', 'error');
+        }
+    }
+
+    /**
+     * Wi-Fi de emergencia: WebSocket al servidor del rover. Desde GitHub Pages
+     * (https) el navegador lo bloquea; entonces se ofrece el panel del rover.
+     */
+    async connectWifi(rawHost) {
+        const host = WsTransport.cleanHost(rawHost);
+        if (!host) {
+            this.login.setStatus('Escribe la dirección del rover (por ejemplo 192.168.4.1).', 'error');
+            return;
+        }
+        this.login.rememberHost(host);
+        this.login.setStatus(`Conectando con ws://${host}/ws ...`, 'info');
+
+        const transport = new WsTransport(
+            (line) => this.link.handleLine(line),
+            () => this._onTransportClosed(transport));
+        try {
+            await transport.open(host);
+            await this._onConnected(transport, 'wifi', host);
+            this.link.sendEvent(Protocol.wifiStatus());
+        } catch (err) {
+            if (!WsTransport.allowedHere) {
+                this.login.setStatus('Esta página es https (GitHub Pages) y el navegador bloquea la conexión ' +
+                    'sin cifrar con el rover. Abre el panel que sirve el propio rover con el enlace de abajo.', 'error');
+                this.login.showRoverLink(host);
+            } else {
+                this.login.setStatus(`${err.message} ¿Está el PC en la red del rover (o en la misma red que él)?`, 'error');
+            }
         }
     }
 
@@ -74,7 +107,7 @@ class ConnectionController {
         this.login.setStatus(reason || 'Enlace cerrado. Si se desenchufó la estación base, vuelve a conectarla.', 'error');
     }
 
-    async _onConnected(transport, mode) {
+    async _onConnected(transport, mode, host = null) {
         // Cierra cualquier enlace previo: si no, su lector y su temporizador
         // seguirian vivos y habria dos pipelines escribiendo a la vez.
         this.retryToken++;
@@ -83,7 +116,7 @@ class ConnectionController {
         await this.link.close();
 
         this.link.attach(transport);
-        this.model.beginSession(mode);
+        this.model.beginSession(mode, host);
 
         this.login.show(false);
         this.login.setStatus('', '');
@@ -100,9 +133,51 @@ class ConnectionController {
         if (!transport || this.link.transport !== transport) return;
         if (this.model.link.mode === 'serial' && transport.info) {
             this._retryUsb(transport);
+        } else if (this.model.link.mode === 'wifi' && transport.host) {
+            this._retryWifi(transport.host);
         } else {
             this.handleClosed();
         }
+    }
+
+    /**
+     * Se cerro el WebSocket (el PC perdio la red, el rover cambio de canal al
+     * unirse a otra red, o se reinicio). Mas intentos que por USB: reasociar el
+     * portatil a una red Wi-Fi tarda varios segundos.
+     */
+    async _retryWifi(host) {
+        const token = ++this.retryToken;
+        const m = this.model;
+        this.link.detach();
+        m.emit('notice', `Se cortó el Wi-Fi con el rover (${host}). Reintentando...`);
+
+        for (let attempt = 1; attempt <= CONFIG.WIFI_RETRY_COUNT; attempt++) {
+            m.setReconnect({ attempt, cause: 'wifi', since: performance.now() });
+            await sleep(CONFIG.RETRY_WINDOW_MS);
+            if (token !== this.retryToken) return;
+
+            const transport = new WsTransport(
+                (line) => this.link.handleLine(line),
+                () => this._onTransportClosed(transport));
+            try {
+                await transport.open(host, CONFIG.RETRY_WINDOW_MS * 2);
+                if (token !== this.retryToken) { await transport.close(); return; }
+                this.link.attach(transport);
+                m.lastRxAt = performance.now();
+                m.setReconnect(null);
+                m.emit('notice', `Wi-Fi recuperado en el intento ${attempt}. ` +
+                    'Si pasaron más de 3 s, el rover se desarmó: vuelve a armar.');
+                return;
+            } catch (err) {
+                console.debug(`[wifi] intento ${attempt} fallido:`, err.message);
+            }
+        }
+
+        if (token !== this.retryToken) return;
+        m.emit('link-giveup', { cause: 'wifi' });
+        m.setReconnect(null);
+        this.handleClosed(`Se perdió el Wi-Fi con el rover (${host}) y no volvió tras ` +
+                          `${CONFIG.WIFI_RETRY_COUNT} intentos. El rover cortó la tracción y se desarmó.`);
     }
 
     async _retryUsb(old) {

@@ -31,6 +31,24 @@
             <p class="hint">Elige el puerto de la ESP32 de la estación base. Para pruebas en banco
                 puedes elegir el USB del propio rover: funciona igual, sin radio.</p>
 
+            <div class="wifi-connect">
+                <span class="metric-label">Emergencia · Wi-Fi directo al rover</span>
+                <div class="wifi-host-row">
+                    <input id="wifi-host" type="text" spellcheck="false" autocomplete="off"
+                           aria-label="Dirección del rover" placeholder="192.168.4.1">
+                    <button id="btn-connect-wifi" class="btn btn-secondary">
+                        <i class="icon" data-icon="wifi"></i><span>Conectar por Wi-Fi</span>
+                    </button>
+                </div>
+                <p class="hint">En la red propia del rover (<strong>ROVER-6x6</strong>): <code>192.168.4.1</code>.
+                    En otra red (p. ej. la del lugar): <code>rover6x6.local</code> o la IP que muestra el rover.</p>
+                <div id="wifi-rover-links" class="rover-links" hidden>
+                    <p class="hint">Desde GitHub Pages el navegador bloquea el Wi-Fi del rover. Conecta el PC a
+                        la red del rover y abre el panel que sirve él mismo:</p>
+                    <div id="wifi-rover-link-list" class="rover-link-list"></div>
+                </div>
+            </div>
+
             <button id="btn-connect-demo" class="btn btn-ghost">
                 <i class="icon" data-icon="globe"></i><span>Simulación (sin hardware)</span>
             </button>
@@ -371,6 +389,28 @@
             <span class="metric-label">Última telemetría (RX)</span>
             <pre id="debug-rx-data" class="wire-log wire-rx">—</pre>
         </section>
+
+        <section class="card wifi-card">
+            <h3 class="card-title"><i class="icon" data-icon="wifi"></i>Wi-Fi del rover · emergencia</h3>
+            <div class="kpi-grid wifi-kpis">
+                <div class="kpi kpi-wide"><span class="metric-label">Red propia (punto de acceso)</span><strong id="wifi-ap">--</strong></div>
+                <div class="kpi kpi-wide"><span class="metric-label">Red externa</span><strong id="wifi-sta" data-state="off">--</strong></div>
+                <div class="kpi kpi-wide"><span class="metric-label">Panel en la red externa</span><strong id="wifi-sta-ip">--</strong></div>
+            </div>
+            <p id="wifi-msg" class="hint wifi-msg">Conecta por Wi-Fi o por cable directo al rover para ver y cambiar su red.</p>
+
+            <form id="wifi-form" class="wifi-form" autocomplete="off">
+                <input id="wifi-ssid" type="text" maxlength="32" spellcheck="false" placeholder="Nombre de la red (SSID)" aria-label="Nombre de la red">
+                <input id="wifi-pass" type="password" maxlength="64" placeholder="Clave (vacía si es abierta)" aria-label="Clave de la red">
+                <button type="submit" id="btn-wifi-join" class="btn btn-primary btn-small" data-wifi-action>Unir el rover a esta red</button>
+                <button type="button" id="btn-wifi-scan" class="btn btn-secondary btn-small" data-wifi-action>Buscar redes</button>
+                <button type="button" id="btn-wifi-forget" class="btn btn-secondary btn-small" data-wifi-action>Olvidar red</button>
+            </form>
+            <ul id="wifi-scan-list" class="wifi-nets"></ul>
+            <p class="hint">El rover siempre mantiene su red propia; además se une a la red que elijas aquí y la
+                recuerda al reiniciar. Hay que desarmar antes de cambiarla. Al unirse, su red propia cambia de
+                canal y los conectados a ella se cortan unos segundos. No funciona a través de la estación base.</p>
+        </section>
     </div>
 </main>
 
@@ -399,6 +439,7 @@
 <script src="js/model/RoverModel.js"></script>
 <script src="js/model/LinkStats.js"></script>
 <script src="js/transport/SerialTransport.js"></script>
+<script src="js/transport/WsTransport.js"></script>
 <script src="js/transport/DemoTransport.js"></script>
 <script src="js/transport/Link.js"></script>
 <script src="js/view/dom.js"></script>
@@ -413,6 +454,7 @@
 <script src="js/view/PreflightView.js"></script>
 <script src="js/view/MastView.js"></script>
 <script src="js/view/SignalView.js"></script>
+<script src="js/view/WifiView.js"></script>
 <script src="js/controller/DriveController.js"></script>
 <script src="js/controller/SafetyController.js"></script>
 <script src="js/controller/DiagnosticsController.js"></script>
@@ -420,6 +462,7 @@
 <script src="js/controller/PreflightController.js"></script>
 <script src="js/controller/ConnectionController.js"></script>
 <script src="js/controller/LinkWatchController.js"></script>
+<script src="js/controller/WifiController.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const preflightView = new PreflightView();
     const mastView = new MastView(model);
     const signalView = new SignalView(model, stats);
+    const wifiView = new WifiView(model);
     new PinTableView(model);
     new LinkMonitorView(model);
 
@@ -28,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const preflight = new PreflightController(model, link, preflightView, drive, diagnostics, safety);
     const connection = new ConnectionController(model, link, login, { drive, preflight, safety });
     const linkWatch = new LinkWatchController(model, link, connection);
+    const wifi = new WifiController(model, link);
 
     drive.bindInputs();
     safety.bindInputs();
@@ -35,7 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Intenciones -> controladores
     login.on('serial', () => connection.connectSerial());
+    login.on('wifi', (host) => connection.connectWifi(host));
     login.on('demo', () => connection.connectDemo());
+
+    wifiView.on('join', (creds) => wifi.join(creds));
+    wifiView.on('scan', () => wifi.scan());
+    wifiView.on('forget', () => wifi.forget());
 
     header.on('disconnect', () => connection.disconnect('Panel desconectado.'));
 

@@ -7,6 +7,8 @@
  *   tx         payload que acaba de salir (texto)
  *   telemetry  { data, line } telemetria decodificada
  *   base       estado de la estacion base (radio)
+ *   wifi       estado del Wi-Fi del rover
+ *   wifi_scan  redes encontradas por el rover
  *   failed     el transporte fallo al escribir
  */
 class Link extends Emitter {
@@ -113,6 +115,7 @@ class Link extends Emitter {
             return;
         }
         if (msg.kind === 'telemetry') this.emit('telemetry', { data: msg.data, line });
-        else this.emit('base', msg.data);
+        else if (msg.kind === 'base') this.emit('base', msg.data);
+        else this.emit(msg.kind, msg.data);          // 'wifi', 'wifi_scan'
     }
 }

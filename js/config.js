@@ -3,7 +3,8 @@
  *
  * El panel habla por USB (Web Serial) con la estacion base, que reenvia por
  * radio nRF24L01 al rover. Tambien puede enchufarse al USB del rover para
- * pruebas en banco: el protocolo es el mismo.
+ * pruebas en banco, o ir por Wi-Fi (WebSocket) como enlace de emergencia:
+ * el protocolo es el mismo.
  *
  * Estructura (MVC). Son scripts clasicos, no modulos ES, para que el panel
  * funcione abierto desde disco (file://). Se cargan en el orden de index.html
@@ -40,6 +41,14 @@ const CONFIG = {
     FAILSAFE_MS: 400,
     RETRY_COUNT: 3,
     RETRY_WINDOW_MS: 1000,
+
+    // Wi-Fi de emergencia. Reconectar el portatil a una red tarda mas que
+    // reabrir un USB: se dan mas intentos. Pasados 3,4 s el rover ya se desarmo.
+    WIFI_DEFAULT_HOST: '192.168.4.1',   // punto de acceso propio del rover
+    WIFI_MDNS_HOST: 'rover6x6.local',   // el rover en otra red (mDNS)
+    WIFI_OPEN_TIMEOUT_MS: 4000,
+    WIFI_RETRY_COUNT: 6,
+    WIFI_STATUS_STALE_MS: 3000,         // el rover informa cada segundo
 
     // Analisis de senal: una muestra cada SAMPLE_MS, se guardan HISTORY_S segundos.
     SAMPLE_MS: 500,

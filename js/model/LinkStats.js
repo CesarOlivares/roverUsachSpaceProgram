@@ -55,7 +55,7 @@ class LinkStats extends Emitter {
         if (connected && !this.active) {
             this.active = true;
             this.reset();
-            this._event('info', 'Sesión iniciada', this.model.link.mode === 'demo' ? 'Simulación.' : 'USB.');
+            this._event('info', 'Sesión iniciada', { demo: 'Simulación.', wifi: `Wi-Fi (${this.model.wifiHost}).` }[this.model.link.mode] || 'USB.');
         } else if (!connected && this.active) {
             this.active = false;
             if (this.outage) this._closeOutage(performance.now(), false);
