@@ -203,6 +203,7 @@ bool WifiLink::startAp()
 
     // El mando va a 20 Hz: el ahorro de energia solo anadiria latencia.
     WiFi.setSleep(false);
+    WiFi.setTxPower((wifi_power_t)cfg::kWifiTxPowerQdbm);
 
     WiFi.onEvent([](arduino_event_id_t, arduino_event_info_t info) {
         s_lastReason = info.wifi_sta_disconnected.reason;
@@ -223,10 +224,12 @@ void WifiLink::startSta()
         return;
     }
     s_lastReason = 0;
+    lastReason_  = 0;
     WiFi.disconnect(false, false);       // false: el punto de acceso sigue arriba
     WiFi.begin(staSsid_, staPass_[0] ? staPass_ : nullptr);
-    sta_      = Sta::Connecting;
-    staSince_ = millis();
+    sta_       = Sta::Connecting;
+    staSince_  = millis();
+    attemptAt_ = staSince_;
     Log::info("WIFI", "Uniendose a la red '%s'...", staSsid_);
 }
 
@@ -239,18 +242,28 @@ void WifiLink::stepSta(uint32_t now)
         break;
 
     case Sta::Connecting:
+        if (s_lastReason != 0) lastReason_ = s_lastReason;
+        // Sin reconexion automatica, un primer rechazo (tipico en redes
+        // concurridas) dejaba sin intentar el resto de la ventana: se reintenta.
+        if (st != WL_CONNECTED && s_lastReason != 0 && now - attemptAt_ > 4000) {
+            Log::warn("WIFI", "'%s' rechazo el intento: %s (motivo %u). Reintentando...",
+                      staSsid_, reasonText(s_lastReason), (unsigned)s_lastReason);
+            s_lastReason = 0;
+            attemptAt_   = now;
+            WiFi.begin(staSsid_, staPass_[0] ? staPass_ : nullptr);
+        }
         if (st == WL_CONNECTED) {
             sta_ = Sta::Connected;
             setMessage("Conectado a '%s': panel en http://%s/ o http://%s.local/",
                        staSsid_, WiFi.localIP().toString().c_str(), cfg::kHostname);
             Log::info("WIFI", "%s", msg_);
         } else if (now - staSince_ > cfg::kStaConnectMs) {
-            uint8_t r = s_lastReason;
+            uint8_t r = lastReason_;
             WiFi.disconnect(false, false);
             sta_      = Sta::Waiting;
             staSince_ = now;
-            setMessage("No se pudo unir a '%s': %s. Reintento en %u s.",
-                       staSsid_, reasonText(r), (unsigned)(cfg::kStaRetryMs / 1000));
+            setMessage("No se pudo unir a '%s': %s (motivo %u). Reintento en %u s.",
+                       staSsid_, reasonText(r), (unsigned)r, (unsigned)(cfg::kStaRetryMs / 1000));
             Log::warn("WIFI", "%s", msg_);
         }
         break;

@@ -44,6 +44,16 @@ constexpr uint32_t kStaConnectMs   = 15000;        // espera maxima a que la red
 constexpr uint32_t kStaRetryMs     = 30000;        // pausa entre intentos si la red no esta
 constexpr uint32_t kWifiStatusMs   = 1000;         // estado {"type":"wifi"} hacia el panel
 
+/*
+ * Potencia de transmision Wi-Fi en cuartos de dBm (34 = 8,5 dBm). A potencia
+ * maxima (78 = 19,5 dBm) el rover oia a CONEIM pero el router no le contestaba
+ * (motivos 2 y 4: AUTH/ASSOC_EXPIRE): la antena de la placa distorsiona a
+ * maxima potencia. Con 8,5 dBm se une a la primera (probado el 24-11-2026).
+ * Si necesitas mas alcance en la red propia, sube por pasos: 44 (11 dBm),
+ * 52 (13 dBm), 60 (15 dBm), y comprueba que sigue uniendose a la red.
+ */
+constexpr int8_t   kWifiTxPowerQdbm = 34;
+
 constexpr uint32_t kSerialBaud        = 115200;
 constexpr uint32_t kTelemetryHz       = 20;     // cadencia de la telemetria por cable
 constexpr uint32_t kTelemetryPeriodMs = 1000 / kTelemetryHz;

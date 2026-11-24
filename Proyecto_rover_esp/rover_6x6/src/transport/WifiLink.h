@@ -74,6 +74,8 @@ private:
     char     staPass_[65] = {0};
     Sta      sta_         = Sta::Off;
     uint32_t staSince_    = 0;
+    uint32_t attemptAt_   = 0;   // ultimo WiFi.begin() dentro de la ventana de conexion
+    uint8_t  lastReason_  = 0;   // ultimo motivo de rechazo visto en esta ventana
     bool     scanning_    = false;
     char     msg_[96]     = {0};
     uint32_t msgSeq_      = 0;

@@ -23,6 +23,7 @@ Si la radio falla, el panel puede hablar con el rover directamente por Wi-Fi. El
   - Funciona con el panel conectado por Wi-Fi o por cable directo al rover. A través de la estación base, no.
 - **Primera red y claves:** en `rover_6x6/src/config/Secrets.h`, que git ignora. Cópialo de `Secrets.example.h`. Ahí van la clave de la red propia y la red a la que se une la primera vez. Lo que se configure desde el panel manda sobre esto.
 - **Una sola radio Wi-Fi:** al unirse a otra red, la red propia del rover se muda al canal de esa red y los conectados a ella se cortan unos segundos. El panel reintenta 6 veces. Si la red guardada no aparece, el rover la vuelve a buscar cada 30 s, para no desestabilizar su red propia.
+- **Potencia de transmisión reducida (8,5 dBm):** a máxima potencia, el rover oía a CONEIM pero el router no le contestaba (motivos 2 y 4 en el log: `AUTH_EXPIRE`/`ASSOC_EXPIRE`). Con 8,5 dBm se une a la primera. Se ajusta en `kWifiTxPowerQdbm` (`RoverConfig.h`). Si te falta alcance en la red propia, súbela por pasos y comprueba que sigue uniéndose. Si un intento falla, el log por USB muestra el motivo.
 - **El failsafe es el mismo:** sin tráfico del operador durante 400 ms corta la tracción, y a los ~3,4 s se desarma, venga el mando por radio, cable o Wi-Fi.
 - **Si cambias el panel,** vuelve a incrustarlo antes de compilar el rover:
 
