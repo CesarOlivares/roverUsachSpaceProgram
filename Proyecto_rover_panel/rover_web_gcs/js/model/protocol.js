@@ -28,6 +28,12 @@ const Protocol = {
     servoSet: (channel, angle) => ({ action: Action.SERVO_SET, channel, angle }),
     stepperJog: (steps, speed) => ({ action: Action.STEPPER_JOG, steps, speed }),
 
+    // Configuracion del Wi-Fi del rover (WifiLink.cpp). Solo por cable directo o Wi-Fi.
+    wifiSet: (ssid, pass) => ({ action: 'WIFI_SET', ssid, pass }),
+    wifiForget: () => ({ action: 'WIFI_FORGET' }),
+    wifiScan: () => ({ action: 'WIFI_SCAN' }),
+    wifiStatus: () => ({ action: 'WIFI_STATUS' }),
+
     encode(obj) { return JSON.stringify(obj); },
 
     /**
@@ -48,7 +54,28 @@ const Protocol = {
         }
         if (data.type === 'telemetry') return { kind: 'telemetry', data: this._telemetry(data) };
         if (data.type === 'base') return { kind: 'base', data: this._baseStatus(data) };
+        if (data.type === 'wifi') return { kind: 'wifi', data: this._wifiStatus(data) };
+        if (data.type === 'wifi_scan') {
+            const nets = Array.isArray(data.nets) ? data.nets : [];
+            return {
+                kind: 'wifi_scan',
+                data: nets.filter((n) => typeof n?.ssid === 'string').map((n) => ({
+                    ssid: n.ssid, rssi: num(n.rssi), ch: num(n.ch), open: Boolean(n.open),
+                })),
+            };
+        }
         return null;
+    },
+
+    /** Estado del Wi-Fi del rover (WifiLink.cpp, cada segundo). */
+    _wifiStatus(data) {
+        const str = (v) => (typeof v === 'string' ? v : '');
+        return {
+            ap: str(data.ap), apIp: str(data.ap_ip), apClients: num(data.ap_clients),
+            sta: str(data.sta), staState: str(data.sta_state) || 'off', staIp: str(data.sta_ip),
+            rssi: num(data.rssi), ch: num(data.ch), host: str(data.host), ws: num(data.ws),
+            scanning: Boolean(data.scanning), msg: str(data.msg), msgSeq: num(data.msg_seq),
+        };
     },
 
     /**

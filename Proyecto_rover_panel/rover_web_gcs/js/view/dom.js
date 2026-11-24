@@ -56,11 +56,12 @@ const Format = {
 
         const rc = model.reconnect;
         if (rc) {
-            const what = rc.cause === 'usb' ? 'USB' : 'ROVER';
-            return { text: `RECONECTANDO ${what} · ${rc.attempt}/${CONFIG.RETRY_COUNT}`, cls: 'badge-warning', state: 'warn' };
+            const what = rc.cause === 'usb' ? 'USB' : rc.cause === 'wifi' ? 'WI-FI' : 'ROVER';
+            const total = rc.cause === 'wifi' ? CONFIG.WIFI_RETRY_COUNT : CONFIG.RETRY_COUNT;
+            return { text: `RECONECTANDO ${what} · ${rc.attempt}/${total}`, cls: 'badge-warning', state: 'warn' };
         }
 
-        let label = mode === 'demo' ? 'SIMULACIÓN' : 'CABLE DIRECTO';
+        let label = mode === 'demo' ? 'SIMULACIÓN' : mode === 'wifi' ? `WI-FI · ${model.wifiHost}` : 'CABLE DIRECTO';
         if (radio) {
             // Con telemetria fresca, un "rover: false" de la base es un estado viejo.
             if (!radio.rover && stale) {

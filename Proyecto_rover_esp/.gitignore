@@ -1,3 +1,6 @@
+# Credenciales Wi-Fi: cada equipo tiene las suyas (plantilla en Secrets.example.h)
+rover_6x6/src/config/Secrets.h
+
 # Salidas de compilacion de Arduino IDE / arduino-cli
 build/
 *.bin

@@ -47,6 +47,8 @@ const ICONS = {
     globe: `<svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="4"><circle cx="60" cy="60" r="50" stroke-width="5"/><ellipse cx="60" cy="60" rx="30" ry="50"/><line x1="60" y1="10" x2="60" y2="110"/><ellipse cx="60" cy="60" rx="50" ry="16"/></svg>`,
 
     // slashed-planet-axis (desconectar)
+    wifi: `<svg viewBox="0 0 120 100" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"><path d="M 10 38 C 38 10 82 10 110 38"/><path d="M 28 56 C 48 36 72 36 92 56"/><path d="M 45 73 C 54 64 66 64 75 73"/><circle cx="60" cy="88" r="7" fill="currentColor" stroke="none"/></svg>`,
+
     eject: `<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"><circle cx="50" cy="50" r="28"/><line x1="18" y1="18" x2="82" y2="82"/></svg>`,
 };
 

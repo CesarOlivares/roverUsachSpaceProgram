@@ -18,6 +18,31 @@ namespace cfg {
 // controlador, la misma telemetria y el mismo failsafe.
 constexpr bool kLinkRadio  = true;   // nRF24L01 con la estacion base (enlace principal)
 constexpr bool kLinkSerial = true;   // linea JSON por USB, para pruebas en banco con cable directo
+constexpr bool kLinkWifi   = true;   // enlace de emergencia: punto de acceso propio + red configurable
+
+/* --- Wi-Fi (credenciales en Secrets.h) ---------------------------------- */
+
+/*
+ * El rover levanta SIEMPRE su propia red (punto de acceso) y, ademas, intenta
+ * unirse a la red guardada (la que se configure desde el panel; la primera vez,
+ * la de Secrets.h). En las dos sirve el panel en http://<ip>/ y el mando por
+ * WebSocket en /ws.
+ *
+ * OJO: la radio del ESP32 es una sola. Cuando el rover se une a otra red, su
+ * punto de acceso se muda al canal de esa red y los que esten conectados a el
+ * se caen un instante. Mientras la red guardada no aparece, el rover la busca
+ * solo cada kStaRetryMs para no dejar inestable su propio punto de acceso.
+ */
+constexpr uint8_t  kApIp[4]        = {192, 168, 4, 1};
+constexpr uint8_t  kApMask[4]      = {255, 255, 255, 0};
+constexpr uint8_t  kApChannel      = 6;
+constexpr uint8_t  kApMaxConn      = 4;
+constexpr uint16_t kHttpPort       = 80;
+constexpr uint8_t  kWsMaxClients   = 4;
+constexpr const char *kHostname    = "rover6x6";   // http://rover6x6.local/ (mDNS)
+constexpr uint32_t kStaConnectMs   = 15000;        // espera maxima a que la red acepte
+constexpr uint32_t kStaRetryMs     = 30000;        // pausa entre intentos si la red no esta
+constexpr uint32_t kWifiStatusMs   = 1000;         // estado {"type":"wifi"} hacia el panel
 
 constexpr uint32_t kSerialBaud        = 115200;
 constexpr uint32_t kTelemetryHz       = 20;     // cadencia de la telemetria por cable

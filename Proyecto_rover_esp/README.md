@@ -11,6 +11,36 @@
      tracción de las 6 ruedas (1× BTS7960) · dirección por servos (PCA9685)
 ```
 
+## Enlace de emergencia por Wi-Fi
+
+Si la radio falla, el panel puede hablar con el rover directamente por Wi-Fi. El rover hace dos cosas a la vez:
+
+1. **Red propia (punto de acceso), siempre encendida:** `ROVER-6x6`. Conecta el PC a esa red y abre **http://192.168.4.1/**.
+2. **Se une a una red existente** (por ejemplo, la del lugar de la competencia). En esa red, el panel está en **http://rover6x6.local/** o en la IP que el rover muestra en la tarjeta *Wi-Fi del rover* (pestaña **Diagnóstico**) y en su log por USB.
+
+- **El rover sirve su propio panel.** Está incrustado en el firmware (`WebAssets.h`), así que no hace falta Internet ni GitHub Pages. GitHub Pages es https, y desde https el navegador bloquea la conexión `ws://` sin cifrar con el rover. Por eso, desde Pages, el botón Wi-Fi te lleva al panel del rover.
+- **Cambiar de red desde el panel:** en **Diagnóstico → Wi-Fi del rover**, pulsa *Buscar redes*, elige una, escribe la clave y pulsa *Unir el rover a esta red*. El rover la guarda en su memoria (NVS) y la recuerda al reiniciar. *Olvidar red* lo deja solo con su red propia. Hay que desarmar antes.
+  - Funciona con el panel conectado por Wi-Fi o por cable directo al rover. A través de la estación base, no.
+- **Primera red y claves:** en `rover_6x6/src/config/Secrets.h`, que git ignora. Cópialo de `Secrets.example.h`. Ahí van la clave de la red propia y la red a la que se une la primera vez. Lo que se configure desde el panel manda sobre esto.
+- **Una sola radio Wi-Fi:** al unirse a otra red, la red propia del rover se muda al canal de esa red y los conectados a ella se cortan unos segundos. El panel reintenta 6 veces. Si la red guardada no aparece, el rover la vuelve a buscar cada 30 s, para no desestabilizar su red propia.
+- **El failsafe es el mismo:** sin tráfico del operador durante 400 ms corta la tracción, y a los ~3,4 s se desarma, venga el mando por radio, cable o Wi-Fi.
+- **Si cambias el panel,** vuelve a incrustarlo antes de compilar el rover:
+
+```bash
+powershell -ExecutionPolicy Bypass -File Proyecto_rover_esp/tools/embed_web.ps1
+```
+
+**Órdenes Wi-Fi** (por cable o WebSocket):
+
+| Orden | Respuesta |
+|---|---|
+| `{"action":"WIFI_SET","ssid":"…","pass":"…"}` | guarda la red y se une a ella |
+| `{"action":"WIFI_FORGET"}` | olvida la red y se queda solo con la red propia |
+| `{"action":"WIFI_SCAN"}` | `{"type":"wifi_scan","nets":[{"ssid","rssi","ch","open"}…]}` |
+| `{"action":"WIFI_STATUS"}` | estado inmediato |
+
+Cada segundo, el rover publica `{"type":"wifi","ap","ap_ip","ap_clients","sta","sta_state","sta_ip","rssi","ch","host","ws","scanning","msg","msg_seq"}`.
+
 ## Pinout del rover (ESP32-S3)
 
 | Componente | Señal | GPIO |
@@ -69,7 +99,8 @@ La estación base elige sola los pines según la placa para la que compiles (`es
 ## Subir el firmware
 
 1. **Core:** en *Herramientas → Placa → Gestor de placas*, instala **esp32 de Espressif 3.x**. Está probado con la 3.3.12.
-2. **Librería:** en *Programa → Incluir librería → Gestionar librerías*, instala **RF24 de TMRh20**. Está probado con la 1.6.2.
+2. **Librería:** en *Programa → Incluir librería → Gestionar librerías*, instala **RF24 de TMRh20**. Está probado con la 1.6.2. El Wi-Fi no necesita librerías extra.
+   - **Credenciales Wi-Fi:** copia `rover_6x6/src/config/Secrets.example.h` como `Secrets.h` y pon tus claves. Si no lo creas, compila igual, pero avisa y usa la clave pública de ejemplo.
 3. **Rover:** abre `rover_6x6/rover_6x6.ino` y configura *Herramientas* así:
 
    | Opción | Valor |
@@ -77,7 +108,7 @@ La estación base elige sola los pines según la placa para la que compiles (`es
    | Placa | ESP32S3 Dev Module |
    | Flash Size | 16MB (128Mb) |
    | PSRAM | OPI PSRAM |
-   | Partition Scheme | 16M Flash (3MB APP/9.9MB FATFS), o la de por defecto (el binario ocupa ~360 KB) |
+   | Partition Scheme | **16M Flash (3MB APP/9.9MB FATFS)**. Con Wi-Fi y el panel incrustado, el binario ocupa ~1,1 MB y apenas cabe en la de por defecto |
    | Core Debug Level | None |
    | USB CDC On Boot | Disabled si usas el puerto UART/COM de la placa · Enabled si usas el USB nativo |
 
@@ -116,7 +147,8 @@ rover_6x6/src/
 ├── view/TelemetryView      VISTA: telemetría en JSON (cable) y en binario (ACK de radio)
 ├── controller/             CONTROLADOR: CommandController (reglas), SafetyController (failsafe)
 ├── hal/                    drivers: TractionDriver (BTS7960), ServoDriver, StepperDriver (sin montar), Pinout.h
-└── transport/              RadioLink (nRF24, receptor) y SerialLink (USB directo)
+└── transport/              RadioLink (nRF24, receptor), SerialLink (USB directo) y WifiLink
+                            (punto de acceso + red configurable, panel embebido y /ws)
 
 estacion_base/src/
 ├── model/BaseModel         última telemetría del rover, calidad del enlace, id del panel

@@ -5,6 +5,8 @@
  * PCA9685. El paso a paso DRV8825 esta sin montar (cfg::kStepperMounted).
  * El mando llega por radio nRF24L01 desde la estacion base conectada
  * al PC (sketch estacion_base), o por cable USB directo para pruebas en banco.
+ * Enlace de emergencia por Wi-Fi: punto de acceso propio + red configurable,
+ * con el panel servido por el propio rover (src/transport/WifiLink).
  *
  * Estructura (MVC):
  *   src/model/       estado del rover y cinematica (sin hardware)
@@ -27,6 +29,7 @@
 #include "src/controller/SafetyController.h"
 #include "src/transport/SerialLink.h"
 #include "src/transport/RadioLink.h"
+#include "src/transport/WifiLink.h"
 #include "src/util/Log.h"
 
 static RoverModel        model;
@@ -37,6 +40,7 @@ static CommandController controller(model, traction, servos, stepper);
 static SafetyController  safety(controller);
 static SerialLink        serialLink(controller);
 static RadioLink         radioLink(controller);
+static WifiLink          wifiLink(controller);
 
 static void haltOnError(const char *what)
 {
@@ -49,8 +53,9 @@ void setup()
 {
     SerialLink::openPort();
 
-    Log::info("ROVER", "Rover 6x6 - ESP32-S3 arrancando (radio: %s, cable: %s)",
-              cfg::kLinkRadio ? "si" : "no", cfg::kLinkSerial ? "si" : "no");
+    Log::info("ROVER", "Rover 6x6 - ESP32-S3 arrancando (radio: %s, cable: %s, wifi: %s)",
+              cfg::kLinkRadio ? "si" : "no", cfg::kLinkSerial ? "si" : "no",
+              cfg::kLinkWifi ? "si" : "no");
 
     // El orden importa: los actuadores tienen que estar en estado seguro antes
     // de que los enlaces empiecen a aceptar ordenes.
@@ -70,6 +75,11 @@ void setup()
      */
     if (cfg::kLinkRadio && !radioLink.begin()) {
         Log::warn("ROVER", "La radio no arranco. El enlace por cable sigue operativo.");
+    }
+
+    // Enlace de emergencia. Tampoco es fatal, por la misma razon.
+    if (cfg::kLinkWifi && !wifiLink.begin()) {
+        Log::warn("ROVER", "El Wi-Fi no arranco. Quedan la radio y el cable.");
     }
 
     // Un unico failsafe para todos los enlaces. Cada intento de reconexion
